@@ -1,0 +1,35 @@
+servers:
+  - name: "Server - ps"
+    host: "taburiss.wang"
+    port: 22
+    username: "ps"
+    # ssh_key_path: "~/.ssh/id_rsa"
+    password: "Swiftechie.com0318#"  # 如果使用密码认证，请取消注释并填写
+    sudo_password: "Swiftechie.com0318#"  # 添加sudo密码配置
+
+  # - name: "Server 2"
+  #   host: "192.168.1.101"
+  #   port: 22
+  #   username: "admin"
+  #   ssh_key_path: "~/.ssh/id_rsa"
+  #   sudo_password: "server2_sudo_password"
+
+monitoring:
+  refresh_interval: 1  # 监控刷新间隔（秒）
+  gpu_refresh_interval: 2  # GPU监控刷新间隔（秒）
+  custom_commands:
+  - name: "Disk Usage Check"
+    command: "df -h | grep -E '^/dev/' | awk '{print $5 \" \" $1 \" \" $6}'"
+    enabled: true
+    interval: 60
+  - name: "Load Average"
+    command: "uptime | awk -F'load average:' '{print $2}'"
+    enabled: true
+    interval: 30
+  - name: "Top Memory Process"
+    command: "ps aux --sort=-%mem | head -n 2 | tail -n 1 | awk '{print $4 \"% \" $11}'"
+    enabled: true
+    interval: 60
+ollama:
+  enabled: true
+  endpoint: "http://taburiss.wang:11434"  # 本地Ollama端点，如果需要的话
