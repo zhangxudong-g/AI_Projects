@@ -18,6 +18,9 @@ AI_Projects/
 
 ### 总体项目文档
 - [总体架构说明](./documents/ARCHITECTURE.md)
+- [Ollama和vLLM使用经验总结文档](./documents/Ollama和vLLM使用经验总结文档.md)
+- [Docker使用经验总结文档](./documents/Docker使用经验总结文档.md)
+- [模型部署和使用总结文档](./documents/模型部署和使用总结文档.md)
 
 ### Chroma Viewer 文档
 - [Chroma Viewer 架构说明](./chroma_viewer/documents/ARCHITECTURE.md)
