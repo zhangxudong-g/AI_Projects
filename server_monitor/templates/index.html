@@ -568,6 +568,7 @@
         let allWsConnection = null;
         let serverDataCache = {}; // 缓存服务器数据以减少闪烁
         let lastUpdateTime = {}; // 记录上次更新时间，防止过于频繁的更新
+        let cachedServerList = null; // 缓存服务器列表，避免重复API调用
 
         // 初始化WebSocket连接
         function initWebSocket() {
@@ -1589,6 +1590,26 @@
             }
         }
 
+        // 获取服务器列表，带缓存功能
+        async function getServerList() {
+            if (cachedServerList) {
+                // 如果已有缓存，直接返回缓存结果
+                return cachedServerList;
+            }
+
+            try {
+                const response = await fetch('/api/servers');
+                const data = await response.json();
+
+                // 缓存结果
+                cachedServerList = data;
+                return data;
+            } catch (error) {
+                console.error('Error fetching server list:', error);
+                throw error;
+            }
+        }
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function () {
             // 加载保存的设置
@@ -1608,8 +1629,7 @@
             });
 
             // 从API获取服务器列表
-            fetch('/api/servers')
-                .then(response => response.json())
+            getServerList()
                 .then(data => {
                     if (data && data.servers) {
                         servers = data.servers;
@@ -1636,8 +1656,7 @@
             document.getElementById('cliBtn').addEventListener('click', async function() {
                 // 获取服务器列表并填充下拉菜单
                 try {
-                    const response = await fetch('/api/servers');  // 使用更新后的API端点
-                    const data = await response.json();
+                    const data = await getServerList();  // 使用缓存的服务器列表
 
                     const serverSelect = document.getElementById('cliServerSelect');
                     serverSelect.innerHTML = '';
@@ -1841,8 +1860,7 @@
 
             // 获取服务器列表并获取Docker信息
             try {
-                const response = await fetch('/api/servers');
-                const serverData = await response.json();
+                const serverData = await getServerList();
 
                 if (serverData && serverData.servers) {
                     let dockerHtml = '';
@@ -1956,8 +1974,7 @@
         document.getElementById('cliBtn').addEventListener('click', async function() {
             // 获取服务器列表并填充下拉菜单
             try {
-                const response = await fetch('/api/servers');  // 使用更新后的API端点
-                const data = await response.json();
+                const data = await getServerList();  // 使用缓存的服务器列表
 
                 const serverSelect = document.getElementById('cliServerSelect');
                 serverSelect.innerHTML = '';
@@ -2192,9 +2209,7 @@
             // 填充服务器选择下拉菜单
             try {
                 console.log('Fetching server list for GPU history...');
-                const response = await fetch('/api/servers');
-                console.log('Response status:', response.status);
-                const data = await response.json();
+                const data = await getServerList();  // 使用缓存的服务器列表
                 console.log('Fetched server list for GPU history:', data);
 
                 const serverSelect = document.getElementById('gpuServerSelect');
