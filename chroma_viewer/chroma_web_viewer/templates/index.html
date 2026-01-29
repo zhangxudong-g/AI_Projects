@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChromaDB 查看器</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>ChromaDB 查看器</h1>
+                <div class="theme-selector">
+                    <label for="themeSelect">主题:</label>
+                    <select id="themeSelect">
+                        <option value="light">浅色</option>
+                        <option value="dark">深色</option>
+                        <option value="blue">蓝色</option>
+                        <option value="green">绿色</option>
+                    </select>
+                </div>
+            </div>
+            <p>通过设置DB目录来查看和搜索 ChromaDB 数据</p>
+        </header>
+
+        <div class="main-layout">
+            <aside class="control-panel">
+                <section class="controls">
+                    <div class="input-group">
+                        <label for="dbPath">数据库路径:</label>
+                        <div class="path-selector">
+                            <select id="dbPathSelect" style="display:none;">
+                                <option value="">选择已保存的数据库配置</option>
+                            </select>
+                            <input type="text" id="dbPath" placeholder="请选择 ChromaDB 路径" readonly>
+                            <button type="button" id="browseBtn">浏览</button>
+                            <button type="button" id="manageDbConfigsBtn">管理</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="collectionName">集合名称:</label>
+                        <select id="collectionName" placeholder="选择或输入集合名称">
+                            <option value="code_symbols" selected>code_symbols</option>
+                        </select>
+                        <small>提示：选择数据库路径后，可用集合将自动加载</small>
+                    </div>
+
+                    <div class="button-group action-buttons">
+                        <button id="viewBtn">查看数据</button>
+                        <button id="searchBtn">搜索数据</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="searchQuery">搜索查询:</label>
+                        <input type="text" id="searchQuery" placeholder="输入搜索关键词">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="limit">显示数量:</label>
+                        <select id="limit" value="10">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+
+                    <div id="collectionsStatsInfo" class="info-section sidebar-info hidden">
+                        <h3>集合信息</h3>
+                        <div id="collectionsStatsContent"></div>
+                    </div>
+                </section>
+            </aside>
+            <div class="resize-handle" id="resizeHandle"></div>
+            <main class="results-panel">
+                <div id="loading" class="hidden">加载中...</div>
+                <div id="error" class="hidden error-message"></div>
+                <div id="success" class="hidden success-message"></div>
+                <div id="toastContainer" class="toast-container"></div>
+
+                <div id="documentsView" class="info-section hidden">
+                    <h3>文档内容</h3>
+                    <div id="documentsList"></div>
+                </div>
+
+                <div id="searchResults" class="info-section hidden">
+                    <h3>搜索结果</h3>
+                    <div id="searchResultsList"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 数据库配置管理模态框 -->
+    <div id="dbConfigModal" class="modal">
+        <div class="modal-content" style="width: 60%; max-width: 600px;">
+            <div class="modal-header">
+                <h3>数据库配置管理</h3>
+                <span id="closeDbConfigModal" class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="config-form">
+                    <div class="input-group">
+                        <label for="configName">配置名称:</label>
+                        <input type="text" id="configName" placeholder="输入配置名称">
+                    </div>
+                    <div class="input-group">
+                        <label for="configPath">数据库路径:</label>
+                        <input type="text" id="configPath" placeholder="输入数据库路径">
+                        <button type="button" id="browseConfigPathBtn">浏览</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="configCollection">默认集合:</label>
+                        <input type="text" id="configCollection" placeholder="输入默认集合名称">
+                    </div>
+                    <div class="button-group config-actions" style="flex-direction: row; gap: 10px;">
+                        <button id="saveConfigBtn" class="btn-primary">保存配置</button>
+                        <button id="deleteConfigBtn" class="btn-danger">删除配置</button>
+                    </div>
+                </div>
+                <hr>
+                <h4>已保存的配置</h4>
+                <div id="savedConfigsList"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeDbConfigModalFooter">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件夹选择模态框 -->
+    <div id="folderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择数据库文件夹</h3>
+                <span id="closeModal" class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="path-navigation">
+                    <button id="goHome">🏠</button>
+                    <button id="goUp">↑</button>
+                    <div id="currentPath" class="current-path"></div>
+                </div>
+                <div id="folderContents" class="folder-contents">
+                    <!-- 文件夹内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelFolderSelection">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

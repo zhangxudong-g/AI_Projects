@@ -1,0 +1,73 @@
+/* Custom styles for the server monitor dashboard */
+
+body {
+    background-color: #f8f9fa;
+    padding-top: 20px;
+}
+
+.server-card {
+    margin-bottom: 20px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.metric-card {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-running {
+    background-color: #28a745;
+}
+
+.status-stopped {
+    background-color: #dc3545;
+}
+
+.gpu-card {
+    background-color: #e8f4fd;
+}
+
+.cpu-card {
+    background-color: #f0f8e8;
+}
+
+.memory-card {
+    background-color: #fdf0e8;
+}
+
+.ollama-card {
+    background-color: #f8e8fd;
+}
+
+.refresh-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    color: #6c757d;
+}
+
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    0% {
+        background-position: 1rem 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}

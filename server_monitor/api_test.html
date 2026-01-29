@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API 服务器列表测试</h1>
+    <button onclick="testApi()">测试 /api/servers</button>
+    <pre id="result"></pre>
+    
+    <script>
+        async function testApi() {
+            try {
+                const response = await fetch('/api/servers');
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+servers:
+  - name: "Production Server"
+    host: "192.168.1.100"
+    port: 22
+    username: "your_username"
+    # ssh_key_path: "~/.ssh/id_rsa"
+    password: "your_password"  # 如果使用密码认证
+    sudo_password: "your_password"
+
+monitoring:
+  refresh_interval: 1  # 监控刷新间隔（秒）
+  gpu_refresh_interval: 0.5  # GPU监控刷新间隔（秒）
+  custom_commands:
+    - name: "Disk Usage Check"
+      command: "df -h | grep -E '^/dev/' | awk '{print $5 \" \" $1 \" \" $6}'"
+      enabled: true
+      interval: 60
+    - name: "Load Average"
+      command: "uptime | awk -F'load average:' '{print $2}'"
+      enabled: true
+      interval: 30
+    - name: "Top Memory Process"
+      command: "ps aux --sort=-%mem | head -n 2 | tail -n 1 | awk '{print $4 \"% \" $11}'"
+      enabled: true
+      interval: 60
+
+ollama:
+  enabled: true
+  endpoint: "http://localhost:11434"

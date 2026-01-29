@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug GPU History</title>
+</head>
+<body>
+    <h1>Debug GPU History Feature</h1>
+    <button onclick="debugServers()">Debug Servers API</button>
+    <button onclick="debugGPUPeaks()">Debug GPU Peaks API</button>
+    <pre id="debugOutput"></pre>
+    
+    <script>
+        async function debugServers() {
+            try {
+                const response = await fetch('/api/servers');
+                const data = await response.json();
+                document.getElementById('debugOutput').textContent = 
+                    'Servers API Response:\n' + JSON.stringify(data, null, 2);
+                
+                // 测试填充下拉菜单
+                const select = document.createElement('select');
+                if (data && data.servers) {
+                    data.servers.forEach(serverObj => {
+                        const serverName = serverObj.name;
+                        const serverHost = serverObj.host;
+                        const option = document.createElement('option');
+                        option.value = serverName;
+                        option.textContent = `${serverName} (${serverHost})`;
+                        select.appendChild(option);
+                    });
+                }
+                
+                document.getElementById('debugOutput').textContent += 
+                    '\n\nGenerated select element options:\n' + Array.from(select.options).map(opt => opt.textContent).join(', ');
+            } catch (error) {
+                document.getElementById('debugOutput').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function debugGPUPeaks() {
+            try {
+                // 尝试获取第一个服务器的GPU历史数据
+                const response = await fetch('/api/servers');
+                const data = await response.json();
+                
+                if (data && data.servers && data.servers.length > 0) {
+                    const firstServer = data.servers[0].name;
+                    const gpuResponse = await fetch(`/api/gpu-history-peaks/${firstServer}?hours=24&min_utilization=10`);
+                    const gpuData = await gpuResponse.json();
+                    
+                    document.getElementById('debugOutput').textContent = 
+                        `GPU Peaks API Response for ${firstServer}:\n` + JSON.stringify(gpuData, null, 2);
+                } else {
+                    document.getElementById('debugOutput').textContent = 'No servers found';
+                }
+            } catch (error) {
+                document.getElementById('debugOutput').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

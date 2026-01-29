@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API 端点测试</h1>
+    
+    <h2>测试 /api/servers</h2>
+    <button onclick="testServers()">获取服务器列表</button>
+    <pre id="serversResult"></pre>
+    
+    <h2>测试 /api/servers-detail</h2>
+    <button onclick="testServersDetail()">获取服务器详细信息</button>
+    <pre id="serversDetailResult"></pre>
+    
+    <script>
+        async function testServers() {
+            try {
+                const response = await fetch('/api/servers');
+                const data = await response.json();
+                document.getElementById('serversResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('serversResult').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testServersDetail() {
+            try {
+                const response = await fetch('/api/servers-detail');
+                const data = await response.json();
+                document.getElementById('serversDetailResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('serversDetailResult').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

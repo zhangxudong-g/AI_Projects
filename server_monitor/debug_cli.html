@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CLI Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { margin: 5px; padding: 10px; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+        .log { margin: 10px 0; padding: 5px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>CLI Debug Test</h1>
+    
+    <div class="section">
+        <h2>1. 测试服务器列表API</h2>
+        <button onclick="testServers()">获取服务器列表</button>
+        <pre id="serversResult"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>2. 测试WebSocket连接</h2>
+        <label>选择服务器: </label>
+        <select id="serverSelect"></select>
+        <button onclick="connectWebSocket()">连接WebSocket</button>
+        <button onclick="disconnectWebSocket()">断开连接</button>
+        <div>状态: <span id="connectionStatus">未连接</span></div>
+        <pre id="websocketLog"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>3. 测试命令发送</h2>
+        <input type="text" id="commandInput" placeholder="输入命令，例如: pwd, ls, whoami" style="width: 300px;">
+        <button onclick="sendCommand()">发送命令</button>
+        <button onclick="sendPwd()">发送PWD</button>
+        <pre id="commandResult"></pre>
+    </div>
+
+    <script>
+        let ws = null;
+        let logs = [];
+
+        function addLog(message) {
+            const timestamp = new Date().toISOString();
+            logs.push(`${timestamp} - ${message}`);
+            document.getElementById('websocketLog').textContent = logs.join('\n');
+            
+            // 滚动到底部
+            const logElement = document.getElementById('websocketLog');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testServers() {
+            try {
+                addLog("开始测试服务器API...");
+                const response = await fetch('/api/servers');
+                const data = await response.json();
+                document.getElementById('serversResult').textContent = JSON.stringify(data, null, 2);
+                
+                // 填充服务器选择框
+                const select = document.getElementById('serverSelect');
+                select.innerHTML = '';
+                if (data && data.servers) {
+                    data.servers.forEach(server => {
+                        const option = document.createElement('option');
+                        if (typeof server === 'object' && server.name) {
+                            option.value = server.name;
+                            option.textContent = `${server.name} (${server.host})`;
+                        } else {
+                            option.value = server;
+                            option.textContent = server;
+                        }
+                        select.appendChild(option);
+                    });
+                }
+                addLog("服务器API测试完成");
+            } catch (error) {
+                document.getElementById('serversResult').textContent = 'Error: ' + error.message;
+                addLog("服务器API测试失败: " + error.message);
+            }
+        }
+
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+            
+            const serverName = document.getElementById('serverSelect').value;
+            if (!serverName) {
+                alert('请选择一个服务器');
+                return;
+            }
+            
+            addLog(`尝试连接到服务器: ${serverName}`);
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/cli/${serverName}`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function(event) {
+                document.getElementById('connectionStatus').textContent = '已连接';
+                addLog('WebSocket连接已建立');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                addLog('收到消息: ' + JSON.stringify(data, null, 2));
+                
+                if (data.error) {
+                    document.getElementById('commandResult').textContent += `\n错误: ${data.error}`;
+                } else {
+                    let output = '';
+                    if (data.stdout) output += data.stdout;
+                    if (data.stderr) output += '\n错误: ' + data.stderr;
+                    if (output) {
+                        document.getElementById('commandResult').textContent += `\n${output}`;
+                    }
+                }
+            };
+            
+            ws.onclose = function(event) {
+                document.getElementById('connectionStatus').textContent = '已断开';
+                addLog('WebSocket连接已关闭');
+            };
+            
+            ws.onerror = function(error) {
+                addLog('WebSocket错误: ' + error);
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            document.getElementById('connectionStatus').textContent = '已断开';
+            addLog('手动断开WebSocket连接');
+        }
+
+        function sendCommand() {
+            const command = document.getElementById('commandInput').value.trim();
+            if (!command) {
+                alert('请输入命令');
+                return;
+            }
+            
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('WebSocket未连接');
+                return;
+            }
+            
+            const commandObj = {
+                command: command,
+                use_sudo: false
+            };
+            
+            ws.send(JSON.stringify(commandObj));
+            document.getElementById('commandResult').textContent += `\n> ${command}\n`;
+            addLog(`发送命令: ${command}`);
+        }
+
+        function sendPwd() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('WebSocket未连接');
+                return;
+            }
+            
+            const commandObj = {
+                command: 'pwd',
+                use_sudo: false
+            };
+            
+            ws.send(JSON.stringify(commandObj));
+            document.getElementById('commandResult').textContent += `\n> pwd\n`;
+            addLog('发送命令: pwd');
+        }
+    </script>
+</body>
+</html>
