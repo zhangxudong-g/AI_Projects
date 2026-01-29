@@ -661,14 +661,30 @@ async def get_gpu_history_peaks(server_name: str, hours: int = 24, min_utilizati
                 "gpu_temperature": record.gpu_temperature
             })
 
+        # 检查是否有任何GPU数据（不管利用率高低）
+        any_gpu_data = session.query(ServerMetrics).join(Server).filter(
+            and_(
+                Server.name == server_name,
+                ServerMetrics.timestamp >= start_time,
+                ServerMetrics.gpu_utilization.isnot(None)
+            )
+        ).first() is not None
+
         session.close()
 
-        return {
+        response = {
             "server_name": server_name,
             "time_range_hours": hours,
             "min_utilization_threshold": min_utilization,
-            "peak_data": result
+            "peak_data": result,
+            "has_gpu_data": len(result) > 0 or any_gpu_data,
+            "info": f"No GPU utilization peaks found above {min_utilization}% threshold in the last {hours} hours" if len(result) == 0 else "Data available"
         }
+
+        if not any_gpu_data:
+            response["warning"] = "No GPU data has been collected from this server. The server may not have a GPU or GPU monitoring may not be properly configured."
+
+        return response
     except Exception as e:
         logger.error(f"Error getting GPU history peaks for {server_name}: {str(e)}")
         return {"error": str(e)}
