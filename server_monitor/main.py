@@ -616,14 +616,39 @@ async def get_gpu_history_peaks(server_name: str, hours: int = 24, min_utilizati
 
         # 查询GPU利用率大于阈值的历史数据
         from db import ServerMetrics, Server
-        peak_data = session.query(ServerMetrics).join(Server).filter(
+        query = session.query(ServerMetrics).join(Server).filter(
             and_(
                 Server.name == server_name,
                 ServerMetrics.timestamp >= start_time,
                 ServerMetrics.gpu_utilization is not None,
                 ServerMetrics.gpu_utilization >= min_utilization
             )
-        ).order_by(ServerMetrics.timestamp.desc()).all()
+        )
+        peak_data = query.order_by(ServerMetrics.timestamp.desc()).all()
+
+        # 添加调试日志
+        logger.info(f"GPU history peaks query for {server_name}: found {len(peak_data)} records with utilization >= {min_utilization}% in last {hours} hours")
+
+        # 额外查询，检查是否有任何GPU数据
+        all_gpu_data = session.query(ServerMetrics).join(Server).filter(
+            and_(
+                Server.name == server_name,
+                ServerMetrics.timestamp >= start_time,
+                ServerMetrics.gpu_utilization is not None
+            )
+        ).count()
+        logger.info(f"Total GPU data points for {server_name} in last {hours} hours: {all_gpu_data}")
+
+        # 再次查询，检查是否有低于阈值的GPU数据
+        low_util_data = session.query(ServerMetrics).join(Server).filter(
+            and_(
+                Server.name == server_name,
+                ServerMetrics.timestamp >= start_time,
+                ServerMetrics.gpu_utilization is not None,
+                ServerMetrics.gpu_utilization < min_utilization
+            )
+        ).count()
+        logger.info(f"GPU data points below threshold ({min_utilization}%) for {server_name}: {low_util_data}")
 
         # 转换数据格式
         result = []
