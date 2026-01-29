@@ -615,10 +615,10 @@ async def get_gpu_history_peaks(server_name: str, hours: int = 24, min_utilizati
         session = monitor.Session()
 
         # 查询GPU利用率大于阈值的历史数据
-        from db import ServerMetrics
-        peak_data = session.query(ServerMetrics).filter(
+        from db import ServerMetrics, Server
+        peak_data = session.query(ServerMetrics).join(Server).filter(
             and_(
-                ServerMetrics.server_name == server_name,
+                Server.name == server_name,
                 ServerMetrics.timestamp >= start_time,
                 ServerMetrics.gpu_utilization is not None,
                 ServerMetrics.gpu_utilization >= min_utilization
