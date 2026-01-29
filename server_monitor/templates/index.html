@@ -2278,27 +2278,53 @@
         }
 
         // 为GPU历史加载按钮添加事件监听器
-        document.getElementById('loadGpuHistoryBtn').addEventListener('click', loadGpuHistoryData);
-        document.getElementById('refreshGpuHistoryBtn').addEventListener('click', loadGpuHistoryData);
-
-        // 当服务器选择变化时，自动加载数据
         // 注意：这些事件监听器需要在DOM元素存在后才能绑定
-        setTimeout(function() {
-            const serverSelect = document.getElementById('gpuServerSelect');
-            if (serverSelect) {
-                serverSelect.addEventListener('change', loadGpuHistoryData);
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用更长的延迟时间确保DOM元素完全创建
+            setTimeout(function() {
+                const loadBtn = document.getElementById('loadGpuHistoryBtn');
+                const refreshBtn = document.getElementById('refreshGpuHistoryBtn');
 
-            const timeRangeSelect = document.getElementById('gpuTimeRange');
-            if (timeRangeSelect) {
-                timeRangeSelect.addEventListener('change', loadGpuHistoryData);
-            }
+                if (loadBtn) {
+                    loadBtn.addEventListener('click', loadGpuHistoryData);
+                    console.log('Successfully bound event listener to loadGpuHistoryBtn');
+                } else {
+                    console.warn('loadGpuHistoryBtn not found when trying to bind event');
+                }
 
-            const minUtilInput = document.getElementById('gpuMinUtilization');
-            if (minUtilInput) {
-                minUtilInput.addEventListener('change', loadGpuHistoryData);
-            }
-        }, 100); // 延迟一点时间确保DOM元素已创建
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', loadGpuHistoryData);
+                    console.log('Successfully bound event listener to refreshGpuHistoryBtn');
+                } else {
+                    console.warn('refreshGpuHistoryBtn not found when trying to bind event');
+                }
+
+                // 当服务器选择变化时，自动加载数据
+                const serverSelect = document.getElementById('gpuServerSelect');
+                if (serverSelect) {
+                    serverSelect.addEventListener('change', loadGpuHistoryData);
+                    console.log('Successfully bound event listener to gpuServerSelect');
+                } else {
+                    console.warn('gpuServerSelect not found when trying to bind event');
+                }
+
+                const timeRangeSelect = document.getElementById('gpuTimeRange');
+                if (timeRangeSelect) {
+                    timeRangeSelect.addEventListener('change', loadGpuHistoryData);
+                    console.log('Successfully bound event listener to gpuTimeRange');
+                } else {
+                    console.warn('gpuTimeRange not found when trying to bind event');
+                }
+
+                const minUtilInput = document.getElementById('gpuMinUtilization');
+                if (minUtilInput) {
+                    minUtilInput.addEventListener('change', loadGpuHistoryData);
+                    console.log('Successfully bound event listener to gpuMinUtilization');
+                } else {
+                    console.warn('gpuMinUtilization not found when trying to bind event');
+                }
+            }, 500); // 增加延迟时间以确保模态框中的元素完全创建
+        });
 
     </script>
 
