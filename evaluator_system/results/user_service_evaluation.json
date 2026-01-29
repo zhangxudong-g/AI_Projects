@@ -1,0 +1,62 @@
+{
+  "metrics": {
+    "faithfulness": 0.1,
+    "hallucination_rate": 0.0,
+    "key_fact_recall": 0.7272727272727273,
+    "redundancy_rate": 0.0
+  },
+  "violations": [
+    {
+      "claim": "UserService",
+      "reason": "Claim缺少fact_ref",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "用户服务类，提供用户认证和资料更新功能。",
+      "reason": "Claim缺少fact_ref",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "authenticate_user",
+      "reason": "Claim缺少fact_ref",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "调用auth_service.validate验证用户名密码",
+      "reason": "语义不对齐: writes 类型应包含对应语义词汇",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "当验证失败时抛出AuthenticationError异常",
+      "reason": "语义不对齐: calls 类型应包含对应语义词汇",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "调用db_service.log_login记录登录日志",
+      "reason": "语义不对齐: writes 类型应包含对应语义词汇",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "update_user_profile",
+      "reason": "语义不对齐: calls 类型应包含对应语义词汇",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "调用auth_service.check_permission检查用户权限",
+      "reason": "语义不对齐: writes 类型应包含对应语义词汇",
+      "violation_type": "missing_fact"
+    },
+    {
+      "claim": "当权限不足时抛出PermissionError异常",
+      "reason": "语义不对齐: calls 类型应包含对应语义词汇",
+      "violation_type": "missing_fact"
+    }
+  ],
+  "pass": false,
+  "summary": {
+    "file": "user_service.py",
+    "total_claims": 10,
+    "matched_facts": 7,
+    "unmatched_claims": 3
+  }
+}
