@@ -133,46 +133,32 @@ class ServerMonitorWebTest:
     def test_websocket_connection_simulation(self):
         """模拟WebSocket连接测试"""
         print("Testing WebSocket connection simulation...")
-        
+
         try:
-            # 尝试连接WebSocket端点（这实际上会失败，但我们可以检查错误类型）
-            import websocket
-            import threading
-            
-            def test_websocket(url):
-                try:
-                    ws = websocket.WebSocket()
-                    ws.connect(url)
-                    ws.close()
-                    return True
-                except Exception as e:
-                    # 如果是连接错误，这是预期的（因为我们没有真实服务器）
-                    # 重要的是服务器端能够正确处理WebSocket请求
-                    return "connection" in str(e).lower() or "handshake" in str(e).lower()
-            
-            # 这里我们不实际运行，而是检查代码中是否有WebSocket端点定义
+            # 检查代码中是否有WebSocket端点定义
             # 通过检查main.py中的WebSocket路由
-            with open("main.py", "r", encoding="utf-8") as f:
+            main_py_path = os.path.join(os.path.dirname(__file__), "main.py")
+            with open(main_py_path, "r", encoding="utf-8") as f:
                 main_content = f.read()
-                
+
             has_ws_routes = (
-                "/ws/" in main_content and 
+                "/ws/" in main_content and
                 "websocket" in main_content.lower()
             )
-            
+
             if has_ws_routes:
                 print("✓ WebSocket routes found in main.py")
                 return True
             else:
                 print("✗ WebSocket routes not found in main.py")
                 return False
-                
-        except ImportError:
-            print("! WebSocket library not available, skipping WebSocket test")
-            return True  # 不算作失败
+
+        except FileNotFoundError:
+            print("✗ main.py file not found")
+            return False
         except Exception as e:
             print(f"✗ WebSocket connection simulation failed: {e}")
-            return True  # WebSocket连接失败是正常的，因为我们可能没有真实服务器
+            return False
 
     def run_all_tests(self):
         """运行所有测试"""
