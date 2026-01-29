@@ -70,7 +70,7 @@ def run_web_tests_if_available():
     print("\n" + "="*50)
     print("CHECKING FOR WEB AUTOMATION CAPABILITIES")
     print("="*50)
-    
+
     try:
         import selenium
         import webdriver_manager
