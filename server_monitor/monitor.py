@@ -404,7 +404,7 @@ class MonitorCollector:
 
             result = {
                 'server_name': self.ssh_client.server_config.name,
-                'timestamp': asyncio.get_event_loop().time(),
+                'timestamp': time.time(),  # 使用Unix时间戳而不是事件循环时间
                 'ollama_models': [model.to_dict() if hasattr(model, 'to_dict') else model.__dict__ for model in ollama_models] if ollama_models else [],
                 'gpu_info': [self._serialize_gpu_info(gpu) for gpu in gpu_info] if gpu_info else [],
                 'system_resources': system_resources.to_dict() if hasattr(system_resources, 'to_dict') else system_resources.__dict__ if hasattr(system_resources, '__dict__') else {}
