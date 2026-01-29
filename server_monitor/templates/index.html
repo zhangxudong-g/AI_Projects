@@ -562,6 +562,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // 全局变量声明
         // 服务器列表将在页面加载时从API获取
         let servers = [];
         let wsConnections = {};
@@ -569,6 +570,18 @@
         let serverDataCache = {}; // 缓存服务器数据以减少闪烁
         let lastUpdateTime = {}; // 记录上次更新时间，防止过于频繁的更新
         let cachedServerList = null; // 缓存服务器列表，避免重复API调用
+        
+        // 图表相关变量
+        let cpuChart, memoryChart, gpuChart, diskChart;
+        let chartData = {
+            cpu: { labels: [], data: [] },
+            memory: { labels: [], data: [] },
+            gpu: { labels: [], data: [] },
+            disk: { labels: [], data: [] }
+        };
+        
+        // GPU历史图表变量 - 已移至顶部以避免初始化错误
+        let gpuHistoryChart = null;
 
         // 初始化WebSocket连接
         function initWebSocket() {
@@ -950,7 +963,7 @@
                             `<div class="progress mt-1">
                                       <div class="progress-bar" role="progressbar"
                                           style="width: ${Math.min(serverData.system_resources.custom_command_results.filter(r => r.success).length / serverData.system_resources.custom_command_results.length * 100, 100)}%"
-                                          title="Success rate: ${serverData.system_resources.custom_command_results.filter(r => r.success).length}/${serverData.system_resources.custom_command_results.length}"
+                                          title="Success rate: ${serverData.system_resources.custom_command_results.filter(r => r.success).length / serverData.system_resources.custom_command_results.length}"
                                           aria-valuenow="${Math.min(serverData.system_resources.custom_command_results.filter(r => r.success).length / serverData.system_resources.custom_command_results.length * 100, 100)}"
                                           aria-valuemin="0" aria-valuemax="100">
                                           Success: ${serverData.system_resources.custom_command_results.filter(r => r.success).length}/${serverData.system_resources.custom_command_results.length}
@@ -1253,15 +1266,6 @@
             showCharts: true,
             refreshInterval: 1000, // 毫秒
             theme: 'light'
-        };
-
-        // 图表相关变量
-        let cpuChart, memoryChart, gpuChart, diskChart;
-        let chartData = {
-            cpu: { labels: [], data: [] },
-            memory: { labels: [], data: [] },
-            gpu: { labels: [], data: [] },
-            disk: { labels: [], data: [] }
         };
 
         // 加载保存的设置
@@ -1684,12 +1688,38 @@
                             document.getElementById('cliOutput').innerHTML = '';
                             document.getElementById('cliInput').value = '';
 
-                            // 自动执行pwd命令显示当前目录
+                            // 显示连接信息
                             addToCliOutput(`<span class="text-success">Connected to ${serverSelect.options[serverSelect.selectedIndex].text}</span><br>`);
-                            addToCliOutput(`<span class="text-info">$ pwd</span><br>`);
 
-                            // 执行pwd命令
-                            await executeCliCommand('pwd');
+                            // 建立WebSocket连接并执行pwd命令
+                            await connectCliWebSocket(selectedServerForCLI);
+
+                            // 等待连接建立
+                            if (cliWebSocket.readyState === WebSocket.CONNECTING) {
+                                await new Promise((resolve) => {
+                                    const checkReadyState = setInterval(() => {
+                                        if (cliWebSocket.readyState === WebSocket.OPEN) {
+                                            clearInterval(checkReadyState);
+                                            resolve();
+                                        }
+                                    }, 100);
+
+                                    setTimeout(() => {
+                                        clearInterval(checkReadyState);
+                                        resolve();
+                                    }, 5000);
+                                });
+                            }
+
+                            // 发送pwd命令
+                            if (cliWebSocket.readyState === WebSocket.OPEN) {
+                                const commandObj = {
+                                    command: 'pwd',
+                                    use_sudo: false
+                                };
+                                cliWebSocket.send(JSON.stringify(commandObj));
+                                addToCliOutput(`<span class="text-info">$ pwd</span><br>`);
+                            }
                         }
                     } else {
                         console.warn('No servers returned from API');
@@ -1724,15 +1754,15 @@
                         return;
                     }
 
+                    // 添加用户输入的命令到输出（显示在终端中）
+                    addToCliOutput(`<span class="text-info">$ ${command}</span>\n`);
+
                     // 如果输入为空，只是换行
                     if (!command) {
                         addToCliOutput('\n');
                         this.value = '';
                         return;
                     }
-
-                    // 添加用户输入的命令到输出（显示在终端中）
-                    addToCliOutput(`<span class="text-info">$ ${command}</span>\n`);
 
                     // 执行命令
                     await executeCliCommand(command);
@@ -1753,23 +1783,25 @@
                 // 如果WebSocket未连接或连接到不同的服务器，则建立新连接
                 if (!cliWebSocket || !cliWebSocket.readyState || cliWebSocket.readyState !== WebSocket.OPEN || currentConnectedServer !== selectedServerForCLI) {
                     await connectCliWebSocket(selectedServerForCLI);
+                }
 
-                    // 等待连接建立
-                    if (cliWebSocket.readyState === WebSocket.CONNECTING) {
-                        await new Promise((resolve) => {
-                            const checkReadyState = setInterval(() => {
-                                if (cliWebSocket.readyState === WebSocket.OPEN) {
-                                    clearInterval(checkReadyState);
-                                    resolve();
-                                }
-                            }, 100);
-
-                            setTimeout(() => {
+                // 等待连接建立后再发送命令
+                if (cliWebSocket.readyState === WebSocket.CONNECTING) {
+                    // 等待一段时间直到连接建立
+                    await new Promise((resolve) => {
+                        const checkReadyState = setInterval(() => {
+                            if (cliWebSocket.readyState === WebSocket.OPEN) {
                                 clearInterval(checkReadyState);
                                 resolve();
-                            }, 5000);
-                        });
-                    }
+                            }
+                        }, 100);
+
+                        // 设置最大等待时间
+                        setTimeout(() => {
+                            clearInterval(checkReadyState);
+                            resolve();
+                        }, 5000); // 5秒后放弃等待
+                    });
                 }
 
                 // 发送命令
@@ -1817,6 +1849,10 @@
                             // 错误输出用红色显示
                             let formattedError = data.stderr.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                             formattedError = formattedError.replace(/\n/g, '<br>').replace(/\r/g, '');
+                            // 特殊处理sudo密码提示
+                            if (formattedError.includes('[sudo] password for')) {
+                                formattedError = 'Sudo password prompt detected. Please configure sudo_password in server config.';
+                            }
                             addToCliOutput(`<span class="text-danger">${formattedError}</span><br>`);
                         }
 
@@ -1858,7 +1894,7 @@
 
         // Docker功能相关代码
         document.getElementById('dockerBtn').addEventListener('click', async function() {
-            
+
             // 显示加载状态
             const dockerContent = document.getElementById('dockerContent');
             dockerContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
@@ -1970,244 +2006,6 @@
                 dockerContent.innerHTML = `<p class="text-danger">Error fetching Docker data: ${error.message}</p>`;
             }
         });
-
-        // CLI功能相关代码
-        let cliWebSocket = null;
-        let selectedServerForCLI = null;
-        let currentConnectedServer = null;
-
-        document.getElementById('cliBtn').addEventListener('click', async function() {
-            // 获取服务器列表并填充下拉菜单
-            try {
-                const data = await getServerList();  // 使用缓存的服务器列表
-
-                const serverSelect = document.getElementById('cliServerSelect');
-                serverSelect.innerHTML = '';
-
-                if (data && data.servers) {
-                    data.servers.forEach(server => {
-                        const displayName = `${server.name} (${server.host})`;
-
-                        const option = document.createElement('option');
-                        option.value = server.name;
-                        option.textContent = displayName;
-                        serverSelect.appendChild(option);
-                    });
-
-                    // 如果有服务器，选择第一个
-                    if (data.servers.length > 0) {
-                        selectedServerForCLI = data.servers[0].name;
-                        serverSelect.value = selectedServerForCLI;
-
-                        // 清空输出区域
-                        document.getElementById('cliOutput').innerHTML = '';
-                        document.getElementById('cliInput').value = '';
-
-                        // 显示连接信息
-                        addToCliOutput(`<span class="text-success">Connected to ${serverSelect.options[serverSelect.selectedIndex].text}</span><br>`);
-
-                        // 建立WebSocket连接并执行pwd命令
-                        await connectCliWebSocket(selectedServerForCLI);
-
-                        // 等待连接建立
-                        if (cliWebSocket.readyState === WebSocket.CONNECTING) {
-                            await new Promise((resolve) => {
-                                const checkReadyState = setInterval(() => {
-                                    if (cliWebSocket.readyState === WebSocket.OPEN) {
-                                        clearInterval(checkReadyState);
-                                        resolve();
-                                    }
-                                }, 100);
-
-                                setTimeout(() => {
-                                    clearInterval(checkReadyState);
-                                    resolve();
-                                }, 5000);
-                            });
-                        }
-
-                        // 发送pwd命令
-                        if (cliWebSocket.readyState === WebSocket.OPEN) {
-                            const commandObj = {
-                                command: 'pwd',
-                                use_sudo: false
-                            };
-                            cliWebSocket.send(JSON.stringify(commandObj));
-                            addToCliOutput(`<span class="text-info">$ pwd</span><br>`);
-                        }
-                    }
-                } else {
-                    console.warn('No servers returned from API');
-                    document.getElementById('cliOutput').innerHTML = '<span class="text-warning">No servers available</span><br>';
-                }
-
-            } catch (error) {
-                console.error('Error fetching server list for CLI:', error);
-                document.getElementById('cliOutput').innerHTML = `<p class="text-danger">Error fetching server list: ${error.message}</p>`;
-            }
-        });
-
-        // 服务器选择变化事件
-        document.getElementById('cliServerSelect').addEventListener('change', function() {
-            selectedServerForCLI = this.value;
-            // 关闭当前WebSocket连接，以便下次命令执行时连接到新服务器
-            if (cliWebSocket) {
-                cliWebSocket.close();
-                cliWebSocket = null;
-                currentConnectedServer = null;
-            }
-        });
-
-        // CLI输入框回车事件
-        document.getElementById('cliInput').addEventListener('keypress', async function(e) {
-            if (e.key === 'Enter') {
-                const command = this.value.trim();
-
-                if (!selectedServerForCLI) {
-                    addToCliOutput('<span class="text-danger">Error: No server selected</span><br>');
-                    this.value = '';
-                    return;
-                }
-
-                // 添加用户输入的命令到输出（显示在终端中）
-                addToCliOutput(`<span class="text-info">$ ${command}</span>\n`);
-
-                // 如果输入为空，只是换行
-                if (!command) {
-                    addToCliOutput('\n');
-                    this.value = '';
-                    return;
-                }
-
-                // 执行命令
-                await executeCliCommand(command);
-
-                // 清空输入框
-                this.value = '';
-            }
-        });
-
-        // 执行CLI命令函数
-        async function executeCliCommand(command) {
-            // 确保选择了服务器
-            if (!selectedServerForCLI) {
-                addToCliOutput('<span class="text-danger">Error: No server selected</span><br>');
-                return;
-            }
-
-            // 如果WebSocket未连接或连接到不同的服务器，则建立新连接
-            if (!cliWebSocket || !cliWebSocket.readyState || cliWebSocket.readyState !== WebSocket.OPEN || currentConnectedServer !== selectedServerForCLI) {
-                await connectCliWebSocket(selectedServerForCLI);
-            }
-
-            // 等待连接建立后再发送命令
-            if (cliWebSocket.readyState === WebSocket.CONNECTING) {
-                // 等待一段时间直到连接建立
-                await new Promise((resolve) => {
-                    const checkReadyState = setInterval(() => {
-                        if (cliWebSocket.readyState === WebSocket.OPEN) {
-                            clearInterval(checkReadyState);
-                            resolve();
-                        }
-                    }, 100);
-
-                    // 设置最大等待时间
-                    setTimeout(() => {
-                        clearInterval(checkReadyState);
-                        resolve();
-                    }, 5000); // 5秒后放弃等待
-                });
-            }
-
-            // 发送命令
-            const commandObj = {
-                command: command,
-                use_sudo: document.getElementById('cliUseSudo').checked
-            };
-
-            if (cliWebSocket.readyState === WebSocket.OPEN) {
-                cliWebSocket.send(JSON.stringify(commandObj));
-            } else {
-                addToCliOutput('<span class="text-danger">Error: WebSocket is not open</span><br>');
-            }
-        }
-
-        // 连接CLI WebSocket
-        async function connectCliWebSocket(serverName) {
-            // 如果已有连接，先关闭
-            if (cliWebSocket) {
-                cliWebSocket.close();
-            }
-
-            // 建立新连接
-            cliWebSocket = new WebSocket(`ws://${window.location.host}/ws/cli/${serverName}`);
-            currentConnectedServer = serverName;
-
-            cliWebSocket.onopen = function(event) {
-                addToCliOutput(`<span class="text-success">Connected to ${serverName}</span><br>`);
-            };
-
-            cliWebSocket.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-
-                if (data.error) {
-                    addToCliOutput(`<span class="text-danger">Error: ${data.error}</span><br>`);
-                } else {
-                    // 显示命令输出
-                    if (data.stdout) {
-                        // 处理换行符和特殊字符
-                        let formattedOutput = data.stdout.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                        formattedOutput = formattedOutput.replace(/\n/g, '<br>').replace(/\r/g, '');
-                        addToCliOutput(formattedOutput);
-                    }
-                    if (data.stderr) {
-                        // 错误输出用红色显示
-                        let formattedError = data.stderr.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                        formattedError = formattedError.replace(/\n/g, '<br>').replace(/\r/g, '');
-                        // 特殊处理sudo密码提示
-                        if (formattedError.includes('[sudo] password for')) {
-                            formattedError = 'Sudo password prompt detected. Please configure sudo_password in server config.';
-                        }
-                        addToCliOutput(`<span class="text-danger">${formattedError}</span><br>`);
-                    }
-
-                    // 如果命令执行失败，显示状态
-                    if (!data.success && !(data.stdout || data.stderr)) {
-                        addToCliOutput(`<span class="text-danger">Command failed</span><br>`);
-                    }
-                }
-            };
-
-            cliWebSocket.onclose = function(event) {
-                currentConnectedServer = null;
-                addToCliOutput(`<span class="text-warning">Disconnected from ${serverName}</span><br>`);
-            };
-
-            cliWebSocket.onerror = function(error) {
-                addToCliOutput(`<span class="text-danger">WebSocket error</span><br>`);
-            };
-        }
-
-        // 添加内容到CLI输出区域
-        function addToCliOutput(content) {
-            const outputDiv = document.getElementById('cliOutput');
-            outputDiv.innerHTML += content;
-
-            // 自动滚动到底部
-            outputDiv.scrollTop = outputDiv.scrollHeight;
-
-            // 将焦点放回输入框，以便继续输入
-            document.getElementById('cliInput').focus();
-        }
-
-        // CLI清除输出按钮
-        document.getElementById('cliClearBtn').addEventListener('click', function() {
-            document.getElementById('cliOutput').innerHTML = '';
-            document.getElementById('cliInput').value = '';
-        });
-
-        // GPU历史峰值功能
-        let gpuHistoryChart = null;
 
         // 为GPU历史按钮绑定事件 - 由于按钮在页面静态部分，使用直接绑定
         function bindGpuHistoryEvent() {
