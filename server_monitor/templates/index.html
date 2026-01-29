@@ -1594,6 +1594,7 @@
         async function getServerList() {
             if (cachedServerList) {
                 // 如果已有缓存，直接返回缓存结果
+                console.log('Using cached server list', cachedServerList);
                 return cachedServerList;
             }
 
@@ -1627,6 +1628,9 @@
                 // 关闭模态框
                 bootstrap.Modal.getInstance(document.getElementById('customizeModal')).hide();
             });
+
+            // 绑定GPU历史按钮事件
+            bindGpuHistoryEvent();
 
             // 从API获取服务器列表
             getServerList()
@@ -1854,6 +1858,7 @@
 
         // Docker功能相关代码
         document.getElementById('dockerBtn').addEventListener('click', async function() {
+            
             // 显示加载状态
             const dockerContent = document.getElementById('dockerContent');
             dockerContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
@@ -2204,53 +2209,60 @@
         // GPU历史峰值功能
         let gpuHistoryChart = null;
 
-        // 初始化GPU历史峰值模态框
-        document.getElementById('gpuHistoryBtn').addEventListener('click', async function() {
-            // 填充服务器选择下拉菜单
-            try {
-                console.log('Fetching server list for GPU history...');
-                const data = await getServerList();  // 使用缓存的服务器列表
-                console.log('Fetched server list for GPU history:', data);
+        // 为GPU历史按钮绑定事件 - 由于按钮在页面静态部分，使用直接绑定
+        function bindGpuHistoryEvent() {
+            const gpuHistoryBtn = document.getElementById('gpuHistoryBtn');
+            if (gpuHistoryBtn) {
+                gpuHistoryBtn.addEventListener('click', async function() {
+                    // 填充服务器选择下拉菜单
+                    try {
+                        console.log('Fetching server list for GPU history...');
+                        const data = await getServerList();  // 使用缓存的服务器列表
+                        console.log('Fetched server list for GPU history:', data);
 
-                const serverSelect = document.getElementById('gpuServerSelect');
-                if (!serverSelect) {
-                    console.error('gpuServerSelect element not found!');
-                    return;
-                }
+                        const serverSelect = document.getElementById('gpuServerSelect');
+                        if (!serverSelect) {
+                            console.error('gpuServerSelect element not found!');
+                            return;
+                        }
 
-                serverSelect.innerHTML = '';
+                        serverSelect.innerHTML = '';
 
-                if (data && data.servers && Array.isArray(data.servers)) {
-                    console.log(`Found ${data.servers.length} servers`);
-                    data.servers.forEach(serverObj => {
-                        console.log('Processing server:', serverObj);
-                        // 服务器对象包含name和host属性
-                        const serverName = serverObj.name;
-                        const serverHost = serverObj.host;
-                        const option = document.createElement('option');
-                        option.value = serverName;
-                        option.textContent = `${serverName} (${serverHost})`;  // 显示名称和主机
-                        serverSelect.appendChild(option);
-                        console.log(`Added option: ${serverName} (${serverHost})`);
-                    });
+                        if (data && data.servers && Array.isArray(data.servers)) {
+                            console.log(`Found ${data.servers.length} servers`);
+                            data.servers.forEach(serverObj => {
+                                console.log('Processing server:', serverObj);
+                                // 服务器对象包含name和host属性
+                                const serverName = serverObj.name;
+                                const serverHost = serverObj.host;
+                                const option = document.createElement('option');
+                                option.value = serverName;
+                                option.textContent = `${serverName} (${serverHost})`;  // 显示名称和主机
+                                serverSelect.appendChild(option);
+                                console.log(`Added option: ${serverName} (${serverHost})`);
+                            });
 
-                    // 如果有服务器，选择第一个
-                    if (data.servers.length > 0) {
-                        serverSelect.value = data.servers[0].name;
-                        console.log('Selected first server:', data.servers[0].name);
-                        // 自动加载第一个服务器的数据
-                        await loadGpuHistoryData();
-                    } else {
-                        console.log('No servers found in response');
+                            // 如果有服务器，选择第一个
+                            if (data.servers.length > 0) {
+                                serverSelect.value = data.servers[0].name;
+                                console.log('Selected first server:', data.servers[0].name);
+                                // 自动加载第一个服务器的数据
+                                await loadGpuHistoryData();
+                            } else {
+                                console.log('No servers found in response');
+                            }
+                        } else {
+                            console.log('No servers in response or invalid format');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching server list for GPU history:', error);
+                        console.error('Stack trace:', error.stack);
                     }
-                } else {
-                    console.log('No servers in response or invalid format');
-                }
-            } catch (error) {
-                console.error('Error fetching server list for GPU history:', error);
-                console.error('Stack trace:', error.stack);
+                });
+            } else {
+                console.warn('gpuHistoryBtn not found when trying to bind event');
             }
-        });
+        }
 
         // 加载GPU历史数据
         async function loadGpuHistoryData() {
