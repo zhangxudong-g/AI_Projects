@@ -1847,7 +1847,8 @@
                 if (serverData && serverData.servers) {
                     let dockerHtml = '';
 
-                    for (const serverName of serverData.servers) {
+                    for (const serverObj of serverData.servers) {
+                        const serverName = serverObj.name;
                         dockerHtml += `<h5 class="mt-4">${serverName}</h5>`;
 
                         // 获取容器信息
