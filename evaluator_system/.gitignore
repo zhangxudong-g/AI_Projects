@@ -45,3 +45,53 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Sensitive files for promptfoo_wiki and API keys
+.env
+*.env
+.env.local
+.env.production
+config.json
+secrets.json
+credentials.json
+api_keys.json
+tokens.json
+private_key.pem
+*.pem
+*.key
+*.crt
+*.cert
+*.secret
+*.private
+*.token
+*.password
+*.passwd
+*.auth
+*.oauth
+*.session
+*.cookie
+local_settings.py
+settings_local.py
+config/local.py
+config/production.py
+*.backup
+*.bak
+*.tmp
+*.swp
+*~
+.project
+.pydevproject
+.metadata
+*.swp
+*.swo
+*~
+
+# API Keys and Secrets
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GOOGLE_API_KEY
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+DATABASE_URL
+SECRET_KEY
+DEBUG
