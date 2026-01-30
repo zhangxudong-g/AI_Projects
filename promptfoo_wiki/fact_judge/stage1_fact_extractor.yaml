@@ -1,0 +1,76 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are a FACT EXTRACTION ENGINE.
+
+    You are given:
+    - SOURCE CODE (Java or SQL)
+    - GENERATED WIKI (Markdown)
+
+    --- SOURCE CODE ---
+    {{source_code}}
+
+    --- GENERATED WIKI ---
+    {{wiki_md}}
+
+    CRITICAL RULES:
+    - Extract ONLY objective, verifiable facts
+    - DO NOT evaluate quality
+    - DO NOT assign scores
+    - DO NOT summarize
+    - DO NOT judge usefulness
+    - DO NOT say good/bad/correct/incorrect
+    - ONLY list concrete missing, mismatched, or hallucinated items
+
+    REQUIRED OUTPUT (VALID JSON ONLY):
+
+    {
+      "coverage": {
+        "total_items": <integer>,
+        "covered_items": <integer>,
+        "missing": [
+          {
+            "position": <integer>,
+            "content": "<what is missing>"
+          }
+        ]
+      },
+      "correctness": {
+        "wrong_count": <integer>,
+        "mismatches": [
+          {
+            "position": <integer>,
+            "content": "<what does not match the source>"
+          }
+        ]
+      },
+      "hallucination": [
+        {
+          "position": <integer>,
+          "content": "<invented object or behavior>"
+        }
+      ],
+      "usefulness": {
+        "missing_explanations": [
+          {
+            "position": <integer>,
+            "content": "<important concept not explained>"
+          }
+        ]
+      }
+    }
+
+tests:
+  - name: Stage1 Fact Extraction
+    vars:
+      source_code: file://data/JIBSOJHJKNCHK.utf8.SQL
+      wiki_md: file://data/JIBSOJHJKNCHK.SQL.md
+      # source_code: file://data/JIBSOIEUPDB.utf8.SQL
+      # wiki_md: file://data/JIBSOIEUPDB.SQL.md
+      # source_code: file://data/agent.py.txt
+      # wiki_md: file://data/agent.py.md

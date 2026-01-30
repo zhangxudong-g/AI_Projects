@@ -1,0 +1,63 @@
+# promptfooconfig.yaml
+# 结合官方 schema，适配 "源码 + wiki.md" 评估
+# env:
+#   OLLAMA_BASE_URL: http://taburiss.wang:11434
+
+
+
+providers:
+  - id: ollama:gpt-oss:120b
+
+prompts:
+  - |
+    You are an expert in reading source code and validating technical documentation.
+
+    --- SOURCE CODE ---
+    {{source_code}}
+
+    --- GENERATED WIKI ---
+    {{wiki_md}}
+
+    Carefully compare the Wiki against the source code.
+# D://AI_Projects//promptfoo_wiki
+# 打开 Git Bash
+# iconv -f CP932 -t UTF-8 JIBSOJHJKNCHK.SQL > JIBSOJHJKNCHK.utf8.SQL
+tests:
+  - name: Wiki Alignment Evaluation
+    vars:
+      source_code: file://data//agent.py.txt
+      wiki_md: file://data//agent.py.md
+
+    assert:
+      - type: llm-rubric
+        provider:
+          id: ollama:gpt-oss:120b
+        rubric: |
+          You are an automated evaluation judge running inside a test system.
+
+          You are ALREADY provided with the FULL source code and the FULL generated wiki
+          in the evaluation context above.
+
+          You MUST NOT ask for more input, files, or clarification.
+          You MUST NOT ask the user to paste or upload anything.
+          You MUST make a judgment based ONLY on the given content.
+
+          Evaluate the generated Wiki against the source code on these dimensions:
+          1. Coverage: Are major components present?
+          2. Hallucination: Does the Wiki invent behavior not in code?
+          3. Alignment: Does the description match actual intent?
+
+          Respond ONLY in valid JSON:
+
+          {
+            "result": "PASS" | "FAIL",
+            "coverage": "GOOD" | "PARTIAL" | "MISSING",
+            "hallucination": "NONE" | "MINOR" | "SEVERE",
+            "alignment": "GOOD" | "WEAK" | "WRONG",
+            "reason": "<one concise sentence>"
+          }
+
+          Rules:
+          - result MUST be FAIL if hallucination is SEVERE or alignment is WRONG
+          - Otherwise result MAY be PASS
+

@@ -1,0 +1,36 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are a SOFT JUDGE.
+
+    You are given FACTUAL FINDINGS extracted from a previous stage.
+
+    --- FACTS ---
+    {{facts}}
+
+    Your task:
+    - Interpret the impact of these facts
+    - Explain their significance
+    - DO NOT assign numeric scores
+    - DO NOT output PASS or FAIL
+
+    REQUIRED OUTPUT (VALID JSON ONLY):
+
+    {
+      "coverage_level": "HIGH" | "MEDIUM" | "LOW",
+      "correctness_level": "GOOD" | "MINOR_ISSUES" | "WRONG",
+      "hallucination_level": "NONE" | "MINOR" | "SEVERE",
+      "usefulness_level": "HIGH" | "MEDIUM" | "LOW",
+      "notes": "one short sentence"
+    }
+
+
+tests:
+  - name: Stage2 Soft Judge
+    vars:
+      facts: file://output/stage1.json

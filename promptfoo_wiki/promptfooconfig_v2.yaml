@@ -1,0 +1,109 @@
+# promptfooconfig.yaml
+# 结合官方 schema，适配 "源码 + wiki.md" 评估
+
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are a senior software engineer reviewing generated documentation.
+
+    You are given:
+    - SOURCE CODE (Java or SQL)
+    - GENERATED WIKI (Markdown)
+
+    --- SOURCE CODE ---
+    {{source_code}}
+
+    --- GENERATED WIKI ---
+    {{wiki_md}}
+
+    Your task:
+    Evaluate whether the Wiki accurately and usefully documents the source code.
+
+    The source language MAY be:
+    - Java (classes, methods, fields)
+    - SQL (procedures, tables, columns, parameters)
+
+    You MUST judge based ONLY on the given content.
+    You MUST NOT ask for more files or clarification.
+
+    Evaluation dimensions (0–25 each):
+
+    1. Coverage (0–25)
+       - Are all major components documented?
+       - Java: classes, public methods, important fields
+       - SQL: procedures, parameters, tables, key logic
+
+    2. Correctness (0–25)
+       - Are names, signatures, and behavior described correctly?
+       - No wrong return types, parameters, or purposes
+
+    3. Hallucination (0–25)
+       - 25 = no invented behavior or objects
+       - Deduct heavily if the Wiki mentions things not present
+
+    4. Usefulness (0–25)
+       - Is this Wiki useful for a developer maintaining the code?
+       - Clear structure, accurate summaries, meaningful explanations
+
+    Final Score = sum of all four dimensions (0–100)
+
+    Respond ONLY in valid JSON.
+
+# D://AI_Projects//promptfoo_wiki
+# 打开 Git Bash
+# iconv -f CP932 -t UTF-8 JIBSOJHJKNCHK.SQL > JIBSOJHJKNCHK.utf8.SQL
+tests:
+  - name: Wiki Alignment Evaluation
+    vars:
+      source_code: file://data//agent.py.txt
+      wiki_md: file://data//agent.py.md
+    assert:
+      - type: llm-rubric
+        provider:
+          id: ollama:gpt-oss:120b
+        rubric: |
+          You are an automated evaluation judge.
+
+          You have already received the SOURCE CODE and GENERATED WIKI above.
+
+          CRITICAL FORMAT REQUIREMENT:
+
+          If your output does NOT EXACTLY match the required JSON schema:
+          - The evaluation is considered INVALID
+          - The final result MUST be FAIL
+
+          You MUST:
+          - Output ALL fields
+          - Use EXACT key names
+          - Use EXACT value types
+          - Output ONLY a JSON object
+          - Do NOT include explanations, markdown, or extra text
+          Evaluate and output STRICTLY this JSON:
+
+          {
+            "language": "JAVA" | "SQL" | "UNKNOWN",
+            "coverage_score": 0-25,
+            "correctness_score": 0-25,
+            "hallucination_score": 0-25,
+            "usefulness_score": 0-25,
+            "total_score": 0-100,
+            "missing_items": ["<object or concept name>"],
+            "hallucinated_items": ["<object or concept name>"],
+            "summary": "<one concise sentence>",
+            "result": "PASS" | "FAIL"
+          }
+
+          Rules:
+          - total_score MUST equal the sum of the four scores
+          - language MUST be inferred from the source code
+          - result MUST be FAIL if:
+            - hallucination_score < 15
+            - correctness_score < 15
+            - total_score < 70
+          - missing_items MUST list important undocumented items
+          - hallucinated_items MUST list invented objects (empty if none)
