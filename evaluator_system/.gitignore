@@ -103,3 +103,37 @@ promptfoo-config-local.yaml
 promptfoo/.cache/
 promptfoo/cache/
 .cache/
+
+# promptfoo_wiki specific sensitive files
+promptfoo_wiki/.env
+promptfoo_wiki/.env.local
+promptfoo_wiki/.env.production
+promptfoo_wiki/config.json
+promptfoo_wiki/secrets.json
+promptfoo_wiki/credentials.json
+promptfoo_wiki/api_keys.json
+promptfoo_wiki/tokens.json
+promptfoo_wiki/private_key.pem
+promptfoo_wiki/*.pem
+promptfoo_wiki/*.key
+promptfoo_wiki/*.crt
+promptfoo_wiki/*.cert
+promptfoo_wiki/*.secret
+promptfoo_wiki/*.private
+promptfoo_wiki/*.token
+promptfoo_wiki/*.password
+promptfoo_wiki/*.passwd
+promptfoo_wiki/*.auth
+promptfoo_wiki/*.oauth
+promptfoo_wiki/*.session
+promptfoo_wiki/*.cookie
+promptfoo_wiki/local_settings.py
+promptfoo_wiki/settings_local.py
+promptfoo_wiki/config/local.py
+promptfoo_wiki/config/production.py
+promptfoo_wiki/*.backup
+promptfoo_wiki/*.bak
+promptfoo_wiki/*.tmp
+promptfoo_wiki/results.json  # 可能包含敏感结果数据
+promptfoo_wiki/data/
+promptfoo_wiki/report/
