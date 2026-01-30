@@ -95,3 +95,11 @@ AWS_SECRET_ACCESS_KEY
 DATABASE_URL
 SECRET_KEY
 DEBUG
+
+# Promptfoo specific sensitive files
+.pfignore
+promptfoo-secrets.json
+promptfoo-config-local.yaml
+promptfoo/.cache/
+promptfoo/cache/
+.cache/
