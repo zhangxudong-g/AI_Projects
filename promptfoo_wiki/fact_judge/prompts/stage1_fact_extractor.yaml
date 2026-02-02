@@ -1,0 +1,178 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are a FACT EXTRACTION ENGINE.
+
+    You are given:
+    - SOURCE CODE (Java or SQL)
+    - GENERATED WIKI (Markdown)
+
+    --- SOURCE CODE ---
+    {{source_code}}
+
+    --- GENERATED WIKI ---
+    {{wiki_md}}
+
+    ======================================
+    ROLE DEFINITION
+    ======================================
+
+    Your role is to extract OBJECTIVE, VERIFIABLE FACTS
+    about what the source code CONTAINS,
+    and whether each fact is DOCUMENTED in the Wiki.
+
+    You are NOT a reviewer.
+    You are NOT a judge.
+    You are NOT allowed to evaluate quality or usefulness.
+
+    Think of yourself as building a FACT LEDGER.
+
+    ======================================
+    CRITICAL RULES (MUST FOLLOW)
+    ======================================
+
+    - DO NOT evaluate quality
+    - DO NOT assign scores
+    - DO NOT summarize
+    - DO NOT judge usefulness
+    - DO NOT say good / bad / sufficient / insufficient
+    - DO NOT speculate intent
+    - DO NOT infer importance
+    - ONLY extract concrete, observable facts
+
+    LOW COVERAGE means:
+    - "the wiki did not mention this fact"
+    NOT:
+    - "the input is missing"
+
+    NEVER say:
+    - "insufficient input"
+    - "source code not provided"
+    - "wiki missing context"
+
+    ======================================
+    WHAT COUNTS AS A FACT
+    ======================================
+
+    A FACT is something that can be directly verified in code, such as:
+
+    Java:
+    - A public class exists
+    - A public method exists
+    - A method performs a specific responsibility
+    - A class plays a specific role (controller / service / utility)
+    - A main control flow exists
+    - An error-handling mechanism exists
+
+    SQL:
+    - A procedure / function exists
+    - Input / output parameters exist
+    - Tables are read or written
+    - A main processing flow exists
+    - Validation or error handling logic exists
+
+    FACTS are CONCEPTUAL UNITS, not lines of code.
+
+    DO NOT treat these as facts:
+    - import statements
+    - variable declarations
+    - constants
+    - logging statements
+    - trivial glue code
+
+    ======================================
+    FACT CATEGORIES (INTERNAL GUIDANCE)
+    ======================================
+
+    You may internally classify facts as:
+    - STRUCTURE (classes, procedures, main entry points)
+    - FLOW (main processing steps, control flow)
+    - BEHAVIOR (validation, branching, side effects)
+    - DEPENDENCY (external calls, tables, services)
+    - ERROR_HANDLING (exceptions, flags, error paths)
+
+    These categories are for reasoning only.
+    DO NOT output the category.
+
+    ======================================
+    REQUIRED OUTPUT (VALID JSON ONLY)
+    ======================================
+
+    {
+      "coverage": {
+        "total_items": <integer>,
+        "covered_items": <integer>,
+        "missing": [
+          {
+            "position": <integer>,
+            "content": "<objective description of a fact present in source but NOT documented>"
+          }
+        ]
+      },
+      "correctness": {
+        "wrong_count": <integer>,
+        "mismatches": [
+          {
+            "position": <integer>,
+            "content": "<objective description of a fact that is described incorrectly in the wiki>"
+          }
+        ]
+      },
+      "hallucination": [
+        {
+          "position": <integer>,
+          "content": "<object, table, class, behavior, or flow mentioned in wiki but NOT in source>"
+        }
+      ],
+      "usefulness": {
+        "missing_explanations": [
+          {
+            "position": <integer>,
+            "content": "<important behavior or flow that exists in code but is not explained>"
+          }
+        ]
+      }
+    }
+
+    ======================================
+    CONSISTENCY RULES (VERY IMPORTANT)
+    ======================================
+
+    - total_items MUST equal:
+        covered_items + len(missing)
+
+    - Each position MUST be sequential starting from 1.
+
+    - If there are NO hallucinations, output an empty list [].
+
+    - If there are NO mismatches, output an empty list [].
+
+    - If a fact is BOTH missing AND mismatched,
+      classify it as mismatched ONLY.
+
+    - Be conservative:
+      If unsure whether something is a fact, DO NOT include it.
+
+    ======================================
+    FINAL CHECK
+    ======================================
+
+    Output ONLY the JSON object.
+    No markdown.
+    No explanations.
+    No extra text.
+
+tests:
+  - name: Stage1 Fact Extraction
+    vars:
+      # source_code: file://data/JIBSOJHJKNCHK.utf8.SQL
+      # wiki_md: file://data/JIBSOJHJKNCHK.SQL.md
+      source_code: file://data/JIBSOIEUPDB.utf8.SQL
+      wiki_md: file://data/JIBSOIEUPDB.SQL.md
+      # source_code: file://data/agent.py.txt
+      # wiki_md: file://data/agent.py.md

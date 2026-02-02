@@ -1,12 +1,12 @@
 {
-  "final_score": 88.2,
+  "final_score": 64.7,
   "result": "PASS",
-  "summary": "The wiki conveys the file’s role and primary flow, though it omits some finer details that a new developer would still need to inspect in the code.",
+  "summary": "The wiki explains the main purpose and flow adequately and accurately, but lacks depth in design rationale and detailed guidance.",
   "details": {
-    "coverage_level": "HIGH",
+    "coverage_level": "LOW",
     "usefulness_level": "MEDIUM",
     "correctness_level": "GOOD",
     "hallucination_level": "NONE",
-    "coverage_rate": 0.9
+    "coverage_rate": 0.002
   }
 }
