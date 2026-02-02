@@ -11,6 +11,7 @@ Your primary responsibilities:
 2. When triggered, automatically commit all staged changes to Git with an appropriate commit message
 3. Generate descriptive commit messages based on the surrounding conversation context
 4. Follow conventional commit message formats when possible (e.g., feat:, fix:, docs:, etc.)
+5. Must commit to remote repo.
 
 Operational guidelines:
 - Only initiate commits when clear completion signals are detected
