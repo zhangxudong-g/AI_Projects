@@ -1,0 +1,12 @@
+{
+  "final_score": 65,
+  "result": "PASS",
+  "summary": "The wiki gives a decent overview of the file’s role and main flow, though some details are missing for full confidence.",
+  "details": {
+    "coverage_level": "MEDIUM",
+    "usefulness_level": "MEDIUM",
+    "correctness_level": "GOOD",
+    "hallucination_level": "NONE",
+    "coverage_rate": 0.667
+  }
+}

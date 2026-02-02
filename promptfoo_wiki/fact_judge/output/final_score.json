@@ -1,69 +1,12 @@
 {
-  "final_score": 58.97,
-  "result": "FAIL",
-  "summary": "The documentation captures most facts, is accurate, but lacks several important explanations and includes minor fabricated references.",
+  "final_score": 88.2,
+  "result": "PASS",
+  "summary": "The wiki conveys the file’s role and primary flow, though it omits some finer details that a new developer would still need to inspect in the code.",
   "details": {
-    "coverage_rate": 0.774,
-    "usefulness_level": "MEDIUM",
     "coverage_level": "HIGH",
+    "usefulness_level": "MEDIUM",
     "correctness_level": "GOOD",
-    "hallucination_level": "MINOR",
-    "correctness_wrong": 0,
-    "coverage": {
-      "total_items": 62,
-      "covered_items": 48,
-      "missing": [
-        {
-          "position": 1,
-          "content": "Constant `c_IRETNG` is defined but not described in the wiki."
-        },
-        {
-          "position": 2,
-          "content": "Constant `I_JICHI_KBN` (old自治体区分) is defined but not mentioned."
-        },
-        {
-          "position": 3,
-          "content": "Cursor `CFD_FILE` definition and its purpose are omitted."
-        },
-        {
-          "position": 4,
-          "content": "Variables `NCOUNT`, `NPOINT`, `NENTER_POINT`, `NUM`, `NDATACOUNT`, `NERRDATACOUNT`, `NERRORFLG`, `NBAK_INDEX`, `NBLOB_BUFFER`, `NOFFSET`, `BRET`, `BOUT_ISNULL`, `NSQLCOUNT`, `NJOKEN`, `W_ERRFLG`, `W_ERRFLG1`, `W_ERRFLG2`, `V_ERRFLG`, `BKIGOUFLG1‑6`, `nRTN` are declared in the source but not explained."
-        },
-        {
-          "position": 5,
-          "content": "The meaning and usage of control parameters `CTLPRM1`‑`CTLPRM9` are not detailed."
-        },
-        {
-          "position": 6,
-          "content": "The logic that appends a long string of commas to `VDATA` (`,,,,......`) is not explained."
-        },
-        {
-          "position": 7,
-          "content": "The handling of NULL values for address fields (e.g., converting NULL to 0) is not described."
-        },
-        {
-          "position": 8,
-          "content": "The detailed error‑flag aggregation using `BKIGOUFLG1`‑`BKIGOUFLG6` and the construction of `ERRFLG` is omitted."
-        },
-        {
-          "position": 9,
-          "content": "The exact mapping of error symbols (`*`, `&`, `#`, `@`, `%`, `$`) to validation steps is only partially covered; the wiki does not explain that `*` = non‑numeric, `&` = length overflow, `#` = required missing, `@` = code not found, `%` = correlation error, `$` = duplicate key."
-        }
-      ]
-    },
-    "correctness": {
-      "wrong_count": 0,
-      "mismatches": []
-    },
-    "hallucination": [
-      {
-        "position": 1,
-        "content": "The wiki includes fabricated URLs such as `http://localhost:3000/projects/JIP/wiki?...` which do not exist in the source code."
-      },
-      {
-        "position": 2,
-        "content": "Reference to a non‑existent table `JIBWJUSHOHENKO_PRM` as the source of control parameters."
-      }
-    ]
+    "hallucination_level": "NONE",
+    "coverage_rate": 0.9
   }
 }

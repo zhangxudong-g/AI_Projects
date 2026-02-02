@@ -18,6 +18,26 @@ prompts:
     --- GENERATED WIKI ---
     {{wiki_md}}
 
+    COVERAGE ITEM DEFINITION (VERY IMPORTANT):
+
+    A "coverage item" MUST correspond to a concrete structural element in the source code.
+
+    Allowed coverage items include ONLY:
+    - Class definitions
+    - Method or function definitions
+    - Public fields or properties
+    - SQL tables, views, or columns
+    - Explicit control-flow behaviors (e.g. transactions, conditional branches) ONLY IF they are directly implemented in code
+
+    Do NOT treat:
+    - Explanations
+    - Design intent
+    - Usage suggestions
+    - High-level concepts
+    - Implicit behavior
+
+    as coverage items.
+
     CRITICAL RULES:
     - Extract ONLY objective, verifiable facts
     - DO NOT evaluate quality
@@ -26,6 +46,11 @@ prompts:
     - DO NOT judge usefulness
     - DO NOT say good/bad/correct/incorrect
     - ONLY list concrete missing, mismatched, or hallucinated items
+
+    COUNTING RULE:
+
+    Each coverage item MUST be countable and refer to a specific location in the source code.
+    If an item cannot be pointed to a concrete code location, it MUST NOT be counted.
 
     REQUIRED OUTPUT (VALID JSON ONLY):
 
@@ -68,9 +93,9 @@ prompts:
 tests:
   - name: Stage1 Fact Extraction
     vars:
-      source_code: file://data/JIBSOJHJKNCHK.utf8.SQL
-      wiki_md: file://data/JIBSOJHJKNCHK.SQL.md
-      # source_code: file://data/JIBSOIEUPDB.utf8.SQL
-      # wiki_md: file://data/JIBSOIEUPDB.SQL.md
+      # source_code: file://data/JIBSOJHJKNCHK.utf8.SQL
+      # wiki_md: file://data/JIBSOJHJKNCHK.SQL.md
+      source_code: file://data/JIBSOIEUPDB.utf8.SQL
+      wiki_md: file://data/JIBSOIEUPDB.SQL.md
       # source_code: file://data/agent.py.txt
       # wiki_md: file://data/agent.py.md

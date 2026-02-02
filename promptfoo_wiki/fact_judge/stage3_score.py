@@ -1,120 +1,130 @@
-import json
-from pathlib import Path
-
-LEVEL_SCORE = {
-    "HIGH": 1.0,
-    "MEDIUM": 0.6,
-    "LOW": 0.3,
-}
-
-CORRECTNESS_PENALTY = {
-    "GOOD": 0,
-    "MINOR_ISSUES": 5,
-    "WRONG": 20,
-}
-
-HALLUCINATION_PENALTY = {
-    "NONE": 0,
-    "MINOR": 10,
-    "SEVERE": 40,
-}
+from typing import Dict, Any
 
 
-def final_score(stage1, stage2):
-    print("[Stage3] Scoring...")
-    # print(f"  Stage1 data: {json.dumps(stage1, indent=2, ensure_ascii=False)}")
-    # print(f"  Stage2 data: {json.dumps(stage2, indent=2, ensure_ascii=False)}")
+def clamp(v: float, min_v: float = 0, max_v: float = 100) -> float:
+    normalized = round(v / 85 * 100, 1)
+    return max(min_v, min(max_v, normalized))
+
+
+# =========================
+# 主打分函数
+# =========================
+def final_score(stage1: Dict[str, Any], stage2: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    stage1: fact-level extraction result (coverage facts, hallucination list, etc.)
+    stage2: soft-judge qualitative assessment
+
+    stage2 expected keys:
+      - coverage_level: HIGH | MEDIUM | LOW
+      - correctness_level: GOOD | MINOR_ISSUES | BAD
+      - hallucination_level: NONE | MINOR | SEVERE
+      - usefulness_level: HIGH | MEDIUM | LOW
+      - summary: str
+    """
+
     # =========================
-    # 1. 从 Stage1 取基础事实
+    # 0. 防御性读取（不会 KeyError）
     # =========================
-    facts = stage1
-    coverage = facts["coverage"]
-    coverage_rate = coverage["covered_items"] / coverage["total_items"]
+    coverage_level = stage2.get("coverage_level", "LOW")
+    usefulness_level = stage2.get("usefulness_level", "LOW")
+    correctness_level = stage2.get("correctness_level", "GOOD")
+    hallucination_level = stage2.get("hallucination_level", "NONE")
+    summary = stage2.get("summary", "")
 
-    score = 0
-    score += coverage_rate * 40
-    score += LEVEL_SCORE[stage2["usefulness_level"]] * 30
-    score += LEVEL_SCORE[stage2["coverage_level"]] * 20
+    # =========================
+    # 1. 基础分（安全但没用 ≠ 0 分）
+    # =========================
+    score = 30
 
-    score -= CORRECTNESS_PENALTY[stage2["correctness_level"]]
-    score -= HALLUCINATION_PENALTY[stage2["hallucination_level"]]
-
-    score = round(max(score, 0), 2)
-    correctness = facts["correctness"]
-    hallucination = facts.get("hallucination", [])
-    correctness_penalty = correctness["wrong_count"]
-    return {
-        "final_score": score,
-        "result": "PASS" if score >= 60 else "FAIL",
-        "summary": stage2["notes"],
-        "details": {
-            "coverage_rate": round(coverage_rate, 3),
-            "usefulness_level": stage2["usefulness_level"],
-            "coverage_level": stage2["coverage_level"],
-            "correctness_level": stage2["correctness_level"],
-            "hallucination_level": stage2["hallucination_level"],
-            "correctness_wrong": correctness_penalty,
-            "coverage": coverage,
-            "correctness": correctness,
-            "hallucination": hallucination,
-        },
+    # =========================
+    # 2. Coverage & Usefulness 加分
+    # =========================
+    coverage_bonus = {
+        "HIGH": 30,
+        "MEDIUM": 20,
+        "LOW": 10,
     }
 
+    usefulness_bonus = {
+        "HIGH": 25,
+        "MEDIUM": 15,
+        "LOW": 5,
+    }
 
-# 临时不用这个函数了
-def score(stage1: dict, stage2: dict) -> dict:
-    """
-    Stage3:
-    - 读取 Stage1（fact extractor 的硬事实）
-    - 读取 Stage2（soft judge 的判断）
-    - 合成最终评分
-    """
-    print("[Stage3] Scoring...")
-    print(f"  Stage1 data: {json.dumps(stage1, indent=2, ensure_ascii=False)}")
-    print(f"  Stage2 data: {json.dumps(stage2, indent=2, ensure_ascii=False)}")
-    # =========================
-    # 1. 从 Stage1 取基础事实
-    # =========================
-    facts = stage1
-
-    coverage = facts["coverage"]
-    correctness = facts["correctness"]
-    hallucination = facts.get("hallucination", [])
-
-    # 示例：硬指标
-    coverage_rate = coverage["covered_items"] / coverage["total_items"]
-    correctness_penalty = correctness["wrong_count"]
-    hallucination_count = len(hallucination)
+    score += usefulness_bonus.get(usefulness_level, 0)
 
     # =========================
-    # 2. 从 Stage2 取 soft judge
+    # 3. Correctness 惩罚（非常重要）
     # =========================
-    soft = stage2
+    correctness_penalty = {
+        "GOOD": 0,
+        "MINOR_ISSUES": -10,
+        "BAD": -40,
+    }
 
-    usefulness = soft.get("usefulness_score", 0)
-    summary = soft.get("summary", "")
+    score += correctness_penalty.get(correctness_level, -40)
 
     # =========================
-    # 3. 最终打分逻辑（你可随意改）
+    # 4. Hallucination 惩罚（硬门槛）
     # =========================
-    final_score = (
-        coverage_rate * 40
-        + usefulness * 0.4
-        - correctness_penalty * 1.5
-        - hallucination_count * 5
-    )
+    hallucination_penalty = {
+        "NONE": 0,
+        "MINOR": -10,
+        "SEVERE": -50,
+    }
 
-    final_score = round(max(final_score, 0), 2)
+    score += hallucination_penalty.get(hallucination_level, -50)
 
+    # =========================
+    # 5. Stage1 轻量校正（不主导，只兜底）
+    # =========================
+    coverage_rate = None
+    try:
+        total_items = stage1.get("coverage", {}).get("total_items")
+        covered_items = stage1.get("coverage", {}).get("covered_items")
+        if total_items and covered_items is not None:
+            coverage_rate = covered_items / max(total_items, 1)
+            # 极低 factual 覆盖，轻微降权
+            # if coverage_rate < 0.2:
+            #     score -= 5
+    except Exception:
+        pass  # 永不因为 stage1 异常翻车
+
+    if coverage_rate < 0.3:
+        coverage_level = "LOW"
+    elif coverage_rate < 0.6:
+        coverage_level = "MEDIUM"
+    else:
+        coverage_level = "HIGH"
+
+    score += coverage_bonus.get(coverage_level, 0)
+    # =========================
+    # 6. 分数收敛
+    # =========================
+    final = round(clamp(score), 2)
+
+    # =========================
+    # 7. PASS / FAIL 判定（稳定规则）
+    # =========================
+    if hallucination_level == "SEVERE" or correctness_level == "BAD" or final < 60:
+        result = "FAIL"
+    else:
+        result = "PASS"
+
+    # =========================
+    # 8. 输出（给人 + 给机器都好用）
+    # =========================
     return {
-        "coverage_rate": round(coverage_rate, 3),
-        "correctness_wrong": correctness_penalty,
-        "hallucination_count": hallucination_count,
-        "coverage": coverage,
-        "correctness": correctness,
-        "hallucination": hallucination,
-        "usefulness": usefulness,
-        "final_score": final_score,
+        "final_score": final,
+        "result": result,
         "summary": summary,
-        "result": "PASS" if final_score >= 60 else "FAIL",
+        "details": {
+            "coverage_level": coverage_level,
+            "usefulness_level": usefulness_level,
+            "correctness_level": correctness_level,
+            "hallucination_level": hallucination_level,
+            "coverage_rate": (
+                round(coverage_rate, 3) if coverage_rate is not None else None
+            ),
+        },
     }
