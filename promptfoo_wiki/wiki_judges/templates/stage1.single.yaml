@@ -1,0 +1,17 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - file: ../../prompts/stage1_fact_extractor.txt
+
+tests:
+  - vars:
+      file_path: "{{file_path}}"
+      language: "{{language}}"
+      source_code: |
+        {{source_code}}
+      wiki_md: |
+        {{wiki_md}}

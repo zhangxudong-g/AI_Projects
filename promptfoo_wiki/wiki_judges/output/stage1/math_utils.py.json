@@ -1,0 +1,45 @@
+{
+  "file_path": "sample_data/src/math_utils.py",
+  "facts": [
+    {
+      "fact_id": "fact_1",
+      "type": "behavior",
+      "description": "math_utils 模块提供 add_numbers 函数，用于两个整数相加",
+      "verdict": "supported",
+      "evidence": [
+        "def add_numbers(a: int, b: int) -> int:",
+        "    return a + b"
+      ]
+    },
+    {
+      "fact_id": "fact_2",
+      "type": "behavior",
+      "description": "math_utils 模块提供 subtract_numbers 函数，用于两个整数相减",
+      "verdict": "supported",
+      "evidence": [
+        "def subtract_numbers(a: int, b: int) -> int:",
+        "    return a - b"
+      ]
+    },
+    {
+      "fact_id": "fact_3",
+      "type": "behavior",
+      "description": "math_utils 模块提供 multiply_numbers 函数，用于两个整数相乘",
+      "verdict": "supported",
+      "evidence": [
+        "def multiply_numbers(a: int, b: int) -> int:",
+        "    return a * b"
+      ]
+    },
+    {
+      "fact_id": "fact_4",
+      "type": "constraint",
+      "description": "divide_numbers 函数会在除数为0时抛出 ZeroDivisionError 异常",
+      "verdict": "supported",
+      "evidence": [
+        "if b == 0:",
+        "        raise ZeroDivisionError(\"Cannot divide by zero\")"
+      ]
+    }
+  ]
+}

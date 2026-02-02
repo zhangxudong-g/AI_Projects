@@ -1,0 +1,13 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - file: ../../prompts/stage2_soft_judge.txt
+
+tests:
+  - vars:
+      stage1_output: |
+        {{stage1_output}}

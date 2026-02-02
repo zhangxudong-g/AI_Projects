@@ -1,0 +1,32 @@
+{
+  "file_path": "sample_data/src/Calculator.java",
+  "facts": [
+    {
+      "fact_id": "fact_1",
+      "type": "behavior",
+      "description": "Calculator 类提供 add 方法，用于两个整数相加",
+      "verdict": "supported",
+      "evidence": [
+        "public int add(int a, int b) { return a + b; }"
+      ]
+    },
+    {
+      "fact_id": "fact_2",
+      "type": "behavior",
+      "description": "Calculator 类提供 subtract 方法，用于两个整数相减",
+      "verdict": "supported",
+      "evidence": [
+        "public int subtract(int a, int b) { return a - b; }"
+      ]
+    },
+    {
+      "fact_id": "fact_3",
+      "type": "behavior",
+      "description": "Calculator 类提供 multiply 方法，用于两个整数相乘",
+      "verdict": "supported",
+      "evidence": [
+        "public int multiply(int a, int b) { return a * b; }"
+      ]
+    }
+  ]
+}

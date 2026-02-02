@@ -1,0 +1,19 @@
+你将收到某个文件的事实抽取结果。
+
+请从以下维度打分（0-100）：
+- accuracy（事实判断是否正确）
+- completeness（是否遗漏关键事实）
+- evidence_quality（证据是否充分）
+
+输入：
+{{stage1_output}}
+
+输出 JSON（必须）：
+
+{
+  "accuracy": number,
+  "completeness": number,
+  "evidence_quality": number,
+  "overall": number,
+  "comments": "string"
+}
