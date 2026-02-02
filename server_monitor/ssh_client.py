@@ -22,16 +22,17 @@ class SSHClient:
         try:
             # 准备连接参数
             conn_args = {
-                'host': self.server_config.host,
-                'port': self.server_config.port,
-                'username': self.server_config.username,
+                "host": self.server_config.host,
+                "port": self.server_config.port,
+                "username": self.server_config.username,
+                "known_hosts": None,
             }
 
             # 根据认证方式选择参数
             if self.server_config.ssh_key_path:
-                conn_args['client_keys'] = [self.server_config.ssh_key_path]
+                conn_args["client_keys"] = [self.server_config.ssh_key_path]
             elif self.server_config.password:
-                conn_args['password'] = self.server_config.password
+                conn_args["password"] = self.server_config.password
             else:
                 raise ValueError("Either ssh_key_path or password must be provided")
 
@@ -39,7 +40,9 @@ class SSHClient:
             self.connection = await asyncssh.connect(**conn_args)
             self.last_used = time.time()
             self.command_count = 0
-            logger.info(f"Connected to {self.server_config.name} ({self.server_config.host})")
+            logger.info(
+                f"Connected to {self.server_config.name} ({self.server_config.host})"
+            )
             return True
 
         except Exception as e:
@@ -56,25 +59,33 @@ class SSHClient:
     async def ensure_connection(self):
         """确保连接有效，如果无效则重新连接"""
         if not self.connection:
-            logger.info(f"Connection to {self.server_config.name} is not established, connecting...")
+            logger.info(
+                f"Connection to {self.server_config.name} is not established, connecting..."
+            )
             return await self.connect()
 
         # 检查连接是否仍然有效
         try:
             # 尝试发送一个简单的命令来检查连接状态
-            result = await self.connection.run('echo ping', check=False, timeout=5)
+            result = await self.connection.run("echo ping", check=False, timeout=5)
             if result.exit_status != 0:
-                logger.warning(f"Connection to {self.server_config.name} appears to be broken, reconnecting...")
+                logger.warning(
+                    f"Connection to {self.server_config.name} appears to be broken, reconnecting..."
+                )
                 await self.disconnect()
                 return await self.connect()
         except Exception as e:
-            logger.warning(f"Connection to {self.server_config.name} failed check, reconnecting: {str(e)}")
+            logger.warning(
+                f"Connection to {self.server_config.name} failed check, reconnecting: {str(e)}"
+            )
             await self.disconnect()
             return await self.connect()
 
         return True
 
-    async def execute_command(self, command: str, use_sudo: bool = False) -> Tuple[bool, str, str]:
+    async def execute_command(
+        self, command: str, use_sudo: bool = False
+    ) -> Tuple[bool, str, str]:
         """
         执行远程命令
         返回: (success, stdout, stderr)
@@ -88,11 +99,17 @@ class SSHClient:
             # 如果需要sudo且有sudo密码，则使用expect脚本或类似方法
             if use_sudo and self.server_config.sudo_password:
                 # 构建带sudo密码的命令
-                sudo_command = f'echo "{self.server_config.sudo_password}" | sudo -S {command}'
-                result = await self.connection.run(sudo_command, check=False, timeout=30)
+                sudo_command = (
+                    f'echo "{self.server_config.sudo_password}" | sudo -S {command}'
+                )
+                result = await self.connection.run(
+                    sudo_command, check=False, timeout=30
+                )
             elif use_sudo:
                 # 如果需要sudo但没有密码，则直接执行sudo命令（假设已配置免密或用户已认证）
-                result = await self.connection.run(f'sudo {command}', check=False, timeout=30)
+                result = await self.connection.run(
+                    f"sudo {command}", check=False, timeout=30
+                )
             else:
                 # 普通命令执行
                 result = await self.connection.run(command, check=False, timeout=30)
@@ -107,25 +124,33 @@ class SSHClient:
 
             # 如果命令执行次数达到阈值，考虑重连以避免长时间连接问题
             if self.command_count >= self.reconnect_threshold:
-                logger.info(f"Command count threshold reached for {self.server_config.name}, preparing for reconnect after next command")
+                logger.info(
+                    f"Command count threshold reached for {self.server_config.name}, preparing for reconnect after next command"
+                )
                 # 标记下次使用时重连
                 await self.disconnect()
 
             return success, stdout, stderr
         except Exception as e:
-            logger.error(f"Error executing command '{command}' on {self.server_config.name}: {str(e)}")
+            logger.error(
+                f"Error executing command '{command}' on {self.server_config.name}: {str(e)}"
+            )
             # 发生错误时断开连接，下次会自动重连
             await self.disconnect()
             return False, "", str(e)
 
-    async def execute_commands_batch(self, commands: list, use_sudo: bool = False) -> Dict[str, Tuple[bool, str, str]]:
+    async def execute_commands_batch(
+        self, commands: list, use_sudo: bool = False
+    ) -> Dict[str, Tuple[bool, str, str]]:
         """
         批量执行命令 - 通过单个会话优化
         """
         # 确保连接有效
         if not await self.ensure_connection():
             logger.error("Unable to establish connection to execute commands")
-            return {cmd: (False, "", "Unable to establish connection") for cmd in commands}
+            return {
+                cmd: (False, "", "Unable to establish connection") for cmd in commands
+            }
 
         results = {}
         for cmd in commands:
@@ -133,11 +158,17 @@ class SSHClient:
                 # 如果需要sudo且有sudo密码，则使用expect脚本或类似方法
                 if use_sudo and self.server_config.sudo_password:
                     # 构建带sudo密码的命令
-                    sudo_command = f'echo "{self.server_config.sudo_password}" | sudo -S {cmd}'
-                    result = await self.connection.run(sudo_command, check=False, timeout=30)
+                    sudo_command = (
+                        f'echo "{self.server_config.sudo_password}" | sudo -S {cmd}'
+                    )
+                    result = await self.connection.run(
+                        sudo_command, check=False, timeout=30
+                    )
                 elif use_sudo:
                     # 如果需要sudo但没有密码，则直接执行sudo命令（假设已配置免密或用户已认证）
-                    result = await self.connection.run(f'sudo {cmd}', check=False, timeout=30)
+                    result = await self.connection.run(
+                        f"sudo {cmd}", check=False, timeout=30
+                    )
                 else:
                     # 普通命令执行
                     result = await self.connection.run(cmd, check=False, timeout=30)
@@ -153,11 +184,15 @@ class SSHClient:
 
                 # 检查是否需要重连
                 if self.command_count >= self.reconnect_threshold:
-                    logger.info(f"Command count threshold reached for {self.server_config.name}, preparing for reconnect")
+                    logger.info(
+                        f"Command count threshold reached for {self.server_config.name}, preparing for reconnect"
+                    )
                     await self.disconnect()
                     break  # 退出循环，下次批量操作时会重连
             except Exception as e:
-                logger.error(f"Error executing command '{cmd}' on {self.server_config.name}: {str(e)}")
+                logger.error(
+                    f"Error executing command '{cmd}' on {self.server_config.name}: {str(e)}"
+                )
                 results[cmd] = (False, "", str(e))
                 # 发生错误时断开连接，下次会自动重连
                 await self.disconnect()
@@ -184,7 +219,7 @@ class SSHClient:
                 # 如果没有配置sudo密码，尝试直接执行sudo（假设已配置免密或用户已认证）
                 # 但这样会导致交互式密码提示，所以我们需要另一种方式
                 # 先检查是否可以无密码执行sudo
-                check_cmd = 'sudo -n true'
+                check_cmd = "sudo -n true"
                 check_process = await self.connection.create_process(check_cmd)
                 check_process.stdin.write_eof()
                 check_result = await check_process.wait()
@@ -217,7 +252,9 @@ class SSHClient:
             yield success, stdout_output, stderr_output
 
         except Exception as e:
-            logger.error(f"Error executing interactive command '{command}' on {self.server_config.name}: {str(e)}")
+            logger.error(
+                f"Error executing interactive command '{command}' on {self.server_config.name}: {str(e)}"
+            )
             yield False, "", str(e)
             # 发生错误时断开连接，下次会自动重连
             await self.disconnect()
