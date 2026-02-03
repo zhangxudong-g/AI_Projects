@@ -8,21 +8,16 @@
         "wrong_count": 0,
         "mismatches": []
     },
-    "hallucination": [
-        {
-            "position": 1,
-            "content": "The wiki includes fabricated \"Wiki 链接\" URLs (e.g., http://localhost:3000/…) that do not exist in the source code."
-        }
-    ],
+    "hallucination": [],
     "usefulness": {
         "missing_explanations": [
             {
                 "position": 1,
-                "content": "The wiki does not explain the purpose and effect of `copilotkit_customize_config` used inside the `chatbot` node."
+                "content": "The wiki does not explain the purpose and effect of `copilotkit_customize_config`, especially the `emit_tool_calls=\"RequestAssistance\"` argument used in the `chatbot` node."
             },
             {
                 "position": 2,
-                "content": "The wiki does not describe the `interrupt_before=[\"human\"]` argument passed to `graph_builder.compile`, which controls where the graph can be interrupted."
+                "content": "The wiki does not describe how `StateGraph` is instantiated with the `State` class and how it orchestrates the overall state machine (node registration, entry point, etc.)."
             }
         ]
     }

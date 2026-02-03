@@ -1,12 +1,12 @@
 {
-  "final_score": 76.5,
+  "final_score": 88.2,
   "result": "PASS",
-  "summary": "The wiki is accurate but omits key configuration explanations and includes minor fabricated URLs, limiting its overall usefulness.",
+  "summary": "The wiki accurately reflects the code but omits key explanations of the copilotkit customization and StateGraph orchestration, limiting its overall usefulness.",
   "details": {
     "coverage_level": "HIGH",
     "usefulness_level": "MEDIUM",
     "correctness_level": "GOOD",
-    "hallucination_level": "MINOR",
+    "hallucination_level": "NONE",
     "coverage_rate": 1.0
   }
 }

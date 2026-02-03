@@ -1,0 +1,12 @@
+{
+  "final_score": 76.5,
+  "result": "PASS",
+  "summary": "The wiki covers the main flow but lacks explanations of the cursor, constants, and external procedures, and includes some invented URLs, reducing overall usefulness.",
+  "details": {
+    "coverage_level": "HIGH",
+    "usefulness_level": "MEDIUM",
+    "correctness_level": "GOOD",
+    "hallucination_level": "MINOR",
+    "coverage_rate": 0.6
+  }
+}

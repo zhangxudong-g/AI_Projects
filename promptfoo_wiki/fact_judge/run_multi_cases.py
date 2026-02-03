@@ -25,7 +25,10 @@ def run_all_cases(cases_yaml: str, base_output: str = "output"):
                 "result": result["result"],
             }
         )
-
+    for r in results:
+        print(
+            f"Case {r['case_id']}: Final Score = {r['final_score']} Result = {r['result']}"
+        )
     return results
 
 

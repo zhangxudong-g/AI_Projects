@@ -9,5 +9,5 @@ cases:
       wiki_md: data/JIBSOJHJKNCHK.SQL.md
   - id: case_003
     vars:
-      source_code: data/JJIBSOIEUPDB.utf8.SQL
+      source_code: data/JIBSOIEUPDB.utf8.SQL
       wiki_md: data/JIBSOIEUPDB.SQL.md

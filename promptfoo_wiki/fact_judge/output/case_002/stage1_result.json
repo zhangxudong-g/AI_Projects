@@ -1,0 +1,74 @@
+{
+    "coverage": {
+        "total_items": 25,
+        "covered_items": 15,
+        "missing": [
+            {
+                "position": 1,
+                "content": "Cursor definition `CURSOR CFD_FILE IS SELECT A.DATA FROM JIBWJUSHOHENKO_TMP A;`"
+            },
+            {
+                "position": 2,
+                "content": "Constant `c_ISUCCESS` (value 0) definition"
+            },
+            {
+                "position": 3,
+                "content": "Constant `c_INOT_SUCCESS` (value -1) definition"
+            },
+            {
+                "position": 4,
+                "content": "Constant `c_IRETNG` (value 1) definition"
+            },
+            {
+                "position": 5,
+                "content": "Constant `c_VTABLE` (value 'JIBTJUSHOHENKO_JKN_ERR') definition"
+            },
+            {
+                "position": 6,
+                "content": "Constant `c_VTABLE1` (value 'JIBWJUSHOHENKO_KEY') definition"
+            },
+            {
+                "position": 7,
+                "content": "Constant `I_JICHI_KBN` (value 1) definition"
+            },
+            {
+                "position": 8,
+                "content": "Call to external procedure `KKAPK3000.FTRUNCATE` for table truncation"
+            },
+            {
+                "position": 9,
+                "content": "Call to external procedure `KKAPK0030.FPRMSHUTOKU` for control‑parameter retrieval"
+            },
+            {
+                "position": 10,
+                "content": "Call to external procedure `JIBSKGYOSEGET` for automatic administrative‑information lookup"
+            }
+        ]
+    },
+    "correctness": {
+        "wrong_count": 0,
+        "mismatches": []
+    },
+    "hallucination": [
+        {
+            "position": 1,
+            "content": "Invented internal wiki URLs such as `http://localhost:3000/projects/JIP/wiki?file_path=...#EBPFCHKNUMERIC` which do not exist in the source code"
+        }
+    ],
+    "usefulness": {
+        "missing_explanations": [
+            {
+                "position": 1,
+                "content": "Explanation of the purpose and usage of the cursor `CFD_FILE` that reads the temporary table"
+            },
+            {
+                "position": 2,
+                "content": "Explanation of the meaning and role of the constants (`c_ISUCCESS`, `c_INOT_SUCCESS`, `c_IRETNG`, `c_VTABLE`, `c_VTABLE1`, `I_JICHI_KBN`)"
+            },
+            {
+                "position": 3,
+                "content": "Explanation of the external procedures `KKAPK3000.FTRUNCATE`, `KKAPK0030.FPRMSHUTOKU`, and `JIBSKGYOSEGET` and how they affect the transaction flow"
+            }
+        ]
+    }
+}
