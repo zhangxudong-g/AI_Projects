@@ -1,12 +1,12 @@
 {
   "final_score": 88.2,
   "result": "PASS",
-  "summary": "The wiki explains the overall role and main flow but misses key details such as multi‑line CSV handling, certain constants, and control‑parameter semantics, limiting its usefulness for new developers.",
+  "summary": "The wiki covers the main purpose and flow but omits several key details, yet it is accurate and not misleading.",
   "details": {
     "coverage_level": "HIGH",
     "usefulness_level": "MEDIUM",
     "correctness_level": "GOOD",
     "hallucination_level": "NONE",
-    "coverage_rate": 0.906
+    "coverage_rate": 0.8
   }
 }

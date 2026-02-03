@@ -1,97 +1,19 @@
 {
     "coverage": {
-        "total_items": 10,
-        "covered_items": 0,
-        "missing": [
-            {
-                "position": 1,
-                "content": "Procedure definition: JIBSOIEUPDB (function/procedure)"
-            },
-            {
-                "position": 2,
-                "content": "Explicit transaction control: COMMIT statements"
-            },
-            {
-                "position": 3,
-                "content": "Explicit transaction control: ROLLBACK statements"
-            },
-            {
-                "position": 4,
-                "content": "Exception handling block (WHEN OTHERS THEN ...)"
-            },
-            {
-                "position": 5,
-                "content": "Conditional branch: IF WK_IDO_JIYU IN (11,12,13,56,57,58,14,17,18) THEN ..."
-            },
-            {
-                "position": 6,
-                "content": "Loop construct: FOR CR_IDO IN C_JIBSOIEUPDB(i_IENTRY_ID) LOOP ..."
-            },
-            {
-                "position": 7,
-                "content": "Dynamic SQL execution: EXECUTE IMMEDIATE VSQL;"
-            },
-            {
-                "position": 8,
-                "content": "Call to another stored procedure: JIBSOCRTIDDTJ(...)"
-            },
-            {
-                "position": 9,
-                "content": "Cursor declaration: CURSOR C_JIBSOIEUPDB(i_IENTRY_ID NUMBER) IS ..."
-            },
-            {
-                "position": 10,
-                "content": "Output parameter assignments (e.g., o_VSEATI_NO := ...)"
-            }
-        ]
+        "total_items": 7,
+        "covered_items": 7,
+        "missing": []
     },
     "correctness": {
         "wrong_count": 0,
         "mismatches": []
     },
-    "hallucination": [
-        {
-            "position": 1,
-            "content": "AUTOTRACE usage (SET AUTOTRACE ON EXPLAIN)"
-        },
-        {
-            "position": 2,
-            "content": "SQL*Plus command syntax"
-        },
-        {
-            "position": 3,
-            "content": "TKPROF tool for trace analysis"
-        },
-        {
-            "position": 4,
-            "content": "DBMS_SQLTUNE / SQL Tuning Advisor recommendations"
-        },
-        {
-            "position": 5,
-            "content": "References to \"SQL*Plus\" and \"SQL Developer\" as execution environments"
-        }
-    ],
+    "hallucination": [],
     "usefulness": {
         "missing_explanations": [
             {
                 "position": 1,
-                "content": "Purpose and effect of the COMMIT statements within the procedure"
-            },
-            {
-                "position": 2,
-                "content": "Reason for the extensive use of cursor loops and their impact on performance"
-            },
-            {
-                "position": 3,
-                "content": "Explanation of the dynamic SQL construction (VSQL) and its role in the process"
-            },
-            {
-                "position": 4,
-                "content": "Details of the conditional logic governing different 'IDO_JIYU' values"
-            },
-            {
-                "position": 5,
-                "content": "Interaction with external procedures (e.g., JIBSKCARDSOFJ, JIBSOCRTIDDTJ) and their expected behavior"
+                "content": "The wiki does not explain the explicit transaction control (COMMIT and ROLLBACK) used in the procedure."
             }
         ]
     }

@@ -1,12 +1,12 @@
 {
-  "final_score": 41.2,
-  "result": "FAIL",
-  "summary": "The wiki omits all major procedural logic and decision points, adds unrelated tool references, but does not contradict the source code.",
+  "final_score": 88.2,
+  "result": "PASS",
+  "summary": "The wiki accurately describes the code but omits transaction control details, limiting its practical usefulness for developers.",
   "details": {
-    "coverage_level": "LOW",
-    "usefulness_level": "LOW",
+    "coverage_level": "HIGH",
+    "usefulness_level": "MEDIUM",
     "correctness_level": "GOOD",
-    "hallucination_level": "MINOR",
-    "coverage_rate": 0.0
+    "hallucination_level": "NONE",
+    "coverage_rate": 1.0
   }
 }

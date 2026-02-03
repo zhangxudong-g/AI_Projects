@@ -1,12 +1,12 @@
 {
-  "final_score": 88.2,
+  "final_score": 64.7,
   "result": "PASS",
-  "summary": "The wiki accurately reflects the code but omits key explanations of tools_condition and interrupt_before, limiting its usefulness.",
+  "summary": "The wiki omits many essential components and explanations, limiting a new developer's ability to grasp and work with the file despite being factually accurate.",
   "details": {
-    "coverage_level": "HIGH",
-    "usefulness_level": "MEDIUM",
+    "coverage_level": "MEDIUM",
+    "usefulness_level": "LOW",
     "correctness_level": "GOOD",
     "hallucination_level": "NONE",
-    "coverage_rate": 1.0
+    "coverage_rate": 0.462
   }
 }

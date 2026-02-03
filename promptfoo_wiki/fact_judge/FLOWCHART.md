@@ -121,3 +121,65 @@ sequenceDiagram
    - 接收Stage 2返回结果后，调用Stage 3 (Final Scoring) 进行最终评分
 5. run_single_case_pipeline.py将最终结果返回给run_multi_cases.py
 6. run_multi_cases.py收集所有案例结果后返回给用户
+
+## 新增功能流程图
+
+### 前置提取事实（工程wiki级别）流程
+
+```mermaid
+graph TD
+    A[开始] --> B[输入: 工程项目路径]
+    B --> C[扫描项目结构]
+    C --> D[识别项目文件和模块]
+    D --> E[分析模块间关系]
+    E --> F[提取架构特征]
+    F --> G[识别设计模式]
+    G --> H[生成项目上下文信息]
+    H --> I[输出: 工程级事实JSON]
+
+    style A fill:#ffffff
+    style B fill:#f8f9fa
+    style C fill:#fff3e0
+    style D fill:#fff8e1
+    style E fill:#e8f5e8
+    style F fill:#f1f8e9
+    style G fill:#e3f2fd
+    style H fill:#e1f5fe
+    style I fill:#fafafa
+```
+
+### 前置提取与评估流程整合
+
+```mermaid
+graph LR
+    A[前置提取事实] --> B[项目结构分析]
+    B --> C[模块关系提取]
+    C --> D[上下文信息生成]
+    D --> E[传统三阶段评估]
+    E --> F[融合工程级上下文]
+    F --> G[最终评估结果]
+
+    style A fill:#e3f2fd
+    style D fill:#fff3e0
+    style E fill:#e8f5e8
+    style G fill:#f1f8e9
+```
+
+### 工程级评估流程
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant PreExtractor as pre_extract_facts.py
+    participant ProjectAnalyzer as 项目分析器
+    participant ContextBuilder as 上下文构建器
+    participant Evaluator as 评估器
+
+    User->>PreExtractor: 提供项目路径
+    PreExtractor->>ProjectAnalyzer: 扫描项目结构
+    ProjectAnalyzer->>ContextBuilder: 提取模块关系
+    ContextBuilder->>PreExtractor: 生成上下文信息
+    PreExtractor-->>User: 返回工程级事实
+    User->>Evaluator: 执行评估（带上下文）
+    Evaluator-->>User: 返回最终评估结果
+```

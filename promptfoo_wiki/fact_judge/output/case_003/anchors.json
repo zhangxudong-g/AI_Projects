@@ -1,0 +1,41 @@
+{
+  "tables": [
+    "GAB_RIREKI_RENBAN",
+    "GACTKANRI_MOUSHIDE",
+    "JIBTKADOBI_KANRI",
+    "JIBWBUPD_BIKO",
+    "JIBWBUPD_GYOMUSHIKAKU",
+    "JIBWBUPD_JUKIIDO",
+    "JIBWBUPD_JUKIJOHO",
+    "JIBWBUPD_JUKIJUSHO",
+    "JIBWBUPD_JUKIKIHON",
+    "JIBWBUPD_TSUSHORIREKI",
+    "JIBWIDORUISEKI_BIKO",
+    "JIBWIES_BIKO",
+    "JIBWIES_ENTRYKANRI",
+    "JIBWIES_JUKIIDO",
+    "JIBWIES_JUKIJUSHO",
+    "JIBWIES_TSUSHORIREKI",
+    "R_BUPD_ATENA.RIREKI_RENBAN",
+    "R_BUPD_JUKIIDO.IDO_BI"
+  ],
+  "operations": [
+    "delete",
+    "insert",
+    "select",
+    "update"
+  ],
+  "clauses": [
+    "group by",
+    "order by",
+    "where"
+  ],
+  "procedures": [
+    "JIBSOIEUPDB"
+  ],
+  "functions": [],
+  "packages": [],
+  "package_bodies": [],
+  "triggers": [],
+  "with_queries": []
+}

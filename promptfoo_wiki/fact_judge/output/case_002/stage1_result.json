@@ -1,19 +1,27 @@
 {
     "coverage": {
-        "total_items": 32,
-        "covered_items": 29,
+        "total_items": 25,
+        "covered_items": 20,
         "missing": [
             {
-                "position": 8,
-                "content": "Constant I_JICHI_KBN (旧自治体区分) is defined but not mentioned in the wiki."
+                "position": 1,
+                "content": "Calls to `KKAPK3000.FTRUNCATE` that clear the error table and work table before processing."
             },
             {
-                "position": 30,
-                "content": "The WHILE loop `WHILE NINDEX <> NBAK_INDEX LOOP` used for processing multi‑line CSV records is not described."
+                "position": 2,
+                "content": "Call to `KKAPK0030.FPRMSHUTOKU` that loads the nine control‑parameter flags (CTLPRM1‑CTLPRM9)."
             },
             {
-                "position": 31,
-                "content": "The conditional `IF NINDEX = 0 THEN ... ELSE ... END IF` that distinguishes single‑line vs multi‑line records is omitted."
+                "position": 3,
+                "content": "Definition and usage of the control‑parameter variables `CTLPRM1` … `CTLPRM9` that drive required‑field checks."
+            },
+            {
+                "position": 4,
+                "content": "Detailed error‑aggregation logic that combines the per‑field symbols (`* & # @ % $`) into the final `ERRFLG` using the `BKIGOUFLG*` booleans."
+            },
+            {
+                "position": 5,
+                "content": "Explicit transaction handling (`COMMIT` at the end of processing and `ROLLBACK` in each exception block)."
             }
         ]
     },
@@ -26,7 +34,23 @@
         "missing_explanations": [
             {
                 "position": 1,
-                "content": "The meaning and effect of the control parameters CTLPRM1‑CTLPRM9 (read via KKAPK0030.FPRMSHUTOKU) are not explained in detail."
+                "content": "Why the procedure truncates the error and work tables at the start (ensuring a clean batch run)."
+            },
+            {
+                "position": 2,
+                "content": "What each of the nine control‑parameter flags (`CTLPRM1`‑`CTLPRM9`) means and how they affect required‑field validation."
+            },
+            {
+                "position": 3,
+                "content": "How the boolean flags `BKIGOUFLG1` … `BKIGOUFLG6` are used to build the consolidated error flag string."
+            },
+            {
+                "position": 4,
+                "content": "The role of the `JIBSKGYOSEGET` call for automatic administrative‑information lookup."
+            },
+            {
+                "position": 5,
+                "content": "The impact of the `COMMIT`/`ROLLBACK` strategy on batch atomicity and error reporting."
             }
         ]
     }

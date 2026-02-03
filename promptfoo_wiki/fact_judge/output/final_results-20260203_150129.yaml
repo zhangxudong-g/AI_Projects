@@ -1,0 +1,4 @@
+results:
+- case_id: case_001
+  final_score: 100
+  result: PASS

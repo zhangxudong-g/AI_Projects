@@ -1,8 +1,8 @@
 {
-  "evalId": "eval-DXR-2026-02-03T06:03:31",
+  "evalId": "eval-sMM-2026-02-03T08:20:57",
   "results": {
     "version": 3,
-    "timestamp": "2026-02-03T06:03:31.757Z",
+    "timestamp": "2026-02-03T08:20:57.808Z",
     "prompts": [
       {
         "id": "9e6c6d694e3a62af137f310a9cef423d45c116748fcbf58f154ba73b07c2b25b",
@@ -16,12 +16,12 @@
           "testErrorCount": 0,
           "assertPassCount": 1,
           "assertFailCount": 0,
-          "totalLatencyMs": 6808,
+          "totalLatencyMs": 4047,
           "tokenUsage": {
-            "prompt": 939,
-            "completion": 293,
+            "prompt": 1290,
+            "completion": 332,
             "cached": 0,
-            "total": 1232,
+            "total": 1622,
             "numRequests": 1,
             "completionDetails": {
               "reasoning": 0,
@@ -73,11 +73,11 @@
             }
           ]
         },
-        "id": "685fd12a-ca87-4c35-b21b-0a0a0046c3a8",
-        "latencyMs": 6808,
+        "id": "d13d7e56-8fdc-420b-8448-d579aabc726a",
+        "latencyMs": 4047,
         "namedScores": {},
         "prompt": {
-          "raw": "You are a senior software engineer evaluating a generated Wiki document.\n\nYou are given:\n- SOURCE CODE (complete)\n- GENERATED WIKI (complete)\n\nThe Facts results as below.\n--- Facts ---\n{\r\n    \"coverage\": {\r\n        \"total_items\": 11,\r\n        \"covered_items\": 11,\r\n        \"missing\": []\r\n    },\r\n    \"correctness\": {\r\n        \"wrong_count\": 0,\r\n        \"mismatches\": []\r\n    },\r\n    \"hallucination\": [],\r\n    \"usefulness\": {\r\n        \"missing_explanations\": [\r\n            {\r\n                \"position\": 1,\r\n                \"content\": \"The wiki does not explain the behavior of `tools_condition` imported from `langgraph.prebuilt`, which determines whether the graph should route to the tools node or end.\"\r\n            },\r\n            {\r\n                \"position\": 2,\r\n                \"content\": \"The wiki does not describe the purpose and effect of the `interrupt_before=[\\\"human\\\"]` argument passed to `graph.compile`, which configures where the graph can be interrupted for human input.\"\r\n            }\r\n        ]\r\n    }\r\n}\n--- END Facts ---\n\n### Your Evaluation Task\nYour task is NOT to check completeness at the code-line level.\n\nYour task is to judge whether the Wiki enables a NEW developer to:\n- Understand the role of this file in the system\n- Follow the main control flow\n- Understand key behaviors and decision points\n- Safely maintain or extend the code\n\nThe SOURCE CODE and GENERATED WIKI are ALWAYS fully provided.\nYou MUST NOT claim missing input, insufficient source, or lack of context.\n\n---\n### CRITICAL INTERPRETATION RULES\n\n1. LOW coverage means \"missing explanation\", NOT missing input.\n2. Do NOT penalize missing:\n   - import statements\n   - variable declarations\n   - obvious boilerplate or glue code\n3. Grouped or conceptual explanations count as valid coverage.\n4. Design intent, motivation, and workflow explanations are MORE important than listing code elements.\n\n---\n### Correctness Judgment (VERY IMPORTANT)\n\nUse the following definitions STRICTLY:\n\n- GOOD:\n  The described behaviors are consistent with the source code.\n\n- MINOR_ISSUES:\n  The Wiki is vague, incomplete, or slightly imprecise,\n  but DOES NOT describe behavior that contradicts the source code\n  and WOULD NOT mislead a developer making changes.\n\n- BAD:\n  Use BAD ONLY IF the Wiki:\n  - Explicitly describes behavior that contradicts the source code, OR\n  - Claims functionality, side effects, or data flow that does NOT exist, OR\n  - Would likely cause a developer to make incorrect modifications.\n\n  Lack of detail, missing explanations, or shallow descriptions\n  MUST NOT be marked as BAD.\n\n---\n### Hallucination Judgment\n\n- NONE:\n  No invented components, classes, tables, URLs, or logic.\n\n- MINOR:\n  Minor invented names or examples that do not affect understanding.\n\n- SEVERE:\n  ONLY if the Wiki invents major components, APIs, tables, classes,\n  control flows, or system behavior NOT present in the source code.\n\nIf no hallucinated items are listed,\nhallucination_level MUST NOT be SEVERE.\n\n---\n### Coverage Evaluation (Conceptual, NOT enumerative)\n\n- HIGH:\n  All major responsibilities, workflows, and roles are explained.\n\n- MEDIUM:\n  Main workflow is explained, but some behaviors or design intent are unclear.\n\n- LOW:\n  A new developer cannot understand how this file works or why it exists.\n\n---\n### Usefulness Evaluation\n\n- HIGH:\n  A developer can confidently debug, modify, or extend this code.\n\n- MEDIUM:\n  The developer understands the file but would need to inspect the source often.\n\n- LOW:\n  The Wiki provides little help beyond restating obvious facts.\n\n---\n### Output STRICTLY in JSON (no extra text):\n\n{\n  \"coverage_level\": \"HIGH\" | \"MEDIUM\" | \"LOW\",\n  \"correctness_level\": \"GOOD\" | \"MINOR_ISSUES\" | \"BAD\",\n  \"hallucination_level\": \"NONE\" | \"MINOR\" | \"SEVERE\",\n  \"usefulness_level\": \"HIGH\" | \"MEDIUM\" | \"LOW\",\n  \"summary\": \"one concise sentence explaining the overall judgment\"\n}\n",
+          "raw": "You are a senior software engineer evaluating a generated Wiki document.\n\nYou are given:\n- SOURCE CODE (complete)\n- GENERATED WIKI (complete)\n\nThe Facts results as below.\n--- Facts ---\n{\r\n    \"coverage\": {\r\n        \"total_items\": 13,\r\n        \"covered_items\": 6,\r\n        \"missing\": [\r\n            {\r\n                \"position\": 1,\r\n                \"content\": \"Top‑level variable `tool = TavilySearchResults(max_results=2)` is not documented.\"\r\n            },\r\n            {\r\n                \"position\": 2,\r\n                \"content\": \"Top‑level variable `tools = [tool]` is not documented.\"\r\n            },\r\n            {\r\n                \"position\": 3,\r\n                \"content\": \"Top‑level variable `llm = ChatAnthropic(... )` is not documented.\"\r\n            },\r\n            {\r\n                \"position\": 4,\r\n                \"content\": \"Top‑level variable `llm_with_tools = llm.bind_tools(tools + [RequestAssistance])` is not documented.\"\r\n            },\r\n            {\r\n                \"position\": 5,\r\n                \"content\": \"Top‑level variable `graph_builder = StateGraph(State)` (and subsequent `add_node` / `add_edge` calls) is not documented as a concrete object.\"\r\n            },\r\n            {\r\n                \"position\": 6,\r\n                \"content\": \"Top‑level variable `memory = MemorySaver()` is not documented.\"\r\n            },\r\n            {\r\n                \"position\": 7,\r\n                \"content\": \"Top‑level variable `graph = graph_builder.compile(... )` is not documented.\"\r\n            }\r\n        ]\r\n    },\r\n    \"correctness\": {\r\n        \"wrong_count\": 0,\r\n        \"mismatches\": []\r\n    },\r\n    \"hallucination\": [],\r\n    \"usefulness\": {\r\n        \"missing_explanations\": [\r\n            {\r\n                \"position\": 1,\r\n                \"content\": \"Explanation of `copilotkit_customize_config` and the purpose of the `emit_tool_calls=\\\"RequestAssistance\\\"` argument.\"\r\n            },\r\n            {\r\n                \"position\": 2,\r\n                \"content\": \"Details of how `tools_condition` decides between routing to the tools node or ending the graph.\"\r\n            },\r\n            {\r\n                \"position\": 3,\r\n                \"content\": \"How the `MemorySaver` checkpoint works, what state is persisted, and how it enables interruption/resumption.\"\r\n            },\r\n            {\r\n                \"position\": 4,\r\n                \"content\": \"The role of `StateGraph.compile` with the `interrupt_before=[\\\"human\\\"]` parameter and how it affects execution.\"\r\n            },\r\n            {\r\n                \"position\": 5,\r\n                \"content\": \"The exact structure of the `ToolMessage` created in `create_response` and how it is consumed by the human node.\"\r\n            }\r\n        ]\r\n    }\r\n}\n--- END Facts ---\n\n### Your Evaluation Task\nYour task is NOT to check completeness at the code-line level.\n\nYour task is to judge whether the Wiki enables a NEW developer to:\n- Understand the role of this file in the system\n- Follow the main control flow\n- Understand key behaviors and decision points\n- Safely maintain or extend the code\n\nThe SOURCE CODE and GENERATED WIKI are ALWAYS fully provided.\nYou MUST NOT claim missing input, insufficient source, or lack of context.\n\n---\n### CRITICAL INTERPRETATION RULES\n\n1. LOW coverage means \"missing explanation\", NOT missing input.\n2. Do NOT penalize missing:\n   - import statements\n   - variable declarations\n   - obvious boilerplate or glue code\n3. Grouped or conceptual explanations count as valid coverage.\n4. Design intent, motivation, and workflow explanations are MORE important than listing code elements.\n\n---\n### Correctness Judgment (VERY IMPORTANT)\n\nUse the following definitions STRICTLY:\n\n- GOOD:\n  The described behaviors are consistent with the source code.\n\n- MINOR_ISSUES:\n  The Wiki is vague, incomplete, or slightly imprecise,\n  but DOES NOT describe behavior that contradicts the source code\n  and WOULD NOT mislead a developer making changes.\n\n- BAD:\n  Use BAD ONLY IF the Wiki:\n  - Explicitly describes behavior that contradicts the source code, OR\n  - Claims functionality, side effects, or data flow that does NOT exist, OR\n  - Would likely cause a developer to make incorrect modifications.\n\n  Lack of detail, missing explanations, or shallow descriptions\n  MUST NOT be marked as BAD.\n\n---\n### Hallucination Judgment\n\n- NONE:\n  No invented components, classes, tables, URLs, or logic.\n\n- MINOR:\n  Minor invented names or examples that do not affect understanding.\n\n- SEVERE:\n  ONLY if the Wiki invents major components, APIs, tables, classes,\n  control flows, or system behavior NOT present in the source code.\n\nIf no hallucinated items are listed,\nhallucination_level MUST NOT be SEVERE.\n\n---\n### Coverage Evaluation (Conceptual, NOT enumerative)\n\n- HIGH:\n  All major responsibilities, workflows, and roles are explained.\n\n- MEDIUM:\n  Main workflow is explained, but some behaviors or design intent are unclear.\n\n- LOW:\n  A new developer cannot understand how this file works or why it exists.\n\n---\n### Usefulness Evaluation\n\n- HIGH:\n  A developer can confidently debug, modify, or extend this code.\n\n- MEDIUM:\n  The developer understands the file but would need to inspect the source often.\n\n- LOW:\n  The Wiki provides little help beyond restating obvious facts.\n\n---\n### Output STRICTLY in JSON (no extra text):\n\n{\n  \"coverage_level\": \"HIGH\" | \"MEDIUM\" | \"LOW\",\n  \"correctness_level\": \"GOOD\" | \"MINOR_ISSUES\" | \"BAD\",\n  \"hallucination_level\": \"NONE\" | \"MINOR\" | \"SEVERE\",\n  \"usefulness_level\": \"HIGH\" | \"MEDIUM\" | \"LOW\",\n  \"summary\": \"one concise sentence explaining the overall judgment\"\n}\n",
           "label": "You are a senior software engineer evaluating a generated Wiki document.\n\nYou are given:\n- SOURCE CODE (complete)\n- GENERATED WIKI (complete)\n\nThe Facts results as below.\n--- Facts ---\n{{facts}}\n--- END Facts ---\n\n### Your Evaluation Task\nYour task is NOT to check completeness at the code-line level.\n\nYour task is to judge whether the Wiki enables a NEW developer to:\n- Understand the role of this file in the system\n- Follow the main control flow\n- Understand key behaviors and decision points\n- Safely maintain or extend the code\n\nThe SOURCE CODE and GENERATED WIKI are ALWAYS fully provided.\nYou MUST NOT claim missing input, insufficient source, or lack of context.\n\n---\n### CRITICAL INTERPRETATION RULES\n\n1. LOW coverage means \"missing explanation\", NOT missing input.\n2. Do NOT penalize missing:\n   - import statements\n   - variable declarations\n   - obvious boilerplate or glue code\n3. Grouped or conceptual explanations count as valid coverage.\n4. Design intent, motivation, and workflow explanations are MORE important than listing code elements.\n\n---\n### Correctness Judgment (VERY IMPORTANT)\n\nUse the following definitions STRICTLY:\n\n- GOOD:\n  The described behaviors are consistent with the source code.\n\n- MINOR_ISSUES:\n  The Wiki is vague, incomplete, or slightly imprecise,\n  but DOES NOT describe behavior that contradicts the source code\n  and WOULD NOT mislead a developer making changes.\n\n- BAD:\n  Use BAD ONLY IF the Wiki:\n  - Explicitly describes behavior that contradicts the source code, OR\n  - Claims functionality, side effects, or data flow that does NOT exist, OR\n  - Would likely cause a developer to make incorrect modifications.\n\n  Lack of detail, missing explanations, or shallow descriptions\n  MUST NOT be marked as BAD.\n\n---\n### Hallucination Judgment\n\n- NONE:\n  No invented components, classes, tables, URLs, or logic.\n\n- MINOR:\n  Minor invented names or examples that do not affect understanding.\n\n- SEVERE:\n  ONLY if the Wiki invents major components, APIs, tables, classes,\n  control flows, or system behavior NOT present in the source code.\n\nIf no hallucinated items are listed,\nhallucination_level MUST NOT be SEVERE.\n\n---\n### Coverage Evaluation (Conceptual, NOT enumerative)\n\n- HIGH:\n  All major responsibilities, workflows, and roles are explained.\n\n- MEDIUM:\n  Main workflow is explained, but some behaviors or design intent are unclear.\n\n- LOW:\n  A new developer cannot understand how this file works or why it exists.\n\n---\n### Usefulness Evaluation\n\n- HIGH:\n  A developer can confidently debug, modify, or extend this code.\n\n- MEDIUM:\n  The developer understands the file but would need to inspect the source often.\n\n- LOW:\n  The Wiki provides little help beyond restating obvious facts.\n\n---\n### Output STRICTLY in JSON (no extra text):\n\n{\n  \"coverage_level\": \"HIGH\" | \"MEDIUM\" | \"LOW\",\n  \"correctness_level\": \"GOOD\" | \"MINOR_ISSUES\" | \"BAD\",\n  \"hallucination_level\": \"NONE\" | \"MINOR\" | \"SEVERE\",\n  \"usefulness_level\": \"HIGH\" | \"MEDIUM\" | \"LOW\",\n  \"summary\": \"one concise sentence explaining the overall judgment\"\n}\n",
           "config": {}
         },
@@ -88,11 +88,11 @@
           "label": ""
         },
         "response": {
-          "output": "{\n  \"coverage_level\": \"MEDIUM\",\n  \"correctness_level\": \"GOOD\",\n  \"hallucination_level\": \"NONE\",\n  \"usefulness_level\": \"MEDIUM\",\n  \"summary\": \"The wiki accurately reflects the code but omits key explanations of tools_condition and interrupt_before, limiting its usefulness.\"\n}",
+          "output": "{\n  \"coverage_level\": \"LOW\",\n  \"correctness_level\": \"GOOD\",\n  \"hallucination_level\": \"NONE\",\n  \"usefulness_level\": \"LOW\",\n  \"summary\": \"The wiki omits many essential components and explanations, limiting a new developer's ability to grasp and work with the file despite being factually accurate.\"\n}",
           "tokenUsage": {
-            "prompt": 939,
-            "completion": 293,
-            "total": 1232
+            "prompt": 1290,
+            "completion": 332,
+            "total": 1622
           }
         },
         "score": 1,
@@ -125,10 +125,10 @@
       "failures": 0,
       "errors": 0,
       "tokenUsage": {
-        "prompt": 939,
-        "completion": 293,
+        "prompt": 1290,
+        "completion": 332,
         "cached": 0,
-        "total": 1232,
+        "total": 1622,
         "numRequests": 1,
         "completionDetails": {
           "reasoning": 0,
@@ -148,7 +148,7 @@
           }
         }
       },
-      "durationMs": 6850
+      "durationMs": 4079
     }
   },
   "config": {
@@ -184,14 +184,14 @@
     "metadata": {},
     "evaluateOptions": {}
   },
-  "shareableUrl": "https://www.promptfoo.app/eval/eval-DXR-2026-02-03T06:03:31",
+  "shareableUrl": "https://www.promptfoo.app/eval/eval-sMM-2026-02-03T08:20:57",
   "metadata": {
     "promptfooVersion": "0.120.20",
     "nodeVersion": "v22.2.0",
     "platform": "win32",
     "arch": "x64",
-    "exportedAt": "2026-02-03T06:03:48.661Z",
-    "evaluationCreatedAt": "2026-02-03T06:03:31.757Z",
+    "exportedAt": "2026-02-03T08:21:03.590Z",
+    "evaluationCreatedAt": "2026-02-03T08:20:57.808Z",
     "author": "zhangxudong.sun@gmail.com"
   }
 }
