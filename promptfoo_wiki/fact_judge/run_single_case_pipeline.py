@@ -25,8 +25,6 @@ def run_single_case(
     *,
     case_id: str,
     vars_cfg: dict,
-    # stage1_config: str,
-    # stage2_config: str,
     output_dir: str | Path,
 ):
     """
@@ -39,19 +37,12 @@ def run_single_case(
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # stage1_config = Path(stage1_config).resolve()
-    # stage2_config = Path(stage2_config).resolve()
-
     # case 根目录 = yaml 所在目录
     # case_root = output_dir.parents[1]
     # print(f"[CWD ] {case_root}  {vars_cfg}")
-    # return []
-    # if not case_root.exists():
-    #     raise RuntimeError(f"Case root not found: {case_root}")
 
     print(f"[CASE] {case_id}")
     # print(f"[CWD ] {case_root}")
-    # output/case_id/
     stage1_out = (output_dir / "stage1.json").resolve()
     stage1_result_out = (output_dir / "stage1_result.json").resolve()
     stage2_out = (output_dir / "stage2.json").resolve()
@@ -69,7 +60,6 @@ def run_single_case(
     # ======================
     run(
         f"promptfoo eval --no-cache "
-        # f"--config {stage1_config} "
         f"--config stage1_fact_extractor.yaml "
         f"--grader ollama:gpt-oss:120b "
         f"{var_str} "
@@ -77,10 +67,6 @@ def run_single_case(
     )
     # 将 Stage 1 结果保存为单独的文件，供 Stage 2 使用
     stage1_data = extract_llm_json(stage1_out)
-
-    # case_dir = Path("cases") / case_id
-    # process_dir = case_dir / "process"
-    # process_dir.mkdir(parents=True, exist_ok=True)
 
     stage1_result_out.write_text(
         json.dumps(stage1_data, indent=4, ensure_ascii=False),

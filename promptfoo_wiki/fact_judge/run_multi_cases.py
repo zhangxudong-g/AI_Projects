@@ -15,8 +15,6 @@ def run_all_cases(cases_yaml: str, base_output: str = "output"):
         result = run_single_case(
             case_id=case_id,
             vars_cfg=vars_cfg,
-            # stage1_config=case["stage1_config"],
-            # stage2_config=case["stage2_config"],
             output_dir=Path(base_output) / case_id,
         )
 
