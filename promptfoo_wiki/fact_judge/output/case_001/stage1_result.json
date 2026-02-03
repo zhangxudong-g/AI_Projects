@@ -1,0 +1,29 @@
+{
+    "coverage": {
+        "total_items": 11,
+        "covered_items": 11,
+        "missing": []
+    },
+    "correctness": {
+        "wrong_count": 0,
+        "mismatches": []
+    },
+    "hallucination": [
+        {
+            "position": 1,
+            "content": "The wiki includes fabricated \"Wiki 链接\" URLs (e.g., http://localhost:3000/…) that do not exist in the source code."
+        }
+    ],
+    "usefulness": {
+        "missing_explanations": [
+            {
+                "position": 1,
+                "content": "The wiki does not explain the purpose and effect of `copilotkit_customize_config` used inside the `chatbot` node."
+            },
+            {
+                "position": 2,
+                "content": "The wiki does not describe the `interrupt_before=[\"human\"]` argument passed to `graph_builder.compile`, which controls where the graph can be interrupted."
+            }
+        ]
+    }
+}

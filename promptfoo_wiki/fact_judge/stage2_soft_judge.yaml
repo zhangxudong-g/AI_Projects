@@ -5,6 +5,9 @@ providers:
       top_p: 1
 
 # stage2_soft_judge.yaml（只示意 prompt 核心）
+   
+
+    
 prompts:
   - |
     You are a senior software engineer evaluating a generated Wiki document.
@@ -13,6 +16,12 @@ prompts:
     - SOURCE CODE (complete)
     - GENERATED WIKI (complete)
 
+    The Facts results as below.
+    --- Facts ---
+    {{facts}}
+    --- END Facts ---
+
+    ### Your Evaluation Task
     Your task is NOT to check completeness at the code-line level.
 
     Your task is to judge whether the Wiki enables a NEW developer to:
@@ -112,5 +121,7 @@ prompts:
 
 tests:
   - name: Stage2 Soft Judge
-    vars:
-      facts: file://output/stage1.json
+    # vars:
+    #   facts: file://output/stage1_result.json
+    assert:
+          - type: contains-json

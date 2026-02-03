@@ -92,10 +92,14 @@ prompts:
 
 tests:
   - name: Stage1 Fact Extraction
-    vars:
+    # vars:
       # source_code: file://data/JIBSOJHJKNCHK.utf8.SQL
       # wiki_md: file://data/JIBSOJHJKNCHK.SQL.md
-      source_code: file://data/JIBSOIEUPDB.utf8.SQL
-      wiki_md: file://data/JIBSOIEUPDB.SQL.md
+      # source_code: file://data/JIBSOIEUPDB.utf8.SQL
+      # wiki_md: file://data/JIBSOIEUPDB.SQL.md
       # source_code: file://data/agent.py.txt
       # wiki_md: file://data/agent.py.md
+      # source_code: {{{source_code}}}
+      # wiki_md: {{{wiki_md}}}
+    assert:
+          - type: contains-json

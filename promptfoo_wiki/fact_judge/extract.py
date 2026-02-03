@@ -10,6 +10,7 @@ def extract_llm_json(promptfoo_output_path: str) -> dict:
 
     try:
         output_text = raw["results"]["results"][0]["response"]["output"]
+        # print(f"[LLM OUTPUT] {output_text}")
     except (KeyError, IndexError):
         raise RuntimeError("Invalid promptfoo output structure")
 
