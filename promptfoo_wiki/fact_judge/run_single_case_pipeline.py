@@ -73,46 +73,54 @@ def extract_anchors(*, source_code: str, language: str) -> Dict[str, List[str]]:
         # Remove multi-line comments (/* ... */)
         source_code_no_comments = re.sub(r'/\*.*?\*/', '', source_code_no_comments, flags=re.DOTALL)
 
-        # Simple and effective pattern for database tables/views
-        # Focus on typical database table naming patterns with known prefixes
-        # Common prefixes in this system: JIBT (住基テーブル), GABT (ガバナンステーブル), etc.
-        table_pattern = r'\b(from|join|into|update)\s+([A-Z][A-Z0-9_]+)(?=\s|,|\)|$|\.|\(|where\b|and\b|or\b|set\b|on\b)'
-        matches = re.findall(table_pattern, source_code_no_comments, re.I)
+        # More comprehensive extraction of SQL elements
 
-        # Process matches and filter for likely database table names
-        for match in matches:
-            table_name = match[1].upper()
+        # 1. Tables from DML statements (more comprehensive)
+        # FROM clauses
+        from_tables = re.findall(r'\bfrom\s+([A-Z][A-Z0-9_.]+)', source_code_no_comments, re.I)
+        # JOIN clauses
+        join_tables = re.findall(r'\bjoin\s+([A-Z][A-Z0-9_.]+)', source_code_no_comments, re.I)
+        # INTO clauses
+        into_tables = re.findall(r'\binto\s+([A-Z][A-Z0-9_.]+)', source_code_no_comments, re.I)
+        # UPDATE clauses
+        update_tables = re.findall(r'\bupdate\s+([A-Z][A-Z0-9_.]+)', source_code_no_comments, re.I)
+        # INSERT INTO clauses
+        insert_tables = re.findall(r'\binsert\s+into\s+([A-Z][A-Z0-9_.]+)', source_code_no_comments, re.I)
 
-            # Filter for likely database table names based on naming conventions
-            # Real tables typically have known prefixes and/or contain underscores
-            if (re.match(r'^(JIBT|GABT|JIBW|GACT|KK[A-Z]|GAB_|JIB|GAB)[A-Z0-9_]+$', table_name)  # Known prefixes
-                and '_' in table_name):  # Real tables typically have underscores
-                anchors["tables"].append(table_name)
+        all_tables = set()
+        all_tables.update([t.upper() for t in from_tables])
+        all_tables.update([t.upper() for t in join_tables])
+        all_tables.update([t.upper() for t in into_tables])
+        all_tables.update([t.upper() for t in update_tables])
+        all_tables.update([t.upper() for t in insert_tables])
 
-        # Also look for schema.table patterns
-        schema_table_pattern = r'\b(from|join|into|update)\s+([A-Z][A-Z0-9_]*\.[A-Z][A-Z0-9_]{4,})\b'
-        schema_matches = re.findall(schema_table_pattern, source_code_no_comments, re.I)
-        anchors["tables"] += [match[1].upper() for match in schema_matches]
+        # Filter for likely database table names based on naming conventions
+        for table in all_tables:
+            # Table names typically have known prefixes and/or contain underscores
+            if (re.match(r'^(JIBT|GABT|JIBW|GACT|KK[A-Z]|GAB_|JIB|GAB)[A-Z0-9_]+$', table)  # Known prefixes
+                and '_' in table):  # Real tables typically have underscores
+                anchors["tables"].append(table)
 
-        # Operations
+        # 2. Operations (expanded list)
         anchors["operations"] += [
             op.lower()
             for op in re.findall(
-                r"\b(select|insert|update|delete|merge|truncate)\b", source_code_no_comments, re.I
+                r"\b(select|insert|update|delete|merge|truncate|create|alter|drop|with|union|intersect|except)\b",
+                source_code_no_comments, re.I
             )
         ]
 
-        # Clauses
+        # 3. Clauses and Keywords (expanded list)
         anchors["clauses"] += [
             c.lower()
             for c in re.findall(
-                r"\b(where|group\s+by|order\s+by|having|limit|with|connect\s+by|start\s+with)\b",
+                r"\b(where|from|join|inner\s+join|left\s+join|right\s+join|full\s+join|on|group\s+by|order\s+by|having|limit|offset|with|connect\s+by|start\s+with|into|values|set|and|or|not|exists|in|between|like)\b",
                 source_code_no_comments,
                 re.I,
             )
         ]
 
-        # Stored Procedures / Functions
+        # 4. Stored Procedures / Functions
         # re.findall with groups returns tuples, so we need to extract the second group ([a-zA-Z0-9_]+)
         procedure_matches = re.findall(
             r"\bcreate\s+(or\s+replace\s+)?procedure\s+([a-zA-Z0-9_]+)",
@@ -128,7 +136,7 @@ def extract_anchors(*, source_code: str, language: str) -> Dict[str, List[str]]:
         )
         anchors["functions"] += [match[1].upper() for match in function_matches if len(match) > 1]
 
-        # Packages
+        # 5. Packages
         package_matches = re.findall(
             r"\bcreate\s+(or\s+replace\s+)?package\s+([a-zA-Z0-9_]+)",
             source_code_no_comments,
@@ -143,7 +151,7 @@ def extract_anchors(*, source_code: str, language: str) -> Dict[str, List[str]]:
         )
         anchors["package_bodies"] += [match[1].upper() for match in package_body_matches if len(match) > 1]
 
-        # Triggers
+        # 6. Triggers
         trigger_matches = re.findall(
             r"\bcreate\s+(or\s+replace\s+)?trigger\s+([a-zA-Z0-9_]+)",
             source_code_no_comments,
@@ -151,7 +159,42 @@ def extract_anchors(*, source_code: str, language: str) -> Dict[str, List[str]]:
         )
         anchors["triggers"] += [match[1].upper() for match in trigger_matches if len(match) > 1]
 
-        # CTEs / WITH queries (engineering signal)
+        # 7. Cursors
+        cursor_matches = re.findall(
+            r"\bcursor\s+([a-zA-Z0-9_]+)",
+            source_code_no_comments,
+            re.I,
+        )
+        anchors["cursors"] += [match.upper() for match in cursor_matches]
+
+        # 8. Types (record/table types)
+        type_matches = re.findall(
+            r"\btype\s+([a-zA-Z0-9_]+)\s+is\s+table",
+            source_code_no_comments,
+            re.I,
+        )
+        anchors["types"] += [match.upper() for match in type_matches]
+
+        # 9. Variables (from declarations)
+        # Find variable declarations in the DECLARE section or as standalone declarations
+        var_matches = re.findall(
+            r"(?:^|\s)([A-Z][A-Z0-9_]+)\s+[A-Z][A-Z0-9_%.]*",
+            source_code_no_comments,
+            re.I | re.MULTILINE
+        )
+        # Filter out common keywords and focus on likely variable names
+        common_keywords = {
+            'IS', 'AS', 'BEGIN', 'END', 'IF', 'THEN', 'ELSE', 'ELSIF', 'WHILE', 'FOR',
+            'LOOP', 'RETURN', 'DECLARE', 'PROCEDURE', 'FUNCTION', 'SELECT', 'INSERT',
+            'UPDATE', 'DELETE', 'FROM', 'WHERE', 'AND', 'OR', 'NOT', 'IN', 'EXISTS'
+        }
+        anchors["variables"] += [
+            var.upper() for var in var_matches
+            if var.upper() not in common_keywords and len(var) > 2 and '_' in var
+        ]
+        anchors["variables"] = list(set(anchors["variables"]))  # Remove duplicates
+
+        # 10. CTEs / WITH queries (engineering signal)
         anchors["with_queries"] += re.findall(
             r"\bwith\s+([a-zA-Z0-9_]+)\s+as\s*\(", source_code_no_comments, re.I
         )
