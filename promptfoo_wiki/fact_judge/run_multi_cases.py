@@ -1,3 +1,4 @@
+import datetime
 import yaml
 from pathlib import Path
 from run_single_case_pipeline import run_single_case
@@ -29,6 +30,15 @@ def run_all_cases(cases_yaml: str, base_output: str = "output"):
         print(
             f"Case {r['case_id']}: Final Score = {r['final_score']} Result = {r['result']}"
         )
+    # 保存最终结果到文件
+    # 获取当前时间戳（格式：年月日_时分秒）
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    # 文件名加上时间戳以防覆盖
+    filename = f"final_results-{timestamp}.yaml"
+    final_results_path = Path(base_output) / filename
+    with open(final_results_path, "w", encoding="utf-8") as f:
+        yaml.dump({"results": results}, f, allow_unicode=True)
+
     return results
 
 
