@@ -1,0 +1,33 @@
+{
+    "coverage": {
+        "total_items": 32,
+        "covered_items": 29,
+        "missing": [
+            {
+                "position": 8,
+                "content": "Constant I_JICHI_KBN (旧自治体区分) is defined but not mentioned in the wiki."
+            },
+            {
+                "position": 30,
+                "content": "The WHILE loop `WHILE NINDEX <> NBAK_INDEX LOOP` used for processing multi‑line CSV records is not described."
+            },
+            {
+                "position": 31,
+                "content": "The conditional `IF NINDEX = 0 THEN ... ELSE ... END IF` that distinguishes single‑line vs multi‑line records is omitted."
+            }
+        ]
+    },
+    "correctness": {
+        "wrong_count": 0,
+        "mismatches": []
+    },
+    "hallucination": [],
+    "usefulness": {
+        "missing_explanations": [
+            {
+                "position": 1,
+                "content": "The meaning and effect of the control parameters CTLPRM1‑CTLPRM9 (read via KKAPK0030.FPRMSHUTOKU) are not explained in detail."
+            }
+        ]
+    }
+}

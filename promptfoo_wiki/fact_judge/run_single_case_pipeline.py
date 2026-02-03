@@ -61,7 +61,7 @@ def run_single_case(
     run(
         f"promptfoo eval --no-cache "
         f"--config stage1_fact_extractor.yaml "
-        f"--grader ollama:gpt-oss:120b "
+        # f"--grader ollama:gpt-oss:120b "
         f"{var_str} "
         f"--output {stage1_out}",
     )
@@ -78,7 +78,7 @@ def run_single_case(
     run(
         f"promptfoo eval --no-cache "
         f"--config stage2_soft_judge.yaml "
-        f"--grader ollama:gpt-oss:120b "
+        # f"--grader ollama:gpt-oss:120b "
         f"--var facts=file://output/{case_id}/stage1_result.json "
         f"--output {stage2_out}",
     )

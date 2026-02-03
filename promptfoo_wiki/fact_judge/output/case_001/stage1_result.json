@@ -1,0 +1,24 @@
+{
+    "coverage": {
+        "total_items": 11,
+        "covered_items": 11,
+        "missing": []
+    },
+    "correctness": {
+        "wrong_count": 0,
+        "mismatches": []
+    },
+    "hallucination": [],
+    "usefulness": {
+        "missing_explanations": [
+            {
+                "position": 1,
+                "content": "The wiki does not explain the behavior of `tools_condition` imported from `langgraph.prebuilt`, which determines whether the graph should route to the tools node or end."
+            },
+            {
+                "position": 2,
+                "content": "The wiki does not describe the purpose and effect of the `interrupt_before=[\"human\"]` argument passed to `graph.compile`, which configures where the graph can be interrupted for human input."
+            }
+        ]
+    }
+}

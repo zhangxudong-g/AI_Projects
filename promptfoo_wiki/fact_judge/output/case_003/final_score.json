@@ -1,0 +1,12 @@
+{
+  "final_score": 41.2,
+  "result": "FAIL",
+  "summary": "The wiki omits all major procedural logic and decision points, adds unrelated tool references, but does not contradict the source code.",
+  "details": {
+    "coverage_level": "LOW",
+    "usefulness_level": "LOW",
+    "correctness_level": "GOOD",
+    "hallucination_level": "MINOR",
+    "coverage_rate": 0.0
+  }
+}

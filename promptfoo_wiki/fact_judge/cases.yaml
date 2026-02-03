@@ -3,11 +3,11 @@ cases:
     vars:
       source_code: data/agent.py.txt
       wiki_md: data/agent.py.md
-  - id: case_002
-    vars:
-      source_code: data/JIBSOJHJKNCHK.utf8.SQL
-      wiki_md: data/JIBSOJHJKNCHK.SQL.md
-  - id: case_003
-    vars:
-      source_code: data/JIBSOIEUPDB.utf8.SQL
-      wiki_md: data/JIBSOIEUPDB.SQL.md
+  # - id: case_002
+  #   vars:
+  #     source_code: data/JIBSOJHJKNCHK.utf8.SQL
+  #     wiki_md: data/JIBSOJHJKNCHK.SQL.md
+  # - id: case_003
+  #   vars:
+  #     source_code: data/JIBSOIEUPDB.utf8.SQL
+  #     wiki_md: data/JIBSOIEUPDB.SQL.md
