@@ -69,30 +69,39 @@ graph TD
 
 ### 安装步骤
 
-1. **安装 Python 依赖**
-
-   ```bash
-   pip install pyyaml
-   ```
-
-2. **安装 Node.js 依赖**
-
-   ```bash
-   npm install -g promptfoo
-   ```
-
-3. **设置 Ollama**
-
-   - 下载并安装 Ollama
-   - 启动 Ollama 服务
-   - 拉取所需的模型（例如 gpt-oss:120b）
-
-4. **克隆或下载 Fact Judge 项目**
+1. **克隆或下载 Fact Judge 项目**
 
    ```bash
    git clone <repository-url>
    cd promptfoo_wiki/fact_judge
    ```
+
+2. **创建虚拟环境（推荐）**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # 或
+   venv\Scripts\activate     # Windows
+   ```
+
+3. **安装 Python 依赖**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **安装 Node.js 依赖**
+
+   ```bash
+   npm install -g promptfoo
+   ```
+
+5. **设置 Ollama**
+
+   - 下载并安装 Ollama
+   - 启动 Ollama 服务
+   - 拉取所需的模型（例如 gpt-oss:120b）
 
 ### 配置说明
 
@@ -308,5 +317,25 @@ Fact Judge 是一个强大的自动化文档质量评估工具，通过多阶段
 新增的前置提取事实功能（工程wiki级别）能够对整个工程项目进行高层次的分析，提取项目结构、模块关系、依赖关系等关键信息，为后续的详细评估提供丰富的上下文。
 
 为了更直观地理解系统的工作流程，请参阅 [FLOWCHART.md](FLOWCHART.md) 文件，其中包含了系统的详细架构图和执行流程。
+
+## 依赖管理
+
+Fact Judge 项目依赖于多个Python包和外部工具。所有必需的依赖都列在 `requirements.txt` 文件中：
+
+- **核心依赖**：
+  - `ollama`：用于与本地大语言模型交互
+  - `promptfoo`：用于运行多阶段评估流程
+  - `PyYAML`：用于解析YAML配置文件
+
+- **可选依赖**（用于代码分析）：
+  - `javalang`：用于Java代码解析
+  - `sqlparse`：用于SQL代码解析
+  - `python-dotenv`：用于环境变量管理
+
+如需开发和测试，可安装 `requirements-dev.txt` 中的额外依赖：
+
+```bash
+pip install -r requirements-dev.txt
+```
 
 如果你在使用过程中遇到任何问题，请参考常见问题解答部分，或者查看项目中的示例文件以获得更多信息。

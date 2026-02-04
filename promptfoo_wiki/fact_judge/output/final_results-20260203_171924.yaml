@@ -1,7 +1,0 @@
-results:
-- case_id: case_002
-  final_score: 88.2
-  result: PASS
-- case_id: case_003
-  final_score: 88.2
-  result: PASS
