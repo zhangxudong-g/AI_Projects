@@ -1,16 +1,41 @@
 cases:
-  - id: case_java_ctl_001_001
+  # - id: case_java_ctl_001_final_001
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+  # - id: case_java_ctl_001_final_002
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+  # - id: case_java_ctl_001_final_003
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+
+
+  # - id: case_java_ctl_001_final_kimi_001
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+  # - id: case_java_ctl_001_final_kimi_002
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+  # - id: case_java_ctl_001_final_kimi_003
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+
+  - id: case_java_ctl_001_cp_001
     vars:
       source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
       wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
-  - id: case_java_ctl_001_002
+
+  - id: case_java_ctl_001_cp_kimi_001
     vars:
       source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
-      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
-  - id: case_java_ctl_001_003
-    vars:
-      source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
-      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+
   # - id: case_java_repo_001
   #   vars:
   #     source_code: data/java/code/Repository_GKB000EntityRepository.java

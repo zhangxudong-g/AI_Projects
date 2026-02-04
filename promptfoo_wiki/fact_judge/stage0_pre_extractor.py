@@ -343,7 +343,9 @@ def generate_engineering_facts(*, anchors: dict, source_code: str) -> list:
     import ollama
 
     prompt = f"""
-You are a SENIOR SOFTWARE ENGINEER performing STATIC CODE ANALYSIS.
+You are a SENIOR SOFTWARE ENGINEER performing STRUCTURAL ANALYSIS, not EXECUTION ANALYSIS.
+
+Your task is to extract STRUCTURAL ENGINEERING FACTS, not execution flow or runtime behavior.
 
 You are NOT writing documentation.
 You are extracting VERIFIABLE ENGINEERING FACTS.
@@ -356,8 +358,9 @@ INPUT
 {json.dumps(anchors, indent=2)}
 
 [SOURCE CODE]
-(The source code is provided ONLY for disambiguation.
-You MUST NOT infer facts that are not supported by anchors.)
+(The source code is provided ONLY to resolve naming ambiguity.
+You MUST NOT derive execution order, branching, or flow from it.)
+
 
 {source_code[:50000]}
 
@@ -367,7 +370,8 @@ WHAT IS AN ENGINEERING FACT
 
 An ENGINEERING FACT is a statement that:
 
-- Describes a RESPONSIBILITY, MECHANISM, or CONTROL FLOW
+- Describes a RESPONSIBILITY or STRUCTURAL MECHANISM
+- CONTROL FLOW facts are NOT allowed unless explicitly required by anchors
 - Can be VERIFIED directly against the source code
 - Would be CLEARLY FALSE if the code changed
 
@@ -405,6 +409,9 @@ STRICT RULES (VERY IMPORTANT)
    - Treat it strictly as a DATA STRUCTURE.
    - Produce AT MOST ONE engineering fact for the class.
    - The fact MUST NOT go beyond describing data shape or data mapping.
+9. Do NOT produce CONTROL-FLOW facts by default.
+   - Prefer STRUCTURAL facts.
+   - Control-flow facts are allowed ONLY when anchors explicitly encode order or branching.
 
 ================================================
 OUTPUT FORMAT (JSON ONLY)
