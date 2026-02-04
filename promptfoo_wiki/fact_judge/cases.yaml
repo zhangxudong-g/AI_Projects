@@ -7,7 +7,159 @@ cases:
   #   vars:
   #     source_code: data/JIBSOJHJKNCHK.utf8.SQL
   #     wiki_md: data/JIBSOJHJKNCHK.SQL.md
-  - id: case_003
+  # - id: case_003
+  #   vars:
+  #     source_code: data/JIBSOIEUPDB.utf8.SQL
+  #     wiki_md: data/JIBSOIEUPDB.SQL.md
+  - id: case_java_ctl_001
     vars:
-      source_code: data/JIBSOIEUPDB.utf8.SQL
-      wiki_md: data/JIBSOIEUPDB.SQL.md
+      source_code: data/java/code/Controller_GakureiboPrintOutController.java
+      wiki_md: data/java/result/Controller_GakureiboPrintOutController-wiki.md
+  # - id: case_java_ctl_001_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_GakureiboPrintOutController.java
+  #     wiki_md: data/java/result/Controller_GakureiboPrintOutController-java-kimi.md
+  # - id: case_java_ctl_001_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_GakureiboPrintOutController.java
+  #     wiki_md: data/java/result/Controller_GakureiboPrintOutController-java-minimax.md
+
+  # 第1组测试用例
+  - id: case_java_ctl_002
+    vars:
+      source_code: data/java/code/Controller_GKB001S006Controller.java
+      wiki_md: data/java/result/Controller_GKB001S006Controller-wiki.md
+  # - id: case_java_ctl_002_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB001S006Controller.java
+  #     wiki_md: data/java/result/Controller_GKB001S006Controller-java-kimi.md
+  # - id: case_java_ctl_002_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB001S006Controller.java
+  #     wiki_md: data/java/result/Controller_GKB001S006Controller-java-minimax.md
+
+  # 第2组测试用例
+  - id: case_java_ctl_003
+    vars:
+      source_code: data/java/code/Controller_GKB002S003HogosyaSetaiListController.java
+      wiki_md: data/java/result/Controller_GKB002S003HogosyaSetaiListController-wiki.md
+  # - id: case_java_ctl_003_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB002S003HogosyaSetaiListController.java
+  #     wiki_md: data/java/result/Controller_GKB002S003HogosyaSetaiListController-java-kimi.md
+  # - id: case_java_ctl_003_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB002S003HogosyaSetaiListController.java
+  #     wiki_md: data/java/result/Controller_GKB002S003HogosyaSetaiListController-java-minimax.md
+
+  # 第3组测试用例
+  - id: case_java_ctl_004
+    vars:
+      source_code: data/java/code/Controller_GKB002S005Controller.java
+      wiki_md: data/java/result/Controller_GKB002S005Controller-wiki.md
+  # - id: case_java_ctl_004_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB002S005Controller.java
+  #     wiki_md: data/java/result/Controller_GKB002S005Controller-java-kimi.md
+  # - id: case_java_ctl_004_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB002S005Controller.java
+  #     wiki_md: data/java/result/Controller_GKB002S005Controller-java-minimax.md
+
+  # 第4组测试用例
+  - id: case_java_ctl_005
+    vars:
+      source_code: data/java/code/Controller_GKB003S004Controller.java
+      wiki_md: data/java/result/Controller_GKB003S004Controller-wiki.md
+  # - id: case_java_ctl_005_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB003S004Controller.java
+  #     wiki_md: data/java/result/Controller_GKB003S004Controller-java-kimi.md
+  # - id: case_java_ctl_005_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB003S004Controller.java
+  #     wiki_md: data/java/result/Controller_GKB003S004Controller-java-minimax.md
+
+  # 第5组测试用例
+  - id: case_java_ctl_006
+    vars:
+      source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+  # - id: case_java_ctl_006_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+  # - id: case_java_ctl_006_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-minimax.md
+
+  # 第6组测试用例
+  - id: case_java_ctl_007
+    vars:
+      source_code: data/java/code/Controller_TabumonGakureiboSyokaiController.java
+      wiki_md: data/java/result/Controller_TabumonGakureiboSyokaiController-wiki.md
+  # - id: case_java_ctl_007_kimi
+  #   vars:
+  #     source_code: data/java/code/Controller_TabumonGakureiboSyokaiController.java
+  #     wiki_md: data/java/result/Controller_TabumonGakureiboSyokaiController-java-kimi.md
+  # - id: case_java_ctl_007_minimax
+  #   vars:
+  #     source_code: data/java/code/Controller_TabumonGakureiboSyokaiController.java
+  #     wiki_md: data/java/result/Controller_TabumonGakureiboSyokaiController-java-minimax.md
+
+  # 第7组测试用例
+  - id: case_java_repo_001
+    vars:
+      source_code: data/java/code/Repository_GKB000EntityRepository.java
+      wiki_md: data/java/result/Repository_GKB000EntityRepository-wiki.md
+  # - id: case_java_repo_001_kimi
+  #   vars:
+  #     source_code: data/java/code/Repository_GKB000EntityRepository.java
+  #     wiki_md: data/java/result/Repository_GKB000EntityRepository-java-kimi.md
+  # - id: case_java_repo_001_minimax
+  #   vars:
+  #     source_code: data/java/code/Repository_GKB000EntityRepository.java
+  #     wiki_md: data/java/result/Repository_GKB000EntityRepository-java-minimax.md
+
+  # 第8组测试用例
+  - id: case_java_service_001
+    vars:
+      source_code: data/java/code/Service_GKB001S001_JidoKohoshaService.java
+      wiki_md: data/java/result/Service_GKB001S001_JidoKohoshaService-wiki.md
+  # - id: case_java_service_001_kimi
+  #   vars:
+  #     source_code: data/java/code/Service_GKB001S001_JidoKohoshaService.java
+  #     wiki_md: data/java/result/Service_GKB001S001_JidoKohoshaService-java-kimi.md
+  # - id: case_java_service_001_minimax
+  #   vars:
+  #     source_code: data/java/code/Service_GKB001S001_JidoKohoshaService.java
+  #     wiki_md: data/java/result/Service_GKB001S001_JidoKohoshaService-java-minimax.md
+
+  # 第9组测试用例
+  - id: case_java_view_001
+    vars:
+      source_code: data/java/code/View_JID000S004ViewRow.java
+      wiki_md: data/java/result/View_JID000S004ViewRow-wiki.md
+  # - id: case_java_view_001_kimi
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-java-kimi.md
+  # - id: case_java_view_001_minimax
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-java-minimax.md
+
+  # 第10组测试用例
+  # - id: case_java_xml_001
+  #   vars:
+  #     source_code: data/java/code/XML_GKB0060Repository.xml
+  #     wiki_md: data/java/result/XML_GKB0060Repository-wiki.md
+  # - id: case_java_xml_001_kimi
+  #   vars:
+  #     source_code: data/java/code/XML_GKB0060Repository.xml
+  #     wiki_md: data/java/result/XML_GKB0060Repository-java-kimi.md
+  # - id: case_java_xml_001_minimax
+  #   vars:
+  #     source_code: data/java/code/XML_GKB0060Repository.xml
+  #     wiki_md: data/java/result/XML_GKB0060Repository-java-minimax.md

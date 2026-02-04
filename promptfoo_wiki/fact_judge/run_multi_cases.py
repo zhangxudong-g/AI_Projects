@@ -43,4 +43,5 @@ def run_all_cases(cases_yaml: str, base_output: str = "output"):
 
 
 if __name__ == "__main__":
-    run_all_cases("cases.yaml")
+    # run_all_cases("cases.yaml")
+    run_all_cases("cases copy.yaml")

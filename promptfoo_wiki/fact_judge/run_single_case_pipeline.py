@@ -223,7 +223,7 @@ Given the following extracted anchors from source code:
 
 And the source code itself (for context only):
 
-{source_code[:100000]}  # (truncated for brevity)
+{source_code[:50000]}  # (truncated for brevity)
 
 Task:
 - Group anchors into ENGINEERING-LEVEL FACTS.
@@ -315,6 +315,11 @@ def run_single_case(
     - Stage1: promptfoo fact extractor
     - Stage2: promptfoo soft judge
     - Stage3: Python final scoring
+
+    Args:
+        case_id: 测试用例ID
+        vars_cfg: 变量配置字典
+        output_dir: 输出目录
     """
 
     output_dir = Path(output_dir).resolve()
@@ -336,8 +341,9 @@ def run_single_case(
         # file:// + 绝对路径（最稳）
         # abs_path = (case_root / v).resolve()
         var_args.append(f"--var {k}=file://{v}")
-
-    # 前置提取事实（工程wiki级别的）
+    # ======================
+    # Stage 0 前置提取事实（工程wiki级别的）
+    # ======================
     source_code_path = Path(vars_cfg["source_code"])
     # 根据文件扩展名自动确定语言
     if "language" in vars_cfg:

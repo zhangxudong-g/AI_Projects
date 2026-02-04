@@ -89,3 +89,4 @@ promptfoo_wiki/.pytest_cache/
 promptfoo_wiki/config.yaml
 promptfoo_wiki/data/
 promptfoo_wiki/fact_judge/data
+promptfoo_wiki/fact_judge/output/

@@ -10,8 +10,9 @@ Fact Judge 是一个基于 promptfoo 框架构建的事实判断系统，专门�
 
 ### 核心功能
 
-Fact Judge 系统采用三阶段评估流程：
+Fact Judge 系统采用四阶段评估流程：
 
+0. **前置阶段（Pre-fact Extraction）**：从源代码中提取工程级锚点和事实，包括类、函数、方法、表等关键信息，为后续评估提供上下文。
 1. **第一阶段（Fact Extraction）**：从源代码和生成的Wiki文档中提取具体的事实信息，识别覆盖率、正确性、幻觉和有用性方面的差异。
 2. **第二阶段（Soft Judge）**：基于提取的事实进行软性判断，评估文档的整体质量，包括覆盖率级别、正确性级别、幻觉级别和有用性级别。
 3. **第三阶段（Final Scoring）**：根据前两个阶段的结果进行综合评分，得出最终的分数和PASS/FAIL判定。
@@ -21,30 +22,35 @@ Fact Judge 系统采用三阶段评估流程：
 ```mermaid
 graph TD
     A[开始] --> B[输入: 源代码和Wiki文档]
-    B --> C[Stage 1: 事实提取]
-    C --> D[提取覆盖率、正确性、幻觉、有用性事实]
-    D --> E[Stage 2: 软性判断]
-    E --> F[评估整体质量: 覆盖率级别、正确性级别<br/>幻觉级别、有用性级别]
-    F --> G[Stage 3: 最终评分]
-    G --> H[计算最终分数和PASS/FAIL判定]
-    H --> I[输出: 评估结果]
+    B --> C[Stage 0: 前置提取事实（工程wiki级别）]
+    C --> D[提取工程级锚点和事实，为后续评估提供上下文]
+    D --> E[Stage 1: 事实提取]
+    E --> F[提取覆盖率、正确性、幻觉、有用性事实]
+    F --> G[Stage 2: 软性判断]
+    G --> H[评估整体质量: 覆盖率级别、正确性级别<br/>幻觉级别、有用性级别]
+    H --> I[Stage 3: 最终评分]
+    I --> J[计算最终分数和PASS/FAIL判定]
+    J --> K[输出: 评估结果]
 
-    C -.-> J[stage1_fact_extractor.yaml]
-    E -.-> K[stage2_soft_judge.yaml]
-    G -.-> L[stage3_score.py]
+    C -.-> L[prepare_engineering_facts函数]
+    E -.-> M[stage1_fact_extractor.yaml]
+    G -.-> N[stage2_soft_judge.yaml]
+    I -.-> O[stage3_score.py]
 
 ```
 
 #### 流程说明
 
 1. **开始** → **输入**: 接收源代码和Wiki文档作为输入
-2. **输入** → **Stage 1**: 执行事实提取阶段，使用stage1_fact_extractor.yaml配置文件
-3. **Stage 1** → **提取事实**: 从源代码和文档中提取覆盖率、正确性、幻觉、有用性事实
-4. **提取事实** → **Stage 2**: 执行软性判断阶段，使用stage2_soft_judge.yaml配置文件
-5. **Stage 2** → **评估质量**: 评估整体质量，包括覆盖率级别、正确性级别、幻觉级别、有用性级别
-6. **评估质量** → **Stage 3**: 执行最终评分阶段，使用stage3_score.py脚本
-7. **Stage 3** → **计算分数**: 计算最终分数和PASS/FAIL判定
-8. **计算分数** → **输出**: 输出评估结果
+2. **输入** → **Stage 0**: 执行前置提取事实阶段（工程wiki级别），使用prepare_engineering_facts函数
+3. **Stage 0** → **提取工程信息**: 提取工程级锚点和事实，为后续评估提供上下文
+4. **提取工程信息** → **Stage 1**: 执行事实提取阶段，使用stage1_fact_extractor.yaml配置文件
+5. **Stage 1** → **提取事实**: 从源代码和文档中提取覆盖率、正确性、幻觉、有用性事实
+6. **提取事实** → **Stage 2**: 执行软性判断阶段，使用stage2_soft_judge.yaml配置文件
+7. **Stage 2** → **评估质量**: 评估整体质量，包括覆盖率级别、正确性级别、幻觉级别、有用性级别
+8. **评估质量** → **Stage 3**: 执行最终评分阶段，使用stage3_score.py脚本
+9. **Stage 3** → **计算分数**: 计算最终分数和PASS/FAIL判定
+10. **计算分数** → **输出**: 输出评估结果
 
 ### 技术架构
 
@@ -115,7 +121,8 @@ result = run_single_case(
 )
 ```
 
-此脚本会依次执行三个阶段：
+此脚本会依次执行四个阶段：
+0. 运行前置提取事实（prepare_engineering_facts函数）
 1. 运行事实提取器（stage1_fact_extractor.yaml）
 2. 运行软性判断器（stage2_soft_judge.yaml）
 3. 计算最终得分（stage3_score.py）
@@ -138,7 +145,7 @@ python run_multi_cases.py
 python run_pipeline.py
 ```
 
-这将执行完整的三阶段评估流程并将结果保存到 `output` 目录中。
+这将执行完整的四阶段评估流程并将结果保存到 `output` 目录中。
 
 ## 配置文件说明
 
@@ -227,65 +234,72 @@ A: 系统设计上支持多种类型的源代码，只需确保你的源代码�
 
 ### 前置提取事实（工程wiki级别的）
 
-Fact Judge 系统新增了前置提取事实功能，专门用于工程wiki级别的事实提取。此功能允许在进行详细评估之前，先对整个工程项目进行高层次的事实提取和分析。
+Fact Judge 系统新增了前置提取事实功能，专门用于工程wiki级别的事实提取。此功能允许在进行详细评估之前，先对源代码进行工程级锚点和事实的提取和分析，为后续评估提供上下文。
 
 #### 功能特点
 
-1. **工程级分析**：能够分析整个工程项目，而不仅仅是单个文件
-2. **结构化提取**：提取项目结构、模块关系、依赖关系等关键信息
-3. **上下文感知**：考虑项目整体上下文，而非孤立地分析单个文件
-4. **预处理能力**：为后续的详细评估提供丰富的上下文信息
+1. **工程级分析**：能够从源代码中提取工程级锚点（如类、函数、方法、表等）
+2. **结构化提取**：提取工程级事实，描述责任、机制或工作流程
+3. **上下文感知**：考虑代码整体上下文，为后续评估提供丰富信息
+4. **预处理能力**：为后续的详细评估提供基础事实数据
 
 #### 使用方法
 
-要使用前置提取事实功能，请使用新添加的 `pre_extract_facts.py` 脚本：
+前置提取事实功能在运行评估流程时自动执行，通过 `prepare_engineering_facts` 函数实现：
 
-```bash
-python pre_extract_facts.py --project-path /path/to/project --output-dir output/pre_extraction
-```
-
-或者在Python代码中：
+在 `run_single_case_pipeline.py` 中，系统会自动执行：
 
 ```python
-from pre_extract_facts import extract_project_facts
-
-facts = extract_project_facts(
-    project_path="/path/to/project",
-    output_dir="output/pre_extraction"
+engineering_facts_path = prepare_engineering_facts(
+    source_code=source_code,
+    language=language,  # 自动根据文件扩展名确定
+    output_dir=output_dir
 )
-
-print(f"提取了 {len(facts)} 个工程项目事实")
 ```
+
+该函数会：
+1. 从源代码中提取工程级锚点（类、函数、方法、表等）
+2. 使用LLM将锚点组合成工程级事实
+3. 生成engineering_facts.json文件供后续阶段使用
 
 #### 输出格式
 
 前置提取的事实将以JSON格式输出，包含以下信息：
 
-- 项目结构信息
-- 模块间关系
-- 关键实体列表
-- 依赖关系图
-- 设计模式识别
-- 架构特征提取
+- 工程级事实列表
+- 事实ID和描述
+- 支持事实的锚点列表
+- 语言特定的工程元素（如类、函数、表等）
 
 ## 高级配置
 
 ### 预提取配置
 
-您可以通过修改 `pre_extraction_config.yaml` 来配置前置提取行为：
+前置提取功能会根据源代码文件扩展名自动确定编程语言：
 
-- `max_depth`: 设置分析的最大深度
-- `include_tests`: 是否包含测试文件
-- `file_patterns`: 定义要分析的文件模式
-- `exclusions`: 定义要排除的文件或目录
+- `.py` → python
+- `.java` → java
+- `.sql/.plsql` → sql
+- 其他 → 默认为java
+
+您还可以在 `cases.yaml` 中显式指定语言：
+
+```yaml
+cases:
+  - id: case_001
+    vars:
+      source_code: data/agent.py.txt
+      wiki_md: data/agent.py.md
+      language: python  # 显式指定语言
+```
 
 ## 最佳实践
 
 ### 工程级评估策略
 
-1. **先整体后局部**：先使用前置提取功能了解项目整体结构，再进行详细评估
-2. **上下文关联**：利用前置提取的信息，更好地理解单个文件在项目中的作用
-3. **迭代优化**：根据前置提取的结果，调整后续评估的重点和策略
+1. **锚点提取**：前置提取阶段会自动从源代码中提取工程级锚点（如类、函数、方法等）
+2. **上下文增强**：利用提取的工程事实为后续评估提供上下文信息
+3. **语言适配**：确保源代码文件扩展名正确，以便系统能自动识别编程语言
 
 ## 总结
 
