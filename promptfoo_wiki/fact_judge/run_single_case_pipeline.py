@@ -113,9 +113,11 @@ def run_single_case(
     # Stage 2
     # ======================
     var_args.append(f"--var artifact_type={artifact_type}")
+    cfg = "stage2_explanatory_judge.yaml"
+    # cfg = "stage2_soft_judge.yaml" # 严格打分
     run(
         f"promptfoo eval --no-cache "
-        f"--config stage2_soft_judge.yaml "
+        f"--config {cfg} "
         f"{" ".join(var_args)} "
         f"--var facts=file://{base_output}/{case_id}/stage1_result.json "
         f"--output {stage2_out}",
