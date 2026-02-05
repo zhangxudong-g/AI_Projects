@@ -126,7 +126,7 @@ def run_single_case(
     # ======================
     stage2_data = extract_llm_json(stage2_out)
 
-    final = final_score(stage1_data, stage2_data)
+    final = final_score(stage2_data)
 
     # 保存最终结果
     final_out.write_text(
