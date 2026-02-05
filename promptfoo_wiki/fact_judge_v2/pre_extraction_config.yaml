@@ -1,0 +1,16 @@
+# 前置提取配置文件
+extraction_settings:
+  max_depth: 5                    # 分析的最大深度
+  include_tests: false            # 是否包含测试文件
+  file_patterns:                  # 要分析的文件模式
+    - "**/*.py"
+    - "**/*.js"
+    - "**/*.java"
+    - "**/*.ts"
+  exclusions:                     # 要排除的文件或目录
+    - "**/node_modules/**"
+    - "**/__pycache__/**"
+    - "**/.git/**"
+  analyze_dependencies: true      # 是否分析依赖关系
+  extract_architecture: true      # 是否提取架构信息
+  identify_patterns: true         # 是否识别设计模式

@@ -1,0 +1,61 @@
+cases:
+  - id: case_java_ctl_001
+    vars:
+      source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+
+  # - id: case_java_ctl_002
+  #   vars:
+  #     source_code: data/java/code/Controller_GakureiboPrintOutController.java
+  #     wiki_md: data/java/result/Controller_GakureiboPrintOutController-wiki.md
+
+  # - id: case_java_ctl_003
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB002S003HogosyaSetaiListController.java
+  #     wiki_md: data/java/result/Controller_GKB002S003HogosyaSetaiListController-wiki.md
+
+  - id: case_java_repo_001
+    vars:
+      source_code: data/java/code/Repository_GKB000EntityRepository.java
+      wiki_md: data/java/result/Repository_GKB000EntityRepository-wiki.md
+
+  # - id: case_java_repo_002
+  #   vars:
+  #     source_code: data/java/code/Repository_GKB0010Repository.java
+  #     wiki_md: data/java/result/Repository_GKB0010Repository-wiki.md
+
+  # - id: case_java_repo_003
+  #   vars:
+  #     source_code: data/java/code/Repository_GKB0040Repository.java
+  #     wiki_md: data/java/result/Repository_GKB0040Repository-wiki.md
+
+  - id: case_java_service_001
+    vars:
+      source_code: data/java/code/Service_GKB001S001_JidoKohoshaService.java
+      wiki_md: data/java/result/Service_GKB001S001_JidoKohoshaService-wiki.md
+
+  # - id: case_java_service_002
+  #   vars:
+  #     source_code: data/java/code/Service_GKB001S024_GakureiboSyukakkuHistoryService.java
+  #     wiki_md: data/java/result/Service_GKB001S024_GakureiboSyukakkuHistoryService-wiki.md
+
+  # - id: case_java_service_003
+  #   vars:
+  #     source_code: data/java/code/Service_JIB005S100_KoushinDataMojisetService.java
+  #     wiki_md: data/java/result/Service_JIB005S100_KoushinDataMojisetService-wiki.md
+
+  - id: case_java_view_001
+    vars:
+      source_code: data/java/code/View_JID000S004ViewRow.java
+      wiki_md: data/java/result/View_JID000S004ViewRow-wiki.md
+
+  # - id: case_java_view_002
+  #   vars:
+  #     source_code: data/java/code/View_JID000S005ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S005ViewRow-wiki.md
+
+  - id: case_sql_001
+    vars:
+      source_code: data/sample/JIBSOJHJKNCHK.utf8.SQL
+      wiki_md: data/sample/JIBSOJHJKNCHK.SQL.md
+ 

@@ -1,0 +1,139 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+version: "1.0"
+
+prompts:
+  - |
+    You are a STRICT ENGINEERING FACT EXTRACTOR.
+
+    You are given:
+    - SOURCE CODE (Java / Spring MVC / SQL / PL-SQL)
+    - GENERATED WIKI (Markdown)
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+    
+    [SOURCE CODE]
+    {{source_code}}
+
+    [ENGINEERING ANCHORS]
+    {{engineering_anchors}}
+    
+    Your role is to extract ONLY hard, verifiable engineering facts
+    that are EXPLICITLY PRESENT in the source code.
+
+    =====================
+    ABSOLUTE ROLE BOUNDARY
+    =====================
+
+    - You are NOT explaining code behavior.
+    - You are NOT summarizing logic.
+    - You are NOT interpreting intent or design.
+    - You are NOT validating the wiki.
+
+    You ONLY extract facts that can be directly pointed to
+    as concrete code artifacts.
+
+    If a fact cannot be proven by pointing to a specific
+    class, method, annotation, field, or SQL object,
+    DO NOT include it.
+
+    =====================
+    WHAT COUNTS AS A FACT
+    =====================
+
+    --------
+    Java / Spring MVC
+    --------
+
+    You MAY extract:
+    - Class names
+    - Method names
+    - Field / constant names
+    - Annotations (@Controller, @Service, @RequestMapping, etc.)
+    - Explicit URL mappings
+    - Explicit dependency injection (@Inject / @Autowired)
+    - Explicit method-to-method calls (A calls B)
+
+    You MUST NOT extract:
+    - Business rules
+    - Validation logic descriptions
+    - Control flow explanations
+    - Error handling behavior
+    - Session usage intent
+    - Pagination, logging, transactions (unless explicitly named)
+
+    --------
+    SQL / PL-SQL
+    --------
+
+    You MAY extract:
+    - TABLE / VIEW / INDEX / SEQUENCE names
+    - PROCEDURE / FUNCTION / PACKAGE / TRIGGER names
+    - Explicit dependencies (procedure calls, trigger-on-table)
+
+    You MUST NOT extract:
+    - Data meaning
+    - Business purpose
+    - Processing steps
+    - Side effects
+
+    =====================
+    FACT GRANULARITY RULE
+    =====================
+
+    Each fact MUST:
+    - Be atomic (one fact per item)
+    - Reference a concrete artifact name
+    - Avoid verbs that imply behavior (e.g. "handles", "manages", "controls")
+
+    Use neutral verbs only:
+    - "defines"
+    - "declares"
+    - "is annotated with"
+    - "injects"
+    - "maps to"
+    - "calls"
+
+    =====================
+    OUTPUT FORMAT (STRICT)
+    =====================
+
+    Return ONLY valid JSON in the following structure:
+
+    [
+      {
+        "id": "F1",
+        "description": "<single verifiable fact>",
+        "anchors": ["classes" | "methods" | "fields" | "annotations" | "sql"]
+      }
+    ]
+
+    =====================
+    MINIMUM OUTPUT RULE:
+    =====================
+
+    If ANY class, method, table, or procedure name is visible,
+    you MUST output at least ONE fact describing its existence.
+
+    =====================
+    FINAL SAFETY RULE
+    =====================
+
+    If you are unsure whether something is a fact or an interpretation,
+    OMIT it.
+
+    Missing facts are acceptable.
+    Invented or interpreted facts are NOT.
+    
+
+tests:
+  - name: Stage1 Fact Extraction
+    # vars:
+      # source_code: file://data/agent.py.txt
+      # wiki_md: file://data/agent.py.md
+    assert:
+          - type: contains-json

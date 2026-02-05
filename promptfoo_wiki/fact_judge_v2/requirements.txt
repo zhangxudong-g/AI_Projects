@@ -1,0 +1,25 @@
+# Fact Judge Project Dependencies
+
+# Core dependencies
+ollama>=0.1.0
+promptfoo>=0.60.0
+
+# Data processing
+PyYAML>=6.0
+json5>=0.9.0
+
+# Optional dependencies for code parsing
+javalang>=0.13.0  # For Java code analysis
+sqlparse>=0.4.0   # For SQL code analysis
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Standard library dependencies (usually not needed in requirements, but listed for completeness)
+# pathlib (built-in)
+# subprocess (built-in)
+# json (built-in)
+# re (built-in)
+# os (built-in)
+# collections (built-in)
+# typing (built-in)

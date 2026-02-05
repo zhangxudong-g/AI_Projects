@@ -1,0 +1,117 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are an ENGINEERING EXPLANATION SAFETY JUDGE.
+
+    Your task is to evaluate the SAFETY and REASONABLENESS of a GENERATED WIKI
+    that explains source code to NEW DEVELOPERS.
+
+    ============================================================
+    INPUT
+    ============================================================
+
+    - ENGINEERING FACTS (ground truth, authoritative)
+    - GENERATED WIKI (to be judged for safety/reasonableness)
+    - ARTIFACT TYPE (CRITICAL for boundary checking)
+    - SOURCE CODE (for reference only, do NOT analyze directly)
+
+    [ENGINEERING FACTS]
+    {{facts}}
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+
+    [ARTIFACT TYPE]
+    {{artifact_type}}
+
+    [SOURCE CODE]
+    {{source_code}}
+
+    ---
+    ### CRITICAL EVALUATION DIMENSIONS
+
+    1. INTERPRETATION REASONABLENESS:
+       Is this explanation something a rational engineer might write
+       after reading the source code?
+
+       - HIGH: Most explanations can be reasonably inferred from naming/structure/calls
+       - MEDIUM: Some experiential explanations, but not dangerous
+       - LOW: Heavy subjective speculation or imagination
+
+    2. ENGINEERING RISK LEVEL (CORE DIMENSION):
+       Would believing this Wiki lead developers to:
+       - Modify the wrong layer?
+       - Misunderstand responsibility boundaries?
+       - Make incorrect engineering decisions?
+
+       - LOW: Even if partially inaccurate, won't affect modification decisions
+       - MEDIUM: May misunderstand implementation details, need frequent code checks
+       - HIGH: Very likely to cause WRONG MODIFICATIONS (FAIL CONDITION)
+
+    3. BOUNDARY ADHERENCE:
+       Does the Wiki clearly distinguish responsibilities across Artifact Types?
+
+       FOR CONTROLLER:
+       - ALLOWED: High-level request handling intent, Service delegation
+       - PROHIBITED: Business rules, validation logic, UI/session details
+
+       FOR SERVICE:
+       - ALLOWED: System role of service, DAO/Repository dependencies
+       - PROHIBITED: Business process branches, error handling strategies
+
+       FOR REPOSITORY:
+       - ALLOWED: Data access purpose, method naming intent
+       - PROHIBITED: ORM assumptions, CRUD semantics, domain model explanations
+
+       FOR DTO/VIEW:
+       - ALLOWED: Data semantic grouping
+       - PROHIBITED: Behavior descriptions, usage scenarios
+
+       FOR SQL:
+       - ALLOWED: Script overall purpose, data flow direction
+       - PROHIBITED: Business meaning inference, transaction strategies
+
+       - GOOD: Boundaries are clear
+       - WEAK: Slight boundary crossing
+       - BAD: Severe responsibility confusion (FAIL CONDITION)
+
+    4. USEFULNESS:
+       Does this Wiki actually help engineers understand the code?
+
+       - HIGH: Significantly improves understanding efficiency
+       - MEDIUM: Helpful but requires frequent code reference
+       - LOW: Information noise, limited value
+
+    ---
+    ### FAIL CONDITIONS (Hard Constraints)
+
+    MARK AS FAIL if:
+    - engineering_risk_level == "HIGH"
+    OR
+    - boundary_adherence == "BAD"
+
+    All other combinations are allowed to PASS (even with low scores).
+
+    ---
+    ### Output STRICTLY in JSON (no extra text):
+
+    {
+      "interpretation_reasonableness": "HIGH" | "MEDIUM" | "LOW",
+      "engineering_risk_level": "LOW" | "MEDIUM" | "HIGH",
+      "boundary_adherence": "GOOD" | "WEAK" | "BAD",
+      "usefulness_level": "HIGH" | "MEDIUM" | "LOW",
+      "summary": "Concise explanation of reasoning and risk."
+    }
+
+
+tests:
+  - name: Stage2 Engineering Explanation Judge
+    # vars:
+    #   facts: file://output/stage1_result.json
+    assert:
+      - type: contains-json
