@@ -97,6 +97,7 @@ sequenceDiagram
     participant stage1 as Stage 1 (Fact Extractor)
     participant stage2 as Stage 2 (Soft Judge)
     participant stage3 as Stage 3 (Final Scoring)
+    participant formatter as 结果格式化器
 
     User->>run_multi_cases: 执行批量评估
     run_multi_cases->>run_single_case: 处理单个案例
@@ -107,7 +108,9 @@ sequenceDiagram
     run_single_case->>stage3: 执行最终评分
     stage3-->>run_single_case: 返回最终结果
     run_single_case-->>run_multi_cases: 返回案例结果
-    run_multi_cases-->>User: 返回所有案例结果
+    run_multi_cases->>formatter: 格式化结果为Markdown表格
+    formatter-->>run_multi_cases: 返回格式化结果
+    run_multi_cases-->>User: 返回所有案例结果及表格
 ```
 
 ### 脚本执行文本说明
@@ -120,7 +123,8 @@ sequenceDiagram
    - 接收Stage 1返回结果后，调用Stage 2 (Soft Judge) 进行软性判断
    - 接收Stage 2返回结果后，调用Stage 3 (Final Scoring) 进行最终评分
 5. run_single_case_pipeline.py将最终结果返回给run_multi_cases.py
-6. run_multi_cases.py收集所有案例结果后返回给用户
+6. run_multi_cases.py收集所有案例结果后，调用结果格式化器生成Markdown表格
+7. run_multi_cases.py返回所有案例结果和格式化的表格给用户
 
 ## 新增功能流程图
 
@@ -182,4 +186,60 @@ sequenceDiagram
     PreExtractor-->>User: 返回工程级事实
     User->>Evaluator: 执行评估（带上下文）
     Evaluator-->>User: 返回最终评估结果
+```
+
+### 结果可视化流程
+
+```mermaid
+graph TD
+    A[开始] --> B[批量评估完成]
+    B --> C[收集所有案例结果]
+    C --> D[读取每个案例的final_score.json]
+    D --> E[提取关键信息]
+    E --> F[Summary<br/>Coverage Level<br/>Usefulness Level<br/>Correctness Level<br/>Hallucination Level<br/>Coverage Rate]
+    F --> G[格式化为平铺显示]
+    G --> H[生成可折叠HTML元素]
+    H --> I[创建Markdown表格]
+    I --> J[Case ID | 文件名 | 结果 | 分数 | 详情]
+    J --> K[保存为final_results_table-[timestamp].md]
+    K --> L[输出完成]
+
+    style A fill:#e3f2fd
+    style B fill:#e8f5e8
+    style C fill:#f1f8e9
+    style D fill:#e8f5e8
+    style E fill:#f1f8e9
+    style F fill:#e3f2fd
+    style G fill:#e8f5e8
+    style H fill:#f1f8e9
+    style I fill:#e8f5e8
+    style J fill:#f1f8e9
+    style K fill:#e3f2fd
+    style L fill:#f1f8e9
+```
+
+### 结果可视化序列图
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant BatchRunner as run_multi_cases.py
+    participant ResultsCollector as 结果收集器
+    participant Formatter as format_results_with_llm函数
+    participant JsonReader as JSON读取器
+    participant HtmlGenerator as HTML生成器
+    participant MdWriter as Markdown写入器
+
+    User->>BatchRunner: 执行批量评估
+    BatchRunner->>ResultsCollector: 收集所有案例结果
+    ResultsCollector->>BatchRunner: 返回结果列表
+    BatchRunner->>Formatter: 调用format_results_with_llm
+    Formatter->>JsonReader: 读取每个案例的final_score.json
+    JsonReader-->>Formatter: 返回JSON数据
+    Formatter->>HtmlGenerator: 生成可折叠HTML元素
+    HtmlGenerator-->>Formatter: 返回HTML字符串
+    Formatter->>MdWriter: 创建Markdown表格并写入文件
+    MdWriter-->>Formatter: 返回文件路径
+    Formatter-->>BatchRunner: 返回格式化结果
+    BatchRunner-->>User: 返回所有结果及表格文件路径
 ```

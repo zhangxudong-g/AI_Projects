@@ -47,5 +47,17 @@ Fact Judge 是一个基于 promptfoo 框架构建的事实判断系统，专门�
 - `stage2_soft_judge.yaml`：第二阶段配置文件
 - `stage3_score.py`：第三阶段评分脚本
 - `run_single_case_pipeline.py`：单案例运行管道
-- `run_multi_cases.py`：多案例批量运行
+- `run_multi_cases.py`：多案例批量运行（包含结果可视化功能）
 - `cases.yaml`：测试案例配置文件
+
+## 新增功能
+
+### 结果可视化
+
+新增了结果可视化功能，能够将评估结果输出为Markdown表格格式，包含Case ID、文件名、结果、分数和详细信息。详细信息使用可折叠的HTML元素展示`final_score.json`中的关键信息。
+
+### 命令行参数支持
+
+`run_multi_cases.py` 现在支持命令行参数：
+- `--cases-yaml`：指定测试案例配置文件路径
+- `--base-output`：指定基础输出目录

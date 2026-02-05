@@ -28,6 +28,7 @@ def run_single_case(
     case_id: str,
     vars_cfg: dict,
     output_dir: str | Path,
+    base_output: str | Path = "output",
 ):
     """
     单 case 完整 pipeline：
@@ -81,12 +82,15 @@ def run_single_case(
 
     source_code = source_code_path.read_text(encoding="utf-8")
 
-    engineering_facts_path = prepare_engineering_facts(
+    engineering_facts = prepare_engineering_facts(
         source_code=source_code,
         language=language,
         output_dir=output_dir,
     )
-    var_args.append(f"--var engineering_facts=file://{engineering_facts_path}")
+    engineering_facts_path = engineering_facts["anchors_path"]
+    artifact_type = engineering_facts["artifact_type"]
+    print(f"[INFO] Artifact type detected: {artifact_type}")
+    var_args.append(f"--var engineering_anchors=file://{engineering_facts_path}")
     var_str = " ".join(var_args)
 
     # ======================
@@ -95,8 +99,7 @@ def run_single_case(
     run(
         f"promptfoo eval --no-cache "
         f"--config stage1_fact_extractor.yaml "
-        # f"--grader ollama:gpt-oss:120b "
-        f"{var_str} "
+        f"{" ".join(var_args)} "
         f"--output {stage1_out}",
     )
     # 将 Stage 1 结果保存为单独的文件，供 Stage 2 使用
@@ -109,11 +112,12 @@ def run_single_case(
     # ======================
     # Stage 2
     # ======================
+    var_args.append(f"--var artifact_type={artifact_type}")
     run(
         f"promptfoo eval --no-cache "
         f"--config stage2_soft_judge.yaml "
-        # f"--grader ollama:gpt-oss:120b "
-        f"--var facts=file://output/{case_id}/stage1_result.json "
+        f"{" ".join(var_args)} "
+        f"--var facts=file://{base_output}/{case_id}/stage1_result.json "
         f"--output {stage2_out}",
     )
 

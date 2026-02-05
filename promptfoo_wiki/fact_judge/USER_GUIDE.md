@@ -280,6 +280,42 @@ engineering_facts_path = prepare_engineering_facts(
 - 支持事实的锚点列表
 - 语言特定的工程元素（如类、函数、表等）
 
+### 结果可视化（Markdown表格格式）
+
+Fact Judge 系统新增了结果可视化功能，能够将评估结果输出为Markdown表格格式，便于查看和分享。
+
+#### 功能特点
+
+1. **表格化展示**：将评估结果以标准Markdown表格格式展示
+2. **多维度信息**：包含Case ID、文件名、结果、分数和详细信息
+3. **可折叠详情**：详细信息使用HTML的`<details>`和`<summary>`标签实现可折叠显示
+4. **平铺信息展示**：在详情中平铺显示`final_score.json`中的关键信息，包括Summary、Coverage、Usefulness、Correctness、Hallucination和Coverage Rate
+
+#### 使用方法
+
+结果可视化功能在批量运行评估时自动执行，通过 `format_results_with_llm` 函数实现：
+
+在 `run_multi_cases.py` 中，系统会自动执行：
+
+```python
+format_results_with_llm(results, cfg, base_output)
+```
+
+该函数会：
+1. 读取每个案例的`final_score.json`文件
+2. 提取关键信息并格式化为平铺显示
+3. 生成带时间戳的Markdown表格文件
+
+#### 输出格式
+
+生成的Markdown表格包含以下列：
+
+- **Case ID**：测试案例的唯一标识符
+- **文件名**：输入源代码文件名
+- **结果**：PASS/FAIL状态
+- **分数**：最终得分
+- **详情**：包含Summary、Coverage Level、Usefulness Level、Correctness Level、Hallucination Level和Coverage Rate的可折叠详细信息
+
 ## 高级配置
 
 ### 预提取配置
@@ -302,6 +338,18 @@ cases:
       language: python  # 显式指定语言
 ```
 
+### 批量运行配置
+
+批量运行功能支持命令行参数，允许动态指定配置文件和输出目录：
+
+```bash
+python run_multi_cases.py --cases-yaml my_cases.yaml --base-output my_output
+```
+
+参数说明：
+- `--cases-yaml`：指定测试案例配置文件路径（默认为'cases_all.yaml'）
+- `--base-output`：指定基础输出目录（默认为'results_output'）
+
 ## 最佳实践
 
 ### 工程级评估策略
@@ -310,11 +358,19 @@ cases:
 2. **上下文增强**：利用提取的工程事实为后续评估提供上下文信息
 3. **语言适配**：确保源代码文件扩展名正确，以便系统能自动识别编程语言
 
+### 结果分析策略
+
+1. **表格化查看**：使用生成的Markdown表格快速浏览所有测试案例的结果
+2. **详细信息展开**：点击可折叠区域查看每个案例的详细评估信息
+3. **批量比较**：通过表格形式方便地比较不同案例之间的评分和表现
+
 ## 总结
 
 Fact Judge 是一个强大的自动化文档质量评估工具，通过多阶段评估流程能够全面评估代码文档与源代码的一致性、准确性和完整性。通过本指南，你应该已经了解了如何安装、配置和使用该系统，以及如何根据需要自定义评估标准。
 
 新增的前置提取事实功能（工程wiki级别）能够对整个工程项目进行高层次的分析，提取项目结构、模块关系、依赖关系等关键信息，为后续的详细评估提供丰富的上下文。
+
+新增的结果可视化功能能够将评估结果以Markdown表格形式展示，便于查看、分享和分析评估结果。
 
 为了更直观地理解系统的工作流程，请参阅 [FLOWCHART.md](FLOWCHART.md) 文件，其中包含了系统的详细架构图和执行流程。
 

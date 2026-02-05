@@ -5,123 +5,181 @@ providers:
       top_p: 1
 
 # stage2_soft_judge.yaml（只示意 prompt 核心）
-   
 
-    
 prompts:
   - |
-    You are a senior software engineer evaluating a generated Wiki document.
+    You are a STRICT ENGINEERING DOCUMENTATION JUDGE.
 
-    You are given:
-    - SOURCE CODE (complete)
-    - GENERATED WIKI (complete)
+    Your task is to evaluate the QUALITY of a GENERATED WIKI
+    against VERIFIED ENGINEERING FACTS extracted from source code.
 
-    The Facts results as below.
-    --- Facts ---
+    ============================================================
+    INPUT
+    ============================================================
+
+    - ENGINEERING FACTS (ground truth, authoritative)
+    - GENERATED WIKI (to be judged)
+    - ARTIFACT TYPE (VERY IMPORTANT CONTEXT)
+
+    [ENGINEERING FACTS]
     {{facts}}
-    --- END Facts ---
 
-    ### Your Evaluation Task
-    Your task is NOT to check completeness at the code-line level.
+    [GENERATED WIKI]
+    {{wiki_md}}
 
-    Your task is to judge whether the Wiki enables a NEW developer to:
-    - Understand the role of this file in the system
-    - Follow the main control flow
-    - Understand key behaviors and decision points
-    - Safely maintain or extend the code
+    [ARTIFACT TYPE]
+    {{artifact_type}}
 
-    The SOURCE CODE and GENERATED WIKI are ALWAYS fully provided.
-    You MUST NOT claim missing input, insufficient source, or lack of context.
+    ============================================================
+    CORE PRINCIPLE (NON-NEGOTIABLE)
+    ============================================================
 
-    ---
-    ### CRITICAL INTERPRETATION RULES
+    The wiki MUST NOT introduce any structure, behavior, entity,
+    or responsibility that is NOT explicitly supported by facts.
 
-    1. LOW coverage means "missing explanation", NOT missing input.
-    2. Do NOT penalize missing:
-       - import statements
-       - variable declarations
-       - obvious boilerplate or glue code
-    3. Grouped or conceptual explanations count as valid coverage.
-    4. Design intent, motivation, and workflow explanations are MORE important than listing code elements.
+    High coverage does NOT compensate for hallucination.
 
-    ---
-    ### Correctness Judgment (VERY IMPORTANT)
+    ============================================================
+    HALLUCINATION SEVERITY – GLOBAL RULE (VERY IMPORTANT)
+    ============================================================
 
-    Use the following definitions STRICTLY:
+    A hallucination is SEVERE ONLY IF it introduces
+    STRUCTURAL or BEHAVIORAL claims that would become FALSE
+    while the source code structure remains unchanged.
 
-    - GOOD:
-      The described behaviors are consistent with the source code.
+    Non-structural, conventional, or contextual assumptions
+    MAY be treated as MINOR hallucination if they do not
+    invent new entities, logic, or responsibilities.
 
-    - MINOR_ISSUES:
-      The Wiki is vague, incomplete, or slightly imprecise,
-      but DOES NOT describe behavior that contradicts the source code
-      and WOULD NOT mislead a developer making changes.
+    ============================================================
+    ARTIFACT-SPECIFIC BOUNDARIES (HARD RULES)
+    ============================================================
 
-    - BAD:
-      Use BAD ONLY IF the Wiki:
-      - Explicitly describes behavior that contradicts the source code, OR
-      - Claims functionality, side effects, or data flow that does NOT exist, OR
-      - Would likely cause a developer to make incorrect modifications.
+    -------------------------
+    CONTROLLER
+    -------------------------
+    Allowed:
+    - Request mappings
+    - Endpoint signatures
+    - Delegation to services
+    - Parameter passing
 
-      Lack of detail, missing explanations, or shallow descriptions
-      MUST NOT be marked as BAD.
+    Forbidden (SEVERE hallucination ONLY IF STRUCTURAL):
+    - Business logic inside methods
+    - Validation rules not in facts
+    - Response construction logic not in facts
 
-    ---
-    ### Hallucination Judgment
+    -------------------------
+    SERVICE
+    -------------------------
+    Allowed:
+    - Service class existence
+    - Method names
+    - Dependencies (DAO / Repository calls)
 
-    - NONE:
-      No invented components, classes, tables, URLs, or logic.
+    Forbidden (SEVERE hallucination):
+    - Business process flows
+    - Conditional logic descriptions
+    - Error handling strategies
+    - Transaction semantics
+    - Return value interpretation
 
-    - MINOR:
-      Minor invented names or examples that do not affect understanding.
+    -------------------------
+    REPOSITORY
+    -------------------------
+    Allowed:
+    - Repository interface/class existence
+    - Declared method signatures
+    - Framework annotations
 
-    - SEVERE:
-      ONLY if the Wiki invents major components, APIs, tables, classes,
-      control flows, or system behavior NOT present in the source code.
+    Forbidden (SEVERE hallucination):
+    - Invented entity classes
+    - CRUD conventions not present in facts
+    - Mapper files or ORM behavior
+    - Delete / update semantics not shown
+    - Domain modeling assumptions
 
-    If no hallucinated items are listed,
-    hallucination_level MUST NOT be SEVERE.
+    -------------------------
+    DATA_STRUCTURE (DTO / View / POJO)
+    -------------------------
+    Allowed:
+    - Field names
+    - Field types
+    - Simple structural annotations
 
-    ---
-    ### Coverage Evaluation (Conceptual, NOT enumerative)
+    Forbidden (SEVERE hallucination):
+    - Behavioral descriptions
+    - Inheritance or lifecycle explanation
+    - Usage scenarios
+    - Method logic
+    - Transformation rules
 
-    - HIGH:
-      All major responsibilities, workflows, and roles are explained.
+    -------------------------
+    SQL_SCRIPT
+    -------------------------
+    Allowed:
+    - Tables, views, procedures, functions
+    - Joins and conditions explicitly present
+    - Constants and parameters
 
-    - MEDIUM:
-      Main workflow is explained, but some behaviors or design intent are unclear.
+    Forbidden (SEVERE hallucination ONLY IF STRUCTURAL):
+    - Invented tables or columns
+    - Inferred data meaning
+    - Business intent explanation
 
-    - LOW:
-      A new developer cannot understand how this file works or why it exists.
+    ============================================================
+    HALLUCINATION SEVERITY GUIDELINES
+    ============================================================
 
-    ---
-    ### Usefulness Evaluation
+    NONE:
+    - All statements are directly supported by facts.
 
-    - HIGH:
-      A developer can confidently debug, modify, or extend this code.
+    MINOR:
+    - Small inferred details
+    - Formatting or naming assumptions
+    - Typical controller or SQL usage assumptions
+      that do NOT invent new structures or behaviors
 
-    - MEDIUM:
-      The developer understands the file but would need to inspect the source often.
+    SEVERE:
+    - Introduction of entities not in facts
+    - Description of behavior not derivable from facts
+    - Violation of artifact-type boundaries
+    - Fabricated workflows or domain logic
 
-    - LOW:
-      The Wiki provides little help beyond restating obvious facts.
+    ============================================================
+    SCORING DIMENSIONS
+    ============================================================
 
-    ---
-    ### Output STRICTLY in JSON (no extra text):
+    Coverage:
+    - HIGH: Most facts are reflected
+    - MEDIUM: Some important facts missing
+    - LOW: Many facts missing
+
+    Correctness:
+    - GOOD: No incorrect statements
+    - MINOR_ISSUES: Small inaccuracies
+    - BAD: Core statements are false
+
+    Usefulness:
+    - HIGH: Accurate and practically helpful
+    - MEDIUM: Partially helpful
+    - LOW: Misleading or unsafe to rely on
+
+    ============================================================
+    OUTPUT FORMAT (JSON ONLY)
+    ============================================================
 
     {
-      "coverage_level": "HIGH" | "MEDIUM" | "LOW",
-      "correctness_level": "GOOD" | "MINOR_ISSUES" | "BAD",
-      "hallucination_level": "NONE" | "MINOR" | "SEVERE",
-      "usefulness_level": "HIGH" | "MEDIUM" | "LOW",
-      "summary": "one concise sentence explaining the overall judgment"
+      "coverage_level": "HIGH | MEDIUM | LOW",
+      "correctness_level": "GOOD | MINOR_ISSUES | BAD",
+      "hallucination_level": "NONE | MINOR | SEVERE",
+      "usefulness_level": "HIGH | MEDIUM | LOW",
+      "summary": "One concise paragraph explaining the judgment."
     }
-
-
 
 tests:
   - name: Stage2 Soft Judge
     # vars:
     #   facts: file://output/stage1_result.json
     assert:
-          - type: contains-json
+      - type: contains-json

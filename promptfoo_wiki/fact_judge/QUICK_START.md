@@ -91,14 +91,31 @@ python run_multi_cases.py
 
 系统将处理`cases.yaml`中的所有案例。
 
+或者使用命令行参数指定配置文件和输出目录：
+
+```bash
+python run_multi_cases.py --cases-yaml my_cases.yaml --base-output my_output
+```
+
 ### 查看结果
 
-评估结果将保存在`output`目录中：
+评估结果将保存在指定的输出目录中：
 
 - `stage1.json`：第一阶段事实提取结果
 - `stage1_result.json`：提取的事实数据
 - `stage2.json`：第二阶段软性判断结果
 - `final_score.json`：最终评分结果
+- `final_results-[timestamp].yaml`：批量运行的汇总结果
+- `final_results_table-[timestamp].md`：格式化的Markdown表格结果
+
+### 结果可视化
+
+系统会自动生成Markdown格式的表格结果，包含以下列：
+- **Case ID**：测试案例的唯一标识符
+- **文件名**：输入源代码文件名
+- **结果**：PASS/FAIL状态
+- **分数**：最终得分
+- **详情**：包含Summary、Coverage Level、Usefulness Level、Correctness Level、Hallucination Level和Coverage Rate的可折叠详细信息
 
 ## 理解结果
 

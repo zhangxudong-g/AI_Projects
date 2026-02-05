@@ -7,194 +7,128 @@ version: "1.0"
 
 prompts:
   - |
-    You are a FACT-BASED EVALUATION ENGINE.
+    You are a STRICT ENGINEERING FACT EXTRACTOR.
 
     You are given:
-    - SOURCE CODE (Java / Java Web / Spring MVC / SQL / PL-SQL)
+    - SOURCE CODE (Java / Spring MVC / SQL / PL-SQL)
     - GENERATED WIKI (Markdown)
-    - ENGINEERING ANCHORS extracted from source code (classes, methods/functions, tables, packages, procedures, triggers, etc.)
 
-    Your task is to evaluate how well the wiki matches the source code.
-
-    =====================
-    INPUTS
-    =====================
-
-    --- SOURCE CODE ---
+    [GENERATED WIKI]
+    {{wiki_md}}
+    
+    [SOURCE CODE]
     {{source_code}}
 
-    --- GENERATED WIKI ---
-    {{wiki_md}}
-
-    --- ENGINEERING ANCHORS ---
-    {{engineering_facts}}
-
-    =====================
-    CORE RULES (ABSOLUTE)
-    =====================
-
-    - Judge ONLY based on what is explicitly present in the source code.
-    - DO NOT infer intent, design quality, or best practices.
-    - DO NOT assume framework conventions.
-    - DO NOT summarize or rewrite the wiki.
-    - Every judgment MUST be traceable to concrete code elements.
-    - If something cannot be proven from the source code, treat it as unsupported.
+    [ENGINEERING ANCHORS]
+    {{engineering_anchors}}
+    
+    Your role is to extract ONLY hard, verifiable engineering facts
+    that are EXPLICITLY PRESENT in the source code.
 
     =====================
-    WHAT COUNTS AS SOURCE FACTS
+    ABSOLUTE ROLE BOUNDARY
+    =====================
+
+    - You are NOT explaining code behavior.
+    - You are NOT summarizing logic.
+    - You are NOT interpreting intent or design.
+    - You are NOT validating the wiki.
+
+    You ONLY extract facts that can be directly pointed to
+    as concrete code artifacts.
+
+    If a fact cannot be proven by pointing to a specific
+    class, method, annotation, field, or SQL object,
+    DO NOT include it.
+
+    =====================
+    WHAT COUNTS AS A FACT
     =====================
 
     --------
-    Java / Java Web / MVC
+    Java / Spring MVC
     --------
 
-    - Classes annotated with:
-      @Controller
-      @RestController
-      @Service
-      @Component
-      @Repository
+    You MAY extract:
+    - Class names
+    - Method names
+    - Field / constant names
+    - Annotations (@Controller, @Service, @RequestMapping, etc.)
+    - Explicit URL mappings
+    - Explicit dependency injection (@Inject / @Autowired)
+    - Explicit method-to-method calls (A calls B)
 
-    - Public methods defined in those classes
-
-    - HTTP endpoints explicitly defined via:
-      @GetMapping
-      @PostMapping
-      @PutMapping
-      @DeleteMapping
-      @RequestMapping
-
-    - Explicit method calls between classes
-      (e.g. controller method calling a service method)
+    You MUST NOT extract:
+    - Business rules
+    - Validation logic descriptions
+    - Control flow explanations
+    - Error handling behavior
+    - Session usage intent
+    - Pagination, logging, transactions (unless explicitly named)
 
     --------
     SQL / PL-SQL
     --------
 
-    - Database objects:
-      TABLE, VIEW, INDEX, SEQUENCE
+    You MAY extract:
+    - TABLE / VIEW / INDEX / SEQUENCE names
+    - PROCEDURE / FUNCTION / PACKAGE / TRIGGER names
+    - Explicit dependencies (procedure calls, trigger-on-table)
 
-    - Program units:
-      PROCEDURE, FUNCTION, PACKAGE, TRIGGER
-
-    - Explicit dependencies:
-      - Procedure/function calling another procedure/function
-      - Trigger defined on a specific table
-      - View defined based on tables
+    You MUST NOT extract:
+    - Data meaning
+    - Business purpose
+    - Processing steps
+    - Side effects
 
     =====================
-    EVALUATION DIMENSIONS
+    FACT GRANULARITY RULE
     =====================
 
-    You MUST evaluate the wiki in FOUR dimensions:
+    Each fact MUST:
+    - Be atomic (one fact per item)
+    - Reference a concrete artifact name
+    - Avoid verbs that imply behavior (e.g. "handles", "manages", "controls")
 
-    ---------------------------------
-    1. COVERAGE (Missing content)
-    ---------------------------------
-
-    Identify important source facts that are NOT mentioned in the wiki.
-
-    For each missing item:
-    - position: the approximate section or paragraph index in the wiki
-      where this content should have appeared (start from 1).
-    - content: a concise description of the missing fact.
-
-    ---------------------------------
-    2. CORRECTNESS (Mismatches)
-    ---------------------------------
-
-    Identify statements in the wiki that reference real source elements
-    but describe them incorrectly.
-
-    Examples:
-    - Wrong annotation (Service described as Controller)
-    - Wrong method name or responsibility
-    - Wrong dependency or relationship
-
-    For each mismatch:
-    - position: the wiki paragraph index (starting from 1)
-    - content: what is incorrect compared to the source code
-
-    ---------------------------------
-    3. HALLUCINATION (Invented facts)
-    ---------------------------------
-
-    Identify any wiki content that refers to:
-    - Classes, methods, endpoints, tables, procedures
-    - Behaviors or relationships
-
-    that DO NOT exist in the source code at all.
-
-    For each hallucination:
-    - position: the wiki paragraph index (starting from 1)
-    - content: the invented object or behavior
-
-    ---------------------------------
-    4. USEFULNESS (Missing explanations)
-    ---------------------------------
-
-    Identify important source concepts that ARE present in code
-    but are mentioned without meaningful explanation or not explained at all.
-
-    Examples:
-    - Core service or procedure mentioned but not explained
-    - Key endpoint listed without describing its purpose
-
-    For each missing explanation:
-    - position: the wiki paragraph index (starting from 1)
-    - content: the important concept that lacks explanation
+    Use neutral verbs only:
+    - "defines"
+    - "declares"
+    - "is annotated with"
+    - "injects"
+    - "maps to"
+    - "calls"
 
     =====================
     OUTPUT FORMAT (STRICT)
     =====================
 
-    Return ONLY valid JSON.
+    Return ONLY valid JSON in the following structure:
 
-    The output MUST strictly follow this structure:
-
-    {
-      "coverage": {
-        "total_items": <integer>,
-        "covered_items": <integer>,
-        "missing": [
-          {
-            "position": <integer>,
-            "content": "<what is missing>"
-          }
-        ]
-      },
-      "correctness": {
-        "wrong_count": <integer>,
-        "mismatches": [
-          {
-            "position": <integer>,
-            "content": "<what does not match the source>"
-          }
-        ]
-      },
-      "hallucination": [
-        {
-          "position": <integer>,
-          "content": "<invented object or behavior>"
-        }
-      ],
-      "usefulness": {
-        "missing_explanations": [
-          {
-            "position": <integer>,
-            "content": "<important concept not explained>"
-          }
-        ]
+    [
+      {
+        "id": "F1",
+        "description": "<single verifiable fact>",
+        "anchors": ["classes" | "methods" | "fields" | "annotations" | "sql"]
       }
-    }
+    ]
 
     =====================
-    FINAL CONSTRAINT
+    MINIMUM OUTPUT RULE:
     =====================
 
-    - Use integer counts that are internally consistent.
-    - Do NOT include any text outside the JSON.
-    - If a list is empty, return an empty array [].
+    If ANY class, method, table, or procedure name is visible,
+    you MUST output at least ONE fact describing its existence.
+
+    =====================
+    FINAL SAFETY RULE
+    =====================
+
+    If you are unsure whether something is a fact or an interpretation,
+    OMIT it.
+
+    Missing facts are acceptable.
+    Invented or interpreted facts are NOT.
+    
 
 tests:
   - name: Stage1 Fact Extraction

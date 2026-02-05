@@ -197,3 +197,139 @@ class CustomFactExtractor:
 - 使用适当的采样策略
 - 监控资源使用情况
 - 调整分析深度以平衡准确性和性能
+
+## 结果可视化高级功能
+
+### 功能概述
+
+结果可视化功能是Fact Judge系统的一项重要增强，能够将评估结果以Markdown表格格式输出，便于查看、分享和分析。该功能具有以下特点：
+
+- **表格化展示**：将评估结果以标准Markdown表格形式呈现
+- **多维度信息**：包含Case ID、文件名、结果、分数和详细信息
+- **可折叠详情**：使用HTML的`<details>`和`<summary>`标签实现可折叠显示
+- **平铺信息展示**：在详情中平铺显示`final_score.json`中的关键信息
+
+### 配置选项
+
+#### 自定义输出格式
+
+可以通过修改`run_multi_cases.py`中的`format_results_with_llm`函数来自定义输出格式：
+
+```python
+def customize_output_format(case_results, cases_config, base_output: str = "output"):
+    # 自定义表格头部
+    md_content = "# 自定义标题\n\n"
+    md_content += "| 自定义列1 | 自定义列2 | 自定义列3 |\n"
+    md_content += "|----------|----------|----------|\n"
+
+    # 自定义每行内容
+    for idx, result in enumerate(case_results):
+        # 自定义处理逻辑
+        pass
+
+    return md_content
+```
+
+### 高级使用选项
+
+#### 选择性显示字段
+
+可以根据需要选择在详情中显示的字段：
+
+```python
+# 在format_results_with_llm函数中
+# 从details中提取各个字段
+coverage_level = details_obj.get('coverage_level', 'N/A')
+usefulness_level = details_obj.get('usefulness_level', 'N/A')
+# ... 其他字段
+
+# 可以选择性地包含在flat_details中
+flat_details = f"Summary: {summary}<br/>Coverage: {coverage_level}<br/>Correctness: {correctness_level}"
+```
+
+#### 自定义样式
+
+可以为HTML元素添加自定义CSS样式：
+
+```python
+# 在details元素中添加样式
+details = f'<details><summary style="cursor: pointer; font-weight: bold;">{compact_info}</summary><div style="padding: 10px; background-color: #f9f9f9;">{flat_details}</div></details>'
+```
+
+### 输出格式详解
+
+生成的Markdown表格包含以下列：
+
+- **Case ID**：测试案例的唯一标识符
+- **文件名**：输入源代码文件名
+- **结果**：PASS/FAIL状态
+- **分数**：最终得分
+- **详情**：包含Summary、Coverage Level、Usefulness Level、Correctness Level、Hallucination Level和Coverage Rate的可折叠详细信息
+
+### 与评估流程整合
+
+结果可视化功能无缝集成到批量评估流程中：
+
+1. **自动触发**：在`run_all_cases`函数执行完毕后自动调用
+2. **数据收集**：收集所有案例的`final_score.json`内容
+3. **格式化输出**：将数据格式化为Markdown表格
+4. **文件生成**：生成带时间戳的Markdown文件
+
+### 性能优化
+
+#### 大量案例处理
+
+对于大量测试案例，可以使用以下优化策略：
+
+- **分页显示**：将大量结果分页显示
+- **异步处理**：异步生成表格内容
+- **内存管理**：及时释放不需要的中间结果
+
+#### 输出格式优化
+
+- **压缩JSON**：在表格中显示压缩的JSON以减少文件大小
+- **懒加载**：实现详情的懒加载以提高页面加载速度
+- **缓存机制**：缓存生成的表格内容避免重复计算
+
+### 扩展开发
+
+#### 自定义可视化
+
+您可以开发自定义的可视化功能来满足特定需求：
+
+```python
+class CustomResultVisualizer:
+    def __init__(self, output_format="markdown"):
+        self.output_format = output_format
+
+    def visualize(self, case_results, cases_config, base_output):
+        if self.output_format == "markdown":
+            return self._to_markdown_table(case_results, cases_config, base_output)
+        elif self.output_format == "html":
+            return self._to_html_report(case_results, cases_config, base_output)
+        # 其他格式...
+```
+
+#### 多格式输出
+
+支持多种输出格式：
+
+- **Markdown表格**：适用于GitHub、文档等
+- **HTML报告**：更丰富的交互功能
+- **CSV文件**：便于数据分析
+- **JSON格式**：便于程序处理
+
+### 最佳实践
+
+#### 结果分析策略
+
+1. **快速浏览**：使用表格快速定位高分和低分案例
+2. **详细分析**：展开详情查看具体评估信息
+3. **批量比较**：通过表格形式比较不同案例的表现
+4. **趋势分析**：观察不同批次评估结果的变化趋势
+
+#### 报告生成
+
+- 结合表格结果生成综合评估报告
+- 添加图表和统计信息
+- 提供改进建议和下一步行动

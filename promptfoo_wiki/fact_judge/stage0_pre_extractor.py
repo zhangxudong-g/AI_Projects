@@ -8,6 +8,7 @@ from typing import Dict, List
 # 加载 .env 文件中的环境变量
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     # 如果没有安装 python-dotenv，则跳过加载
@@ -31,6 +32,26 @@ except ImportError:
 # ---------- shared ----------
 def _uniq(seq: List[str]) -> List[str]:
     return sorted(set(seq))
+
+
+def classify_java_artifact(anchors: dict) -> str:
+    annotations = set(anchors.get("annotations", []))
+    methods = anchors.get("methods", [])
+    fields = anchors.get("fields", [])
+
+    if annotations & {"Controller", "RestController"}:
+        return "CONTROLLER"
+
+    if annotations & {"Service"}:
+        return "SERVICE"
+
+    if annotations & {"Repository"}:
+        return "REPOSITORY"
+
+    if fields and not methods:
+        return "DATA_STRUCTURE"
+
+    return "UNKNOWN"
 
 
 PROPERTY_GETTER_RE = re.compile(r"^(get|is)([A-Z]\w+)$")
@@ -309,6 +330,16 @@ def extract_anchors(*, source_code: str, language: str) -> Dict[str, List[str]]:
     else:
         raise ValueError(f"Unsupported language: {language}")
 
+    # 针对 Java 代码，进行 artifact 类型分类
+    if language.lower() == "java":
+        artifact_type = classify_java_artifact(anchors)
+        anchors["artifact_type"] = [artifact_type]
+
+    # 针对 SQL 代码，设置 artifact 类型为 SQL_SCRIPT
+    if language.lower() == "sql":
+        # normalize table names
+        anchors["artifact_type"] = "SQL_SCRIPT"
+
     # =====================================================
     # normalize / dedupe
     # =====================================================
@@ -334,110 +365,6 @@ def _sql_ident(ident, anchors):
         anchors["tables"].append(parent)
 
 
-def generate_engineering_facts(*, anchors: dict, source_code: str) -> list:
-    """
-    Use LLM to convert anchors into ENGINEERING FACTS.
-    Engineering facts must be strictly derivable from code structure.
-    """
-    import json
-    import ollama
-
-    prompt = f"""
-You are a SENIOR SOFTWARE ENGINEER performing STRUCTURAL ANALYSIS, not EXECUTION ANALYSIS.
-
-Your task is to extract STRUCTURAL ENGINEERING FACTS, not execution flow or runtime behavior.
-
-You are NOT writing documentation.
-You are extracting VERIFIABLE ENGINEERING FACTS.
-
-================================================
-INPUT
-================================================
-
-[ANCHORS]
-{json.dumps(anchors, indent=2)}
-
-[SOURCE CODE]
-(The source code is provided ONLY to resolve naming ambiguity.
-You MUST NOT derive execution order, branching, or flow from it.)
-
-
-{source_code[:50000]}
-
-================================================
-WHAT IS AN ENGINEERING FACT
-================================================
-
-An ENGINEERING FACT is a statement that:
-
-- Describes a RESPONSIBILITY or STRUCTURAL MECHANISM
-- CONTROL FLOW facts are NOT allowed unless explicitly required by anchors
-- Can be VERIFIED directly against the source code
-- Would be CLEARLY FALSE if the code changed
-
-GOOD examples:
-- "Class X coordinates Y and Z components during request handling."
-- "Procedure P performs data aggregation across tables A and B."
-- "This module enforces transactional boundaries around operations."
-
-BAD examples:
-- "Provides a REST API"
-- "Handles business logic"
-- "Used for user management"
-- "Improves performance"
-
-================================================
-STRICT RULES (VERY IMPORTANT)
-================================================
-
-1. Every fact MUST be supported by ONE OR MORE anchors.
-2. The description MUST NOT introduce:
-   - New classes
-   - New tables
-   - New business rules
-   - New workflows
-3. Do NOT describe APIs, endpoints, or UI behavior.
-4. Do NOT speculate about intent or business meaning.
-5. If anchors are weak or fragmented:
-   - Produce SMALLER, more conservative facts.
-6. It is BETTER to produce FEWER facts than incorrect ones.
-7. Anchors of type "properties" represent DATA SHAPE, not behavior.
-   - Do NOT treat properties as workflows.
-   - Do NOT infer logic from getter/setter style properties.
-   - Properties may support facts about "data structure" only.
-8. If a class has fields but NO methods:
-   - Treat it strictly as a DATA STRUCTURE.
-   - Produce AT MOST ONE engineering fact for the class.
-   - The fact MUST NOT go beyond describing data shape or data mapping.
-9. Do NOT produce CONTROL-FLOW facts by default.
-   - Prefer STRUCTURAL facts.
-   - Control-flow facts are allowed ONLY when anchors explicitly encode order or branching.
-
-================================================
-OUTPUT FORMAT (JSON ONLY)
-================================================
-
-[
-  {{
-    "id": "F1",
-    "description": "One precise engineering fact.",
-    "anchors": ["anchor_1", "anchor_2"]
-  }}
-]
-
-If no reliable facts can be formed, output an empty list [].
-"""
-    base_url = os.getenv("OLLAMA_BASE_URL")
-    client = ollama.Client(host=base_url)
-    response = client.generate(
-        model="gpt-oss:120b",
-        prompt=prompt,
-        options={"temperature": 0},
-    )
-
-    return json.loads(response["response"])
-
-
 def prepare_engineering_facts(
     *,
     source_code: str,
@@ -448,21 +375,13 @@ def prepare_engineering_facts(
         source_code=source_code,
         language=language,
     )
-
-    facts = generate_engineering_facts(
-        anchors=anchors,
-        source_code=source_code,
-    )
-
-    facts_path = output_dir / "engineering_facts.json"
     anchors_path = output_dir / "anchors.json"
-    facts_path.write_text(
-        json.dumps(facts, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
     anchors_path.write_text(
         json.dumps(anchors, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
 
-    return facts_path
+    return {
+        "anchors_path": anchors_path,
+        "artifact_type": anchors.get("artifact_type", ["UNKNOWN"])[0],
+    }
