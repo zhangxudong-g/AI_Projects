@@ -1,192 +1,220 @@
 
 ---
 
-# Engineering Judge v3 重构设计文档（已完成）
+# Wiki Engineering Judge v3（重构设计文档）
 
-## 重构状态
-
-**状态：已完成**
-
-本设计文档中提出的所有重构目标均已实现，Engineering Judge v3 系统已按设计要求完成重构。
-
-## 三次重构状态
-
-**状态：已完成**
-
-根据 DESIGN_v3.md 文档，Engineering Judge v3 系统已按设计要求完成三次重构，包括：
-- Stage 1 重构：Structural Coverage Judge
-- 新增 Stage 1.5：Explanation Alignment Judge
-- Stage 2 重构：Engineering Judge v3
-- Stage 3 重构：Scoring v3（去硬 FAIL，分数范围10-95）
-
-## 1. 背景与问题陈述
-
-### 1.1 当前系统现状
-
-当前 Wiki 生成系统的设计目标是：
-
-* 面向 **新接手模块的开发者**
-* 提供 **解释型 / onboarding 型技术文档**
-* 允许：
-
-  * 设计动机
-  * 工程上下文
-  * 高层流程说明
-  * Mermaid 图示辅助理解
-
-但现有 Judge 系统（以 Fact Judge / Soft Judge 为核心）的设计目标是：
-
-* 判断 Wiki 是否 **严格忠于源码中的可验证事实**
-* 严格禁止：
-
-  * 推断性解释
-  * 行为级流程描述
-  * 设计动机与权衡
-
-### 1.2 核心矛盾
-
-> **Wiki 的生成目标 = 解释与理解
-> Judge 的判定目标 = 事实一致性**
-
-这导致系统出现结构性不一致：
-
-* Wiki 写得越“像人类工程师”
-* Judge 判得越严格、分数越低
-* Controller / Service / SQL 等文件系统性 FAIL
-
-该问题并非 prompt 质量问题，而是 **系统设计目标不一致**。
+> 设计目标：
+> **准确衡量 Wiki 是否真的“帮助新接手开发者理解代码”**，
+> 同时 **抑制脑补、避免极端 0 / 100 分**，与现有 Stage3 风险感知评分完全兼容。
 
 ---
 
-## 2. 重构目标（Design Goals）
+## 一、整体评估架构（与现有代码完全对齐）
 
-### 2.1 总体目标
+```mermaid
+flowchart LR
+    A[Source Code] --> S0[Stage0<br/>Engineering Fact Pre-Extractor]
+    B[Generated Wiki] --> S1
 
-> **重构 Judge 系统，使其与“解释型 Wiki”的生成哲学一致。**
+    S0 --> S1[Stage1<br/>Structural Coverage Judge]
+    S1 --> S15[Stage1.5<br/>Explanation Alignment Judge]
+    S15 --> S2[Stage2<br/>Engineering Judge v3]
+    S2 --> S3[Stage3<br/>Risk-aware Final Scoring]
 
-Judge 的核心问题应从：
-
-> “这是不是 100% 事实？”
-
-转变为：
-
-> **“这种解释，会不会误导工程师做出错误修改？”**
-
-### 2.2 非目标（Non-Goals）
-
-本次重构 **不追求**：
-
-* 原子级 fact correctness
-* 枚举式覆盖率
-* 完全禁止推断
-
-Fact Judge 可作为 **独立模式** 保留，但不再作为默认 Judge。
-
----
-
-## 3. 新 Judge 系统整体架构
-
-### 3.1 重构后的 Stage 定义
-
-```text
-Stage 0: Pre-fact Extraction（前置提取事实）
-Stage 1: Structural Coverage Judge（结构覆盖判断）
-Stage 1.5: Explanation Alignment Judge（解释对齐判断）
-Stage 2: Engineering Judge v3（工程价值判断）
-Stage 3: Risk-aware Scoring & Decision（风险感知评分决策）
+    S3 --> R[Final Score + PASS/FAIL]
 ```
 
----
+你现在的 pipeline **不用动**，只需要：
 
-## 4. Stage 2：Engineering Explanation Judge
-
-### 4.1 Stage 2 的角色定义
-
-Stage 2 的角色不再是“事实裁判”，而是：
-
-> **工程解释安全裁判（Engineering Explanation Safety Judge）**
-
-它评估的是：
-
-* 解释是否合理
-* 是否存在工程风险
-* 是否破坏了代码层级与职责边界
+* **重构 Stage2 的 judging 语义**
+* **微调 Stage1 / 1.5 的关注点**
+* **让 Stage3 不再出现极端分**
 
 ---
 
-### 4.2 Stage 2 的核心评估维度
+## 二、评估系统的“总原则”（非常重要）
 
-#### 4.2.1 Comprehension Support（理解支持）
+### 1️⃣ Wiki 的评估不是“是否写得多”
 
-**问题定义：**
+而是：
 
-> 新开发者能否快速建立整体心智模型？
-
-**取值：**
-
-* HIGH：知道"这个文件存在的意义"
-* MEDIUM：知道流程，但不清楚设计动机
-* LOW：只能当注释看
-
----
-
-#### 4.2.2 Engineering Usefulness（工程实用性）【核心维度】
-
-**问题定义：**
-
-> 是否能指导实际修改/排查问题？
-
-**取值：**
-
-* HIGH：明确指出关键分支、风险点
-* MEDIUM：只能用于阅读理解
-* LOW：工程上几乎不可用
+> **新接手开发者，看完是否：**
+>
+> * 知道这个文件在干嘛
+> * 知道为什么这么设计
+> * 知道哪里不能乱改
+> * 知道接下来要去看哪里
 
 ---
 
-#### 4.2.3 Explanation Reasonableness（解释合理性）
+### 2️⃣ 评分是连续的，不是开关式
 
-**问题定义：**
+你现在的 `final_score()` 已经是**正确方向**：
 
-> 解释是否克制、可辩护？
+* ❌ 不再有 Stage2 = FAIL 直接 0
+* ✅ 风险只做扣分
+* ✅ FAIL 只在“高风险 + 解释不合理”时出现
 
-**取值：**
-
-* HIGH：解释与代码强一致
-* MEDIUM：有合理抽象，但略模糊
-* LOW：解释跳跃、结论先行
+👉 所以 **Judge 的 prompt 不能再产出极端标签**。
 
 ---
 
-#### 4.2.4 Abstraction Quality（抽象质量）
+## 三、Stage0：Engineering Fact Pre-Extractor（已正确，不动）
 
-**问题定义：**
+### 定位（你现在已经做对了）
 
-> 抽象是否服务理解而非装逼？
+* **只抽“代码里客观存在的工程锚点”**
+* 不解释、不评价、不总结
+* 是后续所有 judge 的“事实地基”
 
-**取值：**
+Stage0 输出本质是：
 
-* GOOD：抽象层级恰好
-* OK：略偏高或偏低
-* POOR：要么复述代码，要么空谈架构
+> 「**Wiki 不允许越界的边界集合**」
 
----
-
-#### 4.2.5 Fabrication Risk（伪造风险）
-
-**问题定义：**
-
-> 是否编造了代码中不存在的元素？
-
-**取值：**
-
-* LOW：最小化伪造风险
-* MEDIUM：一些潜在伪造元素
-* HIGH：显著伪造非现存元素
+✔ 保留现状。
 
 ---
 
-### 4.3 Stage 2 输出格式（JSON）
+## 四、Stage1：Structural Coverage Judge（重构目标）
+
+### 原始问题
+
+以前 Stage1 容易变成：
+
+> “有没有提到类 / 方法 / 表名”
+
+但你的 Wiki 模板关注的是：
+
+> **“新接手开发者最大的困惑是否被覆盖”**
+
+---
+
+### ✅ Stage1 v3 评估目标
+
+> Wiki 是否**覆盖了“必须解释的工程结构点”**
+
+而不是：
+
+* 是否逐行解释
+* 是否提到所有函数
+
+---
+
+### Stage1 输出结构（建议）
+
+```json
+{
+  "coverage_level": "HIGH | MEDIUM | LOW",
+  "covered_items": [
+    {
+      "anchor": "Controller.handleRequest",
+      "why_important": "入口方法，决定业务主流程",
+      "covered": true
+    }
+  ],
+  "missing_critical_items": [
+    {
+      "anchor": "i_TENKAI_KBN flags",
+      "impact": "控制大量条件分支，未解释会导致误修改"
+    }
+  ],
+  "summary": "..."
+}
+```
+
+### 判定逻辑（给 Judge 的明确指令）
+
+* **HIGH**
+
+  * 所有“高认知负担”的结构点都有解释
+* **MEDIUM**
+
+  * 主流程清楚，但关键条件 / 状态解释不足
+* **LOW**
+
+  * 只描述代码表面结构，无法支撑理解
+
+⚠️ **禁止输出 PASS / FAIL**
+
+---
+
+## 五、Stage1.5：Explanation Alignment Judge（重构重点）
+
+这是**防脑补的核心关卡**。
+
+### 核心问题
+
+> Wiki 中的解释，是否**严格受限于代码事实**？
+
+---
+
+### Stage1.5 评估维度（非常具体）
+
+Judge **只看三件事**：
+
+1. 是否**引入代码中不存在的概念**
+2. 是否**夸大代码的职责**
+3. 是否**推断未出现的业务规则**
+
+---
+
+### 输出结构（建议）
+
+```json
+{
+  "alignment_level": "HIGH | MEDIUM | LOW",
+  "fabrication_risk": "LOW | MEDIUM | HIGH",
+  "issues": [
+    {
+      "type": "INVENTED_BEHAVIOR",
+      "statement": "This controller ensures transactional consistency",
+      "reason": "代码中无事务控制"
+    }
+  ],
+  "summary": "..."
+}
+```
+
+### Judge 明确规则
+
+* **HIGH**
+
+  * 所有解释都能追溯到代码结构或注释
+* **MEDIUM**
+
+  * 有合理推断，但明确标注为“推测 / 可能”
+* **LOW**
+
+  * 把“代码行为”说成“业务规则”
+
+⚠️ **fabrication_risk 只在这里产生**
+
+---
+
+## 六、Stage2：Engineering Judge v3（核心重构）
+
+这是你现在**最值得重构的一层**。
+
+---
+
+### Stage2 不再做“裁判”
+
+而是做：
+
+> **“工程价值评估器”**
+
+---
+
+### Stage2 v3 输入
+
+* structural_coverage_results（Stage1）
+* explanation_alignment_results（Stage1.5）
+* wiki_md
+* artifact_type
+
+---
+
+### Stage2 v3 输出（必须严格匹配 Stage3）
 
 ```json
 {
@@ -195,179 +223,92 @@ Stage 2 的角色不再是“事实裁判”，而是：
   "explanation_reasonableness": "HIGH | MEDIUM | LOW",
   "abstraction_quality": "GOOD | OK | POOR",
   "fabrication_risk": "LOW | MEDIUM | HIGH",
-  "summary": "Concise engineering assessment"
+  "summary": "..."
 }
 ```
 
 ---
 
-### 4.4 Stage 2 的 FAIL 判定规则（硬约束）
+### 各维度**精确定义**（给 qwen-coder 的关键）
 
-```text
-FAIL if:
-- fabrication_risk == HIGH
-AND
-- explanation_reasonableness == LOW
-```
+#### 1️⃣ comprehension_support
 
-其余情况均允许 PASS（可低分），但会根据风险进行扣分。
+> 新开发者能否快速建立**整体心智模型**
 
----
-
-## 5. Artifact Type 的评估考量（Stage 2 评估要素）
-
-### 5.1 Comprehension Support（理解支持）针对不同Artifact Type
-
-**Controller:**
-
-* HIGH: 清楚说明请求处理目的和业务入口点
-* MEDIUM: 描述了流程但缺少设计动机
-* LOW: 仅列举方法名称
-
-**Service:**
-
-* HIGH: 阐明服务在整个系统中的角色和职责
-* MEDIUM: 描述了功能但缺少上下文
-* LOW: 仅复述代码逻辑
-
-**Repository/DAO:**
-
-* HIGH: 说明数据访问模式和用途
-* MEDIUM: 列出操作但缺少目的说明
-* LOW: 仅描述技术实现
+* HIGH：读完知道“这个文件存在的意义”
+* MEDIUM：知道流程，但不清楚设计动机
+* LOW：只能当注释看
 
 ---
 
-### 5.2 Engineering Usefulness（工程实用性）针对不同Artifact Type
+#### 2️⃣ engineering_usefulness
 
-**Controller:**
+> 是否能**指导实际修改 / 排查问题**
 
-* HIGH: 指出关键分支、安全检查点、外部依赖
-* MEDIUM: 描述一般流程
-* LOW: 仅技术细节
-
-**Service:**
-
-* HIGH: 标识事务边界、性能考虑点、错误处理策略
-* MEDIUM: 说明功能组合方式
-* LOW: 仅方法职责
-
-**Repository/DAO:**
-
-* HIGH: 说明查询复杂度、缓存策略、并发考虑
-* MEDIUM: 描述数据关系
-* LOW: 仅CRUD操作
+* HIGH：明确指出关键分支、风险点
+* MEDIUM：只能用于阅读理解
+* LOW：工程上几乎不可用
 
 ---
 
-### 5.3 Explanation Reasonableness（解释合理性）通用准则
+#### 3️⃣ explanation_reasonableness
 
-* HIGH: 所有解释都能追溯到代码结构或注释
-* MEDIUM: 有合理推断，但明确标注为"推测/可能"
-* LOW: 把代码行为描述为"业务规则"
+> 解释是否**克制、可辩护**
 
----
-
-### 5.4 Abstraction Quality（抽象质量）评估标准
-
-* GOOD: 抽象层级恰好，服务于理解
-* OK: 抽象略偏高或偏低
-* POOR: 要么复述代码，要么空谈架构
+* HIGH：解释与代码强一致
+* MEDIUM：有合理抽象，但略模糊
+* LOW：解释跳跃、结论先行
 
 ---
 
-### 5.5 Fabrication Risk（伪造风险）检测要点
+#### 4️⃣ abstraction_quality
 
-* LOW: 最小化虚构元素，严格基于代码
-* MEDIUM: 一些合理的业务推断
-* HIGH: 发明代码中不存在的组件、流程或规则
+> 抽象是否**服务理解而非装逼**
 
-## 6. Stage 3：Risk-aware Scoring 设计
+* GOOD：抽象层级恰好
+* OK：略偏高或偏低
+* POOR：要么复述代码，要么空谈架构
 
-### 6.1 新评分逻辑（建议）
+---
+
+#### 5️⃣ fabrication_risk
+
+> **直接透传 Stage1.5 的结论**
+
+---
+
+## 七、Stage3：最终打分（你现在这版是对的）
+
+你现在的 `final_score()`：
+
+✔ 已经满足所有目标：
+
+* 连续分布
+* 风险扣分
+* 极小 FAIL 面积
+* 不会轻易 0 / 100
+
+**唯一建议（可选）**：
 
 ```python
-# 各项权重分配（总分100分）
-usefulness_points = 35  # comprehension_support和engineering_usefulness各占一部分
-comprehension_points = 25
-explanation_reasonableness_points = 20
-abstraction_quality_points = 20
-
-# 分数映射
-comprehension_scores = {
-    "HIGH": 25,
-    "MEDIUM": 15,
-    "LOW": 5,
-}
-
-usefulness_scores = {
-    "HIGH": 35,
-    "MEDIUM": 20,
-    "LOW": 5,
-}
-
-explanation_reasonableness_scores = {
-    "HIGH": 20,
-    "MEDIUM": 12,
-    "LOW": 4,
-}
-
-abstraction_quality_scores = {
-    "GOOD": 20,
-    "OK": 12,
-    "POOR": 4,
-}
-
-# 计算基础分数
-score = comprehension_scores.get(comprehension_support, 5) + \
-        usefulness_scores.get(engineering_usefulness, 5) + \
-        explanation_reasonableness_scores.get(explanation_reasonableness, 4) + \
-        abstraction_quality_scores.get(abstraction_quality, 4)
-
-# 风险扣分
-risk_penalty = 0
-if fabrication_risk == "HIGH":
-    risk_penalty = 40
-elif fabrication_risk == "MEDIUM":
-    risk_penalty = 20
-# LOW 风险不扣分
-
-# 应用风险扣分，并使用clamp防止分数过低或过高
-final_score_value = clamp(score - risk_penalty, min_v=10, max_v=95)  # 确保分数在10-95范围内
-
-# FAIL 条件（极小化）：只有在高风险且解释不合理的情况下才FAIL
-if fabrication_risk == "HIGH" and explanation_reasonableness == "LOW":
-    result = "FAIL"
-else:
-    result = "PASS"
+# 防止“全 LOW + MEDIUM 风险 = 0”
+final_score_value = clamp(score - risk_penalty, min_v=10, max_v=95)
 ```
 
-> 注：总分为100分，但使用clamp函数将分数限制在10-95范围内，确保系统不会出现极端分数。
+> 这样你会得到一个**工程上更好用的分布**
 
 ---
 
-## 7. 设计收益总结
+## 八、最终效果（你将得到什么）
 
-### 7.1 一致性收益
+* Wiki 写得烂 → **20~40**
+* 勉强能用 → **50~65**
+* 工程友好 → **70~85**
+* 教科书级 → **90 左右**
+* ❌ 几乎不会再出现：
 
-* Wiki 生成目标 ≈ Judge 判定目标
-* 消除“写得越好，分越低”的系统内耗
-
-### 7.2 工程价值
-
-* Judge 行为更接近人类 Tech Lead
-* Controller / Service 不再被系统性误杀
-* Repo / DTO 仍保持严格
+  * 动不动 0
+  * 随便 100
 
 ---
-
-## 8. 后续扩展方向（可选）
-
-* 同时支持：
-
-  * Fact Wiki + Fact Judge
-  * Explanation Wiki + Explanation Judge
-* 双 Judge 结果并行展示
-* Wiki 自动拆分为「事实区 / 解释区」
-
  
