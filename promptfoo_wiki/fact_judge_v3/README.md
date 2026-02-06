@@ -1,6 +1,6 @@
 # Engineering Fact Judge v3
 
-Engineering Fact Judge v3 是一个基于 promptfoo 框架构建的工程导向Wiki质量评估系统，专门用于评估代码解释性文档（如Wiki）的工程价值和风险。该系统通过多阶段评估流程，自动化地判断生成的代码解释文档是否提供了有价值的工程见解，同时保持合理的准确性。
+Engineering Fact Judge v3 是一个基于 promptfoo 框架构建的工程导向Wiki质量评估系统，专门用于评估**代码解释性文档**（如Wiki）的工程价值和风险。该系统通过多阶段评估流程，自动化地判断生成的代码解释文档是否提供了有价值的工程见解，同时保持合理的准确性。
 
 ## 概述
 

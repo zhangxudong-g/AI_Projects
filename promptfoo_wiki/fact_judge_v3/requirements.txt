@@ -15,11 +15,20 @@ sqlparse>=0.4.0   # For SQL code analysis
 # Environment management
 python-dotenv>=1.0.0
 
-# Standard library dependencies (usually not needed in requirements, but listed for completeness)
-# pathlib (built-in)
-# subprocess (built-in)
-# json (built-in)
-# re (built-in)
-# os (built-in)
-# collections (built-in)
-# typing (built-in)
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Linting and formatting
+flake8>=5.0.0
+black>=22.0.0
+isort>=5.10.0
+
+# Type checking
+mypy>=0.950
+
+# Virtual environment management
+virtualenv>=20.0.0
+
+# Documentation (if needed)
+mkdocs>=1.4.0

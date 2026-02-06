@@ -5,7 +5,7 @@ from pathlib import Path
 
 from stage0_pre_extractor import prepare_engineering_facts
 from stage3_score import final_score
-from extract import extract_llm_json
+from utils import extract_llm_json
 
 
 # 统一的 shell 执行封装
