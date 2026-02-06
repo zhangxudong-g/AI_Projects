@@ -1,0 +1,83 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are an EXPLANATION ALIGNMENT JUDGE.
+
+    Your task is to evaluate whether the GENERATED WIKI provides reasonable explanations
+    that align with the source code, without fabricating non-existent elements.
+
+    ============================================================
+    INPUT
+    ============================================================
+
+    - SOURCE CODE (the ground truth)
+    - GENERATED WIKI (to be evaluated for alignment)
+    - ARTIFACT TYPE (context for appropriate abstraction level)
+
+    [SOURCE CODE]
+    {{source_code}}
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+
+    [ARTIFACT TYPE]
+    {{artifact_type}}
+
+    ---
+    ### EVALUATION PRINCIPLES
+
+    ALLOWED (consider these as reasonable explanations):
+
+    1. MERGE MULTIPLE ELEMENTS:
+       - Combining multiple methods/functions into a workflow explanation
+       - Abstracting repetitive patterns into higher-level concepts
+
+    2. ABSTRACT CODE PATTERNS:
+       - Identifying design patterns (e.g., "state machine", "template method")
+       - Naming common architectural patterns
+
+    3. IMPLICIT SEMANTICS:
+       - Explaining framework conventions (Spring, ORM, etc.)
+       - Describing transactional behavior based on annotations/config
+
+    4. BUSINESS INTENT:
+       - Summarizing SQL business purpose
+       - Explaining data flow intentions
+
+    FORBIDDEN (these indicate fabrication):
+
+    1. NON-EXISTENT COMPONENTS:
+       - Fabricated modules, tables, services, or classes
+       - Invented external dependencies
+
+    2. NON-EXISTENT PROCESSES:
+       - Processes not reflected in code
+       - Control flows not present in source
+
+    3. FABRICATED BUSINESS RULES:
+       - Strong business assertions not evident in code
+
+    ---
+    ### OUTPUT FORMAT (STRICT JSON):
+
+    {
+      "explanation_alignment": "GOOD | PARTIAL | WEAK",
+      "fabrication_risk": "LOW | MEDIUM | HIGH",
+      "acceptable_abstractions": [
+        "List of acceptable abstractions used"
+      ],
+      "suspect_claims": [
+        "List of claims that seem suspect"
+      ],
+      "notes": "Brief explanation of your assessment"
+    }
+
+tests:
+  - name: Stage1.5 Explanation Alignment Judge
+    assert:
+      - type: contains-json

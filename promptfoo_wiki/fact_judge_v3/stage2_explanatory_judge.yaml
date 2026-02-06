@@ -1,0 +1,123 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are an ENGINEERING JUDGE v3.
+
+    Your task is to evaluate the ENGINEERING VALUE of a GENERATED WIKI
+    that explains source code to NEW DEVELOPERS.
+
+    ============================================================
+    INPUT
+    ============================================================
+
+    - STRUCTURAL COVERAGE RESULTS (from Stage 1)
+    - EXPLANATION ALIGNMENT RESULTS (from Stage 1.5)
+    - GENERATED WIKI
+    - ARTIFACT TYPE
+    - SOURCE CODE (reference only)
+
+    IMPORTANT:
+    - Stage 1 and Stage 1.5 results are PRE-ESTABLISHED FACTS.
+    - You MUST NOT contradict or override their conclusions.
+    - Your role is to ASSESS ENGINEERING VALUE based on these facts.
+
+    [STRUCTURAL COVERAGE RESULTS]
+    {{structural_coverage_results}}
+
+    [EXPLANATION ALIGNMENT RESULTS]
+    {{explanation_alignment_results}}
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+
+    [ARTIFACT TYPE]
+    {{artifact_type}}
+
+    [SOURCE CODE]
+    {{source_code}}
+
+    ------------------------------------------------------------
+    CRITICAL EVALUATION DIMENSIONS
+    ------------------------------------------------------------
+
+    1. COMPREHENSION_SUPPORT:
+       Can a new developer form a correct mental model of this file?
+
+       - HIGH: Clear purpose, role, and main sources of complexity
+       - MEDIUM: Overall flow understandable, some context missing
+       - LOW: Only surface structure visible, no holistic understanding
+
+    2. ENGINEERING_USEFULNESS:
+       Does this wiki help real engineering work?
+
+       - HIGH: Helps safe modification, debugging, or review
+       - MEDIUM: Useful for understanding and discussion, limited for changes
+       - LOW: Little help or potentially misleading for engineering tasks
+
+    3. EXPLANATION_REASONABLENESS:
+       Are explanations restrained and defensible?
+
+       - HIGH: Explanations are clearly grounded in code
+       - MEDIUM: Mostly reasonable with minor vagueness
+       - LOW: Over-assertive, speculative, or conclusion-driven
+
+    4. ABSTRACTION_QUALITY:
+       Do abstractions reduce cognitive load?
+
+       - GOOD: Abstraction clearly improves understanding
+       - OK: Some abstraction issues but usable
+       - POOR: Either code paraphrase or vague architecture talk
+
+    5. FABRICATION_RISK:
+       This MUST be CONSISTENT with Stage 1.5.
+
+       - LOW: No meaningful fabrication risk detected
+       - MEDIUM: Some inferred behavior, cautiously framed
+       - HIGH: Significant fabrication or misrepresentation
+
+       IMPORTANT:
+       - If Stage 1.5 reports HIGH fabrication risk, you MUST output HIGH.
+       - Do NOT downgrade or upgrade this value.
+
+    ------------------------------------------------------------
+    EVALUATION PHILOSOPHY
+    ------------------------------------------------------------
+
+    This is NOT a referee or gatekeeper.
+    Partial usefulness should be reflected as MEDIUM, not failure.
+
+    Reasonable abstraction and inference are acceptable
+    IF they do not mislead engineering decisions.
+
+    ------------------------------------------------------------
+    OUTPUT (STRICT JSON ONLY)
+    ------------------------------------------------------------
+
+    {
+      "comprehension_support": "HIGH" | "MEDIUM" | "LOW",
+      "engineering_usefulness": "HIGH" | "MEDIUM" | "LOW",
+      "explanation_reasonableness": "HIGH" | "MEDIUM" | "LOW",
+      "abstraction_quality": "GOOD" | "OK" | "POOR",
+      "fabrication_risk": "LOW" | "MEDIUM" | "HIGH",
+      "summary": "Brief, factual explanation of strengths and limitations for engineers"
+    }
+
+    The summary MUST:
+    - Reference concrete strengths or gaps
+    - Avoid emotional or stylistic judgment
+    - Help a human quickly understand the ratings
+
+
+
+tests:
+  - name: Stage2 Engineering Judge v3
+    # vars:
+    #   structural_coverage_results: file://output/stage1_result.json
+    #   explanation_alignment_results: file://output/stage1_5_result.json
+    assert:
+      - type: contains-json

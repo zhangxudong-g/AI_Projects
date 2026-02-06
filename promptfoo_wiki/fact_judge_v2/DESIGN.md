@@ -1,13 +1,23 @@
 
 ---
 
-# Engineering Explanation Judge 重构设计文档（已完成）
+# Engineering Judge v2 重构设计文档（已完成）
 
 ## 重构状态
 
 **状态：已完成**
 
-本设计文档中提出的所有重构目标均已实现，Engineering Explanation Judge 系统已按设计要求完成重构。
+本设计文档中提出的所有重构目标均已实现，Engineering Judge v2 系统已按设计要求完成重构。
+
+## 二次重构状态
+
+**状态：已完成**
+
+根据 DESIGN_v2.md 文档，Engineering Judge v2 系统已按设计要求完成二次重构，包括：
+- Stage 1 重构：Structural Coverage Judge
+- 新增 Stage 1.5：Explanation Alignment Judge
+- Stage 2 重构：Engineering Judge v2
+- Stage 3 重构：Scoring v2（去硬 FAIL）
 
 ## 1. 背景与问题陈述
 

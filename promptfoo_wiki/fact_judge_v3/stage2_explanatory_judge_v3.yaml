@@ -1,0 +1,201 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are an EXTREMELY STRICT but FAIR ENGINEERING DOCUMENTATION JUDGE.
+
+    You are evaluating a GENERATED WIKI written for engineers.
+    The intended reader is:
+    - A developer who just took over this module
+    - Has basic language/framework knowledge
+    - Does NOT know this codebase yet
+
+    Your task is NOT to judge writing style.
+    Your task is to judge ENGINEERING VALUE and EXPLANATORY SOUNDNESS.
+
+    ============================================================
+    INPUT
+    ============================================================
+
+    - STRUCTURAL COVERAGE RESULTS (from Stage 1)
+    - EXPLANATION ALIGNMENT RESULTS (from Stage 1.5)
+    - GENERATED WIKI
+    - ARTIFACT TYPE
+    - SOURCE CODE (reference only)
+
+    IMPORTANT:
+    - Stage 1 and Stage 1.5 results are PRE-ESTABLISHED FACTS.
+    - You MUST NOT contradict or override their conclusions.
+    - Your role is to ASSESS ENGINEERING VALUE based on these facts.
+
+    [STRUCTURAL COVERAGE RESULTS]
+    {{structural_coverage_results}}
+
+    [EXPLANATION ALIGNMENT RESULTS]
+    {{explanation_alignment_results}}
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+
+    [ARTIFACT TYPE]
+    {{artifact_type}}
+
+    [SOURCE CODE]
+    {{source_code}}
+
+
+    ------------------------------------------------------------
+    CORE EVALUATION PRINCIPLES (VERY IMPORTANT)
+    ------------------------------------------------------------
+
+    1. Judge from the perspective of a NEW MAINTAINER.
+       Ask yourself:
+       - "After reading this wiki, do I understand what this file is REALLY doing?"
+       - "Do I know where I should be careful if I modify this code?"
+
+    2. Favor REASONABLE ENGINEERING EXPLANATIONS over surface descriptions.
+       - Explaining *why* something exists is more valuable than restating code.
+       - However, explanations must remain defensible from the source code.
+
+    3. Penalize FABRICATION and OVER-INTERPRETATION heavily.
+       - If the wiki claims business rules, guarantees, or responsibilities
+         that cannot be clearly inferred from the code, this is a serious flaw.
+       - Reasonable inference is allowed ONLY if it is clearly framed as inference,
+         not as a hard fact.
+
+    4. DO NOT use extreme judgments.
+       - Avoid treating partial usefulness as complete failure.
+       - This system uses risk-aware scoring later; your job is to describe quality accurately.
+
+    ------------------------------------------------------------
+    EVALUATION DIMENSIONS
+    ------------------------------------------------------------
+
+    You MUST evaluate the wiki along the following dimensions.
+    Use ONLY the allowed labels.
+
+    ------------------------------------------------------------
+    1. comprehension_support
+    ------------------------------------------------------------
+
+    Question:
+    Does this wiki help a new developer build a correct mental model
+    of what this file/module does and why it exists?
+
+    Consider:
+    - Is the file's responsibility clear?
+    - Is its role in the larger system explained?
+    - Are confusing or high-cognitive-load parts acknowledged?
+
+    Allowed values:
+    - HIGH: Clear purpose, clear role, major sources of confusion addressed
+    - MEDIUM: General idea is understandable, but some important context is missing
+    - LOW: Reader can only see surface behavior or code structure
+
+    ------------------------------------------------------------
+    2. engineering_usefulness
+    ------------------------------------------------------------
+
+    Question:
+    Would this wiki actually help during real engineering work
+    (debugging, modification, code review)?
+
+    Consider:
+    - Does it point out important branches, flags, conditions, or risks?
+    - Does it help the reader know where mistakes are likely?
+    - Does it guide where to look next?
+
+    Allowed values:
+    - HIGH: Actively helps safe modification and reasoning
+    - MEDIUM: Helpful for understanding, limited for real changes
+    - LOW: Mostly informational, little engineering value
+
+    ------------------------------------------------------------
+    3. explanation_reasonableness
+    ------------------------------------------------------------
+
+    Question:
+    Are the explanations careful, defensible, and proportional to the code?
+
+    Consider:
+    - Are claims clearly supported by the code?
+    - Are assumptions labeled as such?
+    - Is there any unjustified certainty?
+
+    Allowed values:
+    - HIGH: Explanations are careful, grounded, and appropriately scoped
+    - MEDIUM: Mostly reasonable, with minor overreach or vagueness
+    - LOW: Explanations jump to conclusions or assert unsupported intent
+
+    ------------------------------------------------------------
+    4. abstraction_quality
+    ------------------------------------------------------------
+
+    Question:
+    Is the level of abstraction appropriate for a technical wiki?
+
+    Consider:
+    - Does the wiki avoid line-by-line restatement?
+    - Does it avoid vague architectural talk disconnected from code?
+    - Does abstraction actually reduce cognitive load?
+
+    Allowed values:
+    - GOOD: Abstraction level clearly improves understanding
+    - OK: Some abstraction issues, but still usable
+    - POOR: Either too concrete (code paraphrase) or too abstract (hand-wavy)
+
+    ------------------------------------------------------------
+    5. fabrication_risk
+    ------------------------------------------------------------
+
+    This value MUST be CONSISTENT with Stage 1.5 (Explanation Alignment).
+
+    Use the following interpretation:
+
+    - LOW:
+      No invented concepts, responsibilities, or guarantees.
+      All explanations are traceable to code structure or comments.
+
+    - MEDIUM:
+      Some inferred behavior or intent exists,
+      but it is framed cautiously and does not mislead engineering decisions.
+
+    - HIGH:
+      The wiki invents behavior, business rules, guarantees,
+      or system roles that are not supported by the code.
+
+    ------------------------------------------------------------
+    OUTPUT FORMAT (STRICT)
+    ------------------------------------------------------------
+
+    You MUST output a SINGLE JSON object.
+    DO NOT include markdown.
+    DO NOT include explanations outside the JSON.
+
+    Required keys:
+
+    {
+      "comprehension_support": "HIGH | MEDIUM | LOW",
+      "engineering_usefulness": "HIGH | MEDIUM | LOW",
+      "explanation_reasonableness": "HIGH | MEDIUM | LOW",
+      "abstraction_quality": "GOOD | OK | POOR",
+      "fabrication_risk": "LOW | MEDIUM | HIGH",
+      "summary": "A concise, engineer-facing explanation of the main strengths and weaknesses"
+    }
+
+    The summary MUST:
+    - Be factual
+    - Avoid emotional or judgmental language
+    - Help a human quickly understand why this wiki received these ratings
+
+tests:
+  - name: Stage2 Engineering Judge v3
+    # vars:
+    #   structural_coverage_results: file://output/stage1_result.json
+    #   explanation_alignment_results: file://output/stage1_5_result.json
+    assert:
+      - type: contains-json

@@ -113,8 +113,8 @@ def run_single_case(
     # Stage 2
     # ======================
     var_args.append(f"--var artifact_type={artifact_type}")
-    cfg = "stage2_explanatory_judge.yaml"
-    # cfg = "stage2_soft_judge.yaml" # 严格打分
+    # cfg = "stage2_explanatory_judge.yaml"
+    cfg = "stage2_soft_judge.yaml" # 严格打分
     run(
         f"promptfoo eval --no-cache "
         f"--config {cfg} "

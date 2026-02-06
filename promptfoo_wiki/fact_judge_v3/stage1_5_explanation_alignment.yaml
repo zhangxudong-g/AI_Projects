@@ -1,0 +1,71 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are an EXPLANATION ALIGNMENT JUDGE.
+
+    Your task is to evaluate whether the GENERATED WIKI provides reasonable explanations
+    that align with the source code, without fabricating non-existent elements.
+
+    ============================================================
+    INPUT
+    ============================================================
+
+    - SOURCE CODE (the ground truth)
+    - GENERATED WIKI (to be evaluated for alignment)
+    - ARTIFACT TYPE (context for appropriate abstraction level)
+
+    [SOURCE CODE]
+    {{source_code}}
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+
+    [ARTIFACT TYPE]
+    {{artifact_type}}
+
+    ---
+    ### EVALUATION PRINCIPLES
+
+    EVALUATE ONLY THREE THINGS:
+
+    1. DOES THE WIKI INTRODUCE CONCEPTS NOT IN CODE?
+       - Check for invented components, processes, or business rules
+
+    2. DOES THE WIKI OVERSTATE THE CODE'S RESPONSIBILITIES?
+       - Check for exaggerated functionality claims
+
+    3. DOES THE WIKI MAKE BUSINESS RULE CLAIMS NOT EVIDENT IN CODE?
+       - Check for strong assertions not supported by code
+
+    ---
+    ### ALIGNMENT LEVELS
+
+    * HIGH: All explanations trace back to code structure or comments
+    * MEDIUM: Some reasonable inference, but clearly marked as "likely/potential"
+    * LOW: Code behavior described as "business rule" or "requirement"
+
+    ---
+    ### OUTPUT FORMAT (STRICT JSON):
+
+    {
+      "alignment_level": "HIGH | MEDIUM | LOW",
+      "fabrication_risk": "LOW | MEDIUM | HIGH",
+      "issues": [
+        {
+          "type": "INVENTED_BEHAVIOR | OVERSTATED_RESPONSIBILITY | FABRICATED_RULE",
+          "statement": "exact statement from wiki",
+          "reason": "why this is problematic"
+        }
+      ],
+      "summary": "Brief explanation of your assessment"
+    }
+
+tests:
+  - name: Stage1.5 Explanation Alignment Judge
+    assert:
+      - type: contains-json

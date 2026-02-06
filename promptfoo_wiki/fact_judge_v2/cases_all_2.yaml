@@ -1,0 +1,29 @@
+cases:
+  - id: case_java_ctl_001
+    vars:
+      source_code: data/sample/Controller_GKB004S011SetZokugaraController.java
+      wiki_md: data/sample/wiki_cache/Controller_GKB004S011SetZokugaraController.java.md
+ 
+
+  - id: case_java_repo_001
+    vars:
+      source_code: data/sample/Repository_GKB000EntityRepository.java
+      wiki_md: data/sample/wiki_cache/Repository_GKB000EntityRepository.java.md
+ 
+  - id: case_java_service_001
+    vars:
+      source_code: data/sample/Service_GKB001S001_JidoKohoshaService.java
+      wiki_md: data/sample/wiki_cache/Service_GKB001S001_JidoKohoshaService.java.md
+ 
+
+  - id: case_java_view_001
+    vars:
+      source_code: data/sample/View_JID000S004ViewRow.java
+      wiki_md: data/sample/wiki_cache/View_JID000S004ViewRow.java.md
+
+ 
+  # - id: case_sql_001
+  #   vars:
+  #     source_code: data/sample/JIBSOJHJKNCHK.utf8.SQL
+  #     wiki_md: data/sample/JIBSOJHJKNCHK.SQL.md
+ 

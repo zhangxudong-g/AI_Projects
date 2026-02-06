@@ -1,0 +1,66 @@
+cases:
+  # - id: case_java_ctl_001_final_001
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+  # - id: case_java_ctl_001_final_002
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+  # - id: case_java_ctl_001_final_003
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+
+
+  # - id: case_java_ctl_001_final_kimi_001
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+  # - id: case_java_ctl_001_final_kimi_002
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+  # - id: case_java_ctl_001_final_kimi_003
+  #   vars:
+  #     source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+  #     wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+
+  - id: case_java_ctl_001_cp_001
+    vars:
+      source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-wiki.md
+
+  - id: case_java_ctl_001_cp_kimi_001
+    vars:
+      source_code: data/java/code/Controller_GKB004S011SetZokugaraController.java
+      wiki_md: data/java/result/Controller_GKB004S011SetZokugaraController-java-kimi.md
+
+  # - id: case_java_repo_001
+  #   vars:
+  #     source_code: data/java/code/Repository_GKB000EntityRepository.java
+  #     wiki_md: data/java/result/Repository_GKB000EntityRepository-wiki.md
+  # - id: case_java_service_001
+  #   vars:
+  #     source_code: data/java/code/Service_GKB001S001_JidoKohoshaService.java
+  #     wiki_md: data/java/result/Service_GKB001S001_JidoKohoshaService-wiki.md
+  # - id: case_java_view_001_01_base_02
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-wiki.md
+  # - id: case_java_view_001_01_base_03
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-wiki.md
+  # - id: case_java_view_001_01_kimi_001
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-java-kimi.md
+  # - id: case_java_view_001_01_kimi_002
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-java-kimi.md
+  # - id: case_java_view_001_01_kimi_003
+  #   vars:
+  #     source_code: data/java/code/View_JID000S004ViewRow.java
+  #     wiki_md: data/java/result/View_JID000S004ViewRow-java-kimi.md

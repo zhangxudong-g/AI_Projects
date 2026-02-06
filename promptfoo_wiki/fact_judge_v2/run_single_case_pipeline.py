@@ -33,9 +33,10 @@ def run_single_case(
     """
     单 case 完整 pipeline：
     - Stage0: engineering facts pre-extractor
-    - Stage1: promptfoo fact extractor
-    - Stage2: promptfoo engineering explanation judge
-    - Stage3: Python risk-aware scoring
+    - Stage1: promptfoo structural coverage judge
+    - Stage1.5: promptfoo explanation alignment judge
+    - Stage2: promptfoo engineering judge v2
+    - Stage3: Python scoring v2
 
     Args:
         case_id: 测试用例ID
@@ -54,6 +55,8 @@ def run_single_case(
     # print(f"[CWD ] {case_root}")
     stage1_out = (output_dir / "stage1.json").resolve()
     stage1_result_out = (output_dir / "stage1_result.json").resolve()
+    stage1_5_out = (output_dir / "stage1_5.json").resolve()
+    stage1_5_result_out = (output_dir / "stage1_5_result.json").resolve()
     stage2_out = (output_dir / "stage2.json").resolve()
     final_out = (output_dir / "final_score.json").resolve()
     # 拼 --var 参数
@@ -94,7 +97,7 @@ def run_single_case(
     var_str = " ".join(var_args)
 
     # ======================
-    # Stage 1
+    # Stage 1: Structural Coverage Judge
     # ======================
     run(
         f"promptfoo eval --no-cache "
@@ -109,15 +112,39 @@ def run_single_case(
         json.dumps(stage1_data, indent=4, ensure_ascii=False),
         encoding="utf-8",
     )
+
     # ======================
-    # Stage 2
+    # Stage 1.5: Explanation Alignment Judge
+    # ======================
+    var_args_1_5 = []
+    for k, v in vars_cfg.items():
+        var_args_1_5.append(f"--var {k}=file://{v}")
+    var_args_1_5.append(f"--var artifact_type={artifact_type}")
+
+    run(
+        f"promptfoo eval --no-cache "
+        f"--config stage1_5_explanation_alignment.yaml "
+        f"{" ".join(var_args_1_5)} "
+        f"--output {stage1_5_out}",
+    )
+    # 将 Stage 1.5 结果保存为单独的文件，供 Stage 2 使用
+    stage1_5_data = extract_llm_json(stage1_5_out)
+
+    stage1_5_result_out.write_text(
+        json.dumps(stage1_5_data, indent=4, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    # ======================
+    # Stage 2: Engineering Judge v2
     # ======================
     # 为 Stage 2 创建新的参数列表，确保所有必要变量都传递
     var_args_for_stage2 = []
     for k, v in vars_cfg.items():
         var_args_for_stage2.append(f"--var {k}=file://{v}")
     var_args_for_stage2.append(f"--var artifact_type={artifact_type}")
-    var_args_for_stage2.append(f"--var facts=file://{base_output}/{case_id}/stage1_result.json")
+    var_args_for_stage2.append(f"--var structural_coverage_results=file://{base_output}/{case_id}/stage1_result.json")
+    var_args_for_stage2.append(f"--var explanation_alignment_results=file://{base_output}/{case_id}/stage1_5_result.json")
 
     cfg = "stage2_explanatory_judge.yaml"
     # cfg = "stage2_soft_judge.yaml" # 严格打分

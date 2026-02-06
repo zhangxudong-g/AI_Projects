@@ -8,10 +8,10 @@ from run_single_case_pipeline import run_single_case
 def format_results_with_llm(case_results, cases_config, base_output: str = "output"):
     """
     使用LLM整理结果并输出为Markdown表格格式
-    表格包含：case id/文件名/结果/分数/详情（final_score.json内容，包括解释合理性、工程风险等级、边界遵循和实用性）
+    表格包含：case id/文件名/结果/分数/详情（final_score.json内容，包括理解支持、工程实用性、解释合理性、抽象质量和伪造风险）
     """
     # 创建Markdown表格
-    md_content = "# Engineering Explanation Judge 测试结果汇总\n\n"
+    md_content = "# Engineering Judge v2 测试结果汇总\n\n"
     md_content += "| Case ID | 文件名 | 结果 | 分数 | 详情 |\n"
     md_content += "|--------|-------|------|------|------|\n"
 
@@ -32,14 +32,15 @@ def format_results_with_llm(case_results, cases_config, base_output: str = "outp
                     summary = details_data.get('summary', 'N/A')
                     details_obj = details_data.get('details', {})
 
-                    # 从details中提取各个字段（新版本的评估维度）
-                    interpretation_reasonableness = details_obj.get('interpretation_reasonableness', 'N/A')
-                    engineering_risk_level = details_obj.get('engineering_risk_level', 'N/A')
-                    boundary_adherence = details_obj.get('boundary_adherence', 'N/A')
-                    usefulness_level = details_obj.get('usefulness_level', 'N/A')
+                    # 从details中提取各个字段（新版本的评估维度 - Judge v2）
+                    comprehension_support = details_obj.get('comprehension_support', 'N/A')
+                    engineering_usefulness = details_obj.get('engineering_usefulness', 'N/A')
+                    explanation_reasonableness = details_obj.get('explanation_reasonableness', 'N/A')
+                    abstraction_quality = details_obj.get('abstraction_quality', 'N/A')
+                    fabrication_risk = details_obj.get('fabrication_risk', 'N/A')
 
                     # 构建平铺显示的内容
-                    flat_details = f"Summary: {summary}<br/>Interpretation Reasonableness: {interpretation_reasonableness}<br/>Engineering Risk Level: {engineering_risk_level}<br/>Boundary Adherence: {boundary_adherence}<br/>Usefulness: {usefulness_level}"
+                    flat_details = f"Summary: {summary}<br/>Comprehension Support: {comprehension_support}<br/>Engineering Usefulness: {engineering_usefulness}<br/>Explanation Reasonableness: {explanation_reasonableness}<br/>Abstraction Quality: {abstraction_quality}<br/>Fabrication Risk: {fabrication_risk}"
 
                     # 使用简洁的摘要和详细的平铺信息
                     compact_info = f"Score: {details_data.get('final_score', 'N/A')}, Result: {details_data.get('result', 'N/A')}"
@@ -67,13 +68,13 @@ def format_results_with_llm(case_results, cases_config, base_output: str = "outp
     with open(final_results_path, "w", encoding="utf-8") as f:
         f.write(md_content)
 
-    print(f"SUCCESS: Engineering Explanation Judge Markdown结果表格已保存至: {final_results_path}")
+    print(f"SUCCESS: Engineering Judge v2 Markdown结果表格已保存至: {final_results_path}")
     return final_results_path
 
 
 def run_all_cases(cases_yaml: str, base_output: str = "output"):
     """
-    运行所有测试案例，使用Engineering Explanation Judge系统进行评估
+    运行所有测试案例，使用Engineering Judge v2系统进行评估
     """
     cfg = yaml.safe_load(open(cases_yaml, encoding="utf-8"))
     results = []
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Run fact judge test cases')
-    parser.add_argument('--cases-yaml', type=str, default='cases_all_1.yaml', help='Cases YAML file path')
+    parser.add_argument('--cases-yaml', type=str, default='cases_all_4.yaml', help='Cases YAML file path')
     parser.add_argument('--base-output', type=str, default='results_output', help='Base output directory')
 
     args = parser.parse_args()

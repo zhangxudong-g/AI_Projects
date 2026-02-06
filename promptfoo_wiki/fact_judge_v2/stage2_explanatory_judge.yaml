@@ -6,22 +6,26 @@ providers:
 
 prompts:
   - |
-    You are an ENGINEERING EXPLANATION SAFETY JUDGE.
+    You are an ENGINEERING JUDGE v2.
 
-    Your task is to evaluate the SAFETY and REASONABLENESS of a GENERATED WIKI
+    Your task is to evaluate the ENGINEERING VALUE and RISK of a GENERATED WIKI
     that explains source code to NEW DEVELOPERS.
 
     ============================================================
     INPUT
     ============================================================
 
-    - ENGINEERING FACTS (ground truth, authoritative)
-    - GENERATED WIKI (to be judged for safety/reasonableness)
-    - ARTIFACT TYPE (CRITICAL for boundary checking)
-    - SOURCE CODE (for reference only, do NOT analyze directly)
+    - STRUCTURAL COVERAGE RESULTS (from Stage 1)
+    - EXPLANATION ALIGNMENT RESULTS (from Stage 1.5)
+    - GENERATED WIKI (to be evaluated)
+    - ARTIFACT TYPE (context for appropriate abstraction level)
+    - SOURCE CODE (reference)
 
-    [ENGINEERING FACTS]
-    {{facts}}
+    [STRUCTURAL COVERAGE RESULTS]
+    {{structural_coverage_results}}
+
+    [EXPLANATION ALIGNMENT RESULTS]
+    {{explanation_alignment_results}}
 
     [GENERATED WIKI]
     {{wiki_md}}
@@ -35,83 +39,75 @@ prompts:
     ---
     ### CRITICAL EVALUATION DIMENSIONS
 
-    1. INTERPRETATION REASONABLENESS:
-       Is this explanation something a rational engineer might write
-       after reading the source code?
+    1. COMPREHENSION SUPPORT:
+       Does this Wiki help a new developer build a mental model of the code?
 
-       - HIGH: Most explanations can be reasonably inferred from naming/structure/calls
-       - MEDIUM: Some experiential explanations, but not dangerous
-       - LOW: Heavy subjective speculation or imagination
+       - HIGH: Significantly aids understanding and navigation
+       - MEDIUM: Provides some helpful context
+       - LOW: Minimal help for comprehension
 
-    2. ENGINEERING RISK LEVEL (CORE DIMENSION):
-       Would believing this Wiki lead developers to:
-       - Modify the wrong layer?
-       - Misunderstand responsibility boundaries?
-       - Make incorrect engineering decisions?
+    2. ENGINEERING USEFULNESS:
+       Does this Wiki provide practical value for engineering tasks?
 
-       - LOW: Even if partially inaccurate, won't affect modification decisions
-       - MEDIUM: May misunderstand implementation details, need frequent code checks
-       - HIGH: Very likely to cause WRONG MODIFICATIONS (FAIL CONDITION)
+       - HIGH: Valuable for debugging, modification, extension
+       - MEDIUM: Somewhat helpful for engineering tasks
+       - LOW: Limited practical value
 
-    3. BOUNDARY ADHERENCE:
-       Does the Wiki clearly distinguish responsibilities across Artifact Types?
+    3. EXPLANATION REASONABLENESS:
+       Are the abstractions and explanations reasonable and grounded in code?
 
-       FOR CONTROLLER:
-       - ALLOWED: High-level request handling intent, Service delegation
-       - PROHIBITED: Business rules, validation logic, UI/session details
+       - HIGH: Explanations are well-grounded and reasonable abstractions
+       - MEDIUM: Some acceptable abstractions, minor concerns
+       - LOW: Many unfounded or unreasonable explanations
 
-       FOR SERVICE:
-       - ALLOWED: System role of service, DAO/Repository dependencies
-       - PROHIBITED: Business process branches, error handling strategies
+    4. ABSTRACTION QUALITY:
+       Are the abstraction levels appropriate for the artifact type?
 
-       FOR REPOSITORY:
-       - ALLOWED: Data access purpose, method naming intent
-       - PROHIBITED: ORM assumptions, CRUD semantics, domain model explanations
+       - GOOD: Appropriate level of abstraction for the context
+       - OK: Abstraction level is acceptable but could be improved
+       - POOR: Too detailed (just repeating code) or too abstract (misrepresenting)
 
-       FOR DTO/VIEW:
-       - ALLOWED: Data semantic grouping
-       - PROHIBITED: Behavior descriptions, usage scenarios
+    5. FABRICATION RISK:
+       Does the Wiki fabricate non-existent elements or behaviors?
 
-       FOR SQL:
-       - ALLOWED: Script overall purpose, data flow direction
-       - PROHIBITED: Business meaning inference, transaction strategies
-
-       - GOOD: Boundaries are clear
-       - WEAK: Slight boundary crossing
-       - BAD: Severe responsibility confusion (FAIL CONDITION)
-
-    4. USEFULNESS:
-       Does this Wiki actually help engineers understand the code?
-
-       - HIGH: Significantly improves understanding efficiency
-       - MEDIUM: Helpful but requires frequent code reference
-       - LOW: Information noise, limited value
+       - LOW: Minimal risk of fabricated elements
+       - MEDIUM: Some potentially fabricated elements
+       - HIGH: Significant fabrication of non-existent elements
 
     ---
-    ### FAIL CONDITIONS (Hard Constraints)
+    ### EVALUATION PHILOSOPHY
 
-    MARK AS FAIL if:
-    - engineering_risk_level == "HIGH"
-    OR
-    - boundary_adherence == "BAD"
+    Remember: This is NOT a "strict fact checker".
+    The goal is to evaluate whether the Wiki provides engineering value
+    while maintaining reasonable accuracy.
 
-    All other combinations are allowed to PASS (even with low scores).
+    ALLOWED (and potentially valuable):
+    - Reasonable abstractions and simplifications
+    - Mermaid diagrams showing system flows
+    - High-level explanations of complex mechanisms
+    - Consolidated explanations of multiple elements
+
+    DISCOURAGED:
+    - Fabrication of non-existent components/processes
+    - Serious misrepresentation of core functionality
 
     ---
     ### Output STRICTLY in JSON (no extra text):
 
     {
-      "interpretation_reasonableness": "HIGH" | "MEDIUM" | "LOW",
-      "engineering_risk_level": "LOW" | "MEDIUM" | "HIGH",
-      "boundary_adherence": "GOOD" | "WEAK" | "BAD",
-      "usefulness_level": "HIGH" | "MEDIUM" | "LOW",
-      "summary": "Concise explanation of reasoning and risk."
+      "comprehension_support": "HIGH" | "MEDIUM" | "LOW",
+      "engineering_usefulness": "HIGH" | "MEDIUM" | "LOW",
+      "explanation_reasonableness": "HIGH" | "MEDIUM" | "LOW",
+      "abstraction_quality": "GOOD" | "OK" | "POOR",
+      "fabrication_risk": "LOW" | "MEDIUM" | "HIGH",
+      "summary": "Concise engineering assessment"
     }
 
 
 tests:
-  - name: Stage2 Engineering Explanation Judge
+  - name: Stage2 Engineering Judge v2
     # vars:
-    #   facts: file://output/stage1_result.json
+    #   structural_coverage_results: file://output/stage1_result.json
+    #   explanation_alignment_results: file://output/stage1_5_result.json
     assert:
       - type: contains-json

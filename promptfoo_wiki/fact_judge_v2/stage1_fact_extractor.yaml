@@ -3,137 +3,87 @@ providers:
     config:
       temperature: 0
       top_p: 1
-version: "1.0"
 
 prompts:
   - |
-    You are a STRICT ENGINEERING FACT EXTRACTOR.
+    You are a STRUCTURAL COVERAGE JUDGE for code documentation evaluation.
 
-    You are given:
-    - SOURCE CODE (Java / Spring MVC / SQL / PL-SQL)
-    - GENERATED WIKI (Markdown)
+    Your task is to determine whether the GENERATED WIKI adequately covers
+    the core engineering roles and responsibilities in the source code,
+    NOT whether every single element is individually mentioned.
 
-    [GENERATED WIKI]
-    {{wiki_md}}
-    
+    ============================================================
+    INPUT
+    ============================================================
+
+    - SOURCE CODE (ground truth)
+    - GENERATED WIKI (to be evaluated)
+    - ENGINEERING ANCHORS (critical elements to cover)
+
     [SOURCE CODE]
     {{source_code}}
 
+    [GENERATED WIKI]
+    {{wiki_md}}
+
     [ENGINEERING ANCHORS]
     {{engineering_anchors}}
-    
-    Your role is to extract ONLY hard, verifiable engineering facts
-    that are EXPLICITLY PRESENT in the source code.
 
-    =====================
-    ABSOLUTE ROLE BOUNDARY
-    =====================
+    ---
+    ### COVERAGE EVALUATION PRINCIPLES
 
-    - You are NOT explaining code behavior.
-    - You are NOT summarizing logic.
-    - You are NOT interpreting intent or design.
-    - You are NOT validating the wiki.
+    EVALUATE whether the wiki covers the "core engineering roles":
 
-    You ONLY extract facts that can be directly pointed to
-    as concrete code artifacts.
+    1. SERVICE ROLE (for Service classes):
+       - Overall system responsibility
+       - Key data flows
+       - Main dependencies
 
-    If a fact cannot be proven by pointing to a specific
-    class, method, annotation, field, or SQL object,
-    DO NOT include it.
+    2. CONTROLLER ROLE (for Controllers):
+       - Request handling purpose
+       - Main service delegations
+       - Response patterns
 
-    =====================
-    WHAT COUNTS AS A FACT
-    =====================
+    3. REPOSITORY ROLE (for Repositories):
+       - Data access purpose
+       - Main operations provided
 
-    --------
-    Java / Spring MVC
-    --------
+    4. CORE WORKFLOW (for any module):
+       - Main execution path
+       - Key decision points
+       - Error handling strategy
 
-    You MAY extract:
-    - Class names
-    - Method names
-    - Field / constant names
-    - Annotations (@Controller, @Service, @RequestMapping, etc.)
-    - Explicit URL mappings
-    - Explicit dependency injection (@Inject / @Autowired)
-    - Explicit method-to-method calls (A calls B)
+    ❌ DO NOT require:
+    - Every single method/function to be individually documented
+    - Every SQL statement to be described
+    - Every variable to be mentioned
 
-    You MUST NOT extract:
-    - Business rules
-    - Validation logic descriptions
-    - Control flow explanations
-    - Error handling behavior
-    - Session usage intent
-    - Pagination, logging, transactions (unless explicitly named)
+    ✅ LOOK FOR:
+    - Whether core responsibilities are explained
+    - Whether main data/control flows are covered
+    - Whether architectural patterns are captured
 
-    --------
-    SQL / PL-SQL
-    --------
+    ---
+    ### Output Format (STRICT JSON):
 
-    You MAY extract:
-    - TABLE / VIEW / INDEX / SEQUENCE names
-    - PROCEDURE / FUNCTION / PACKAGE / TRIGGER names
-    - Explicit dependencies (procedure calls, trigger-on-table)
-
-    You MUST NOT extract:
-    - Data meaning
-    - Business purpose
-    - Processing steps
-    - Side effects
-
-    =====================
-    FACT GRANULARITY RULE
-    =====================
-
-    Each fact MUST:
-    - Be atomic (one fact per item)
-    - Reference a concrete artifact name
-    - Avoid verbs that imply behavior (e.g. "handles", "manages", "controls")
-
-    Use neutral verbs only:
-    - "defines"
-    - "declares"
-    - "is annotated with"
-    - "injects"
-    - "maps to"
-    - "calls"
-
-    =====================
-    OUTPUT FORMAT (STRICT)
-    =====================
-
-    Return ONLY valid JSON in the following structure:
-
-    [
-      {
-        "id": "F1",
-        "description": "<single verifiable fact>",
-        "anchors": ["classes" | "methods" | "fields" | "annotations" | "sql"]
-      }
-    ]
-
-    =====================
-    MINIMUM OUTPUT RULE:
-    =====================
-
-    If ANY class, method, table, or procedure name is visible,
-    you MUST output at least ONE fact describing its existence.
-
-    =====================
-    FINAL SAFETY RULE
-    =====================
-
-    If you are unsure whether something is a fact or an interpretation,
-    OMIT it.
-
-    Missing facts are acceptable.
-    Invented or interpreted facts are NOT.
-    
+    {
+      "structural_coverage": "HIGH | MEDIUM | LOW",
+      "unexplained_critical_anchors": [
+        "List of critical engineering elements not adequately covered"
+      ],
+      "well_covered_anchors": [
+        "List of well-covered engineering elements"
+      ],
+      "coverage_notes": "Brief explanation of coverage assessment",
+      "main_strengths": [
+        "What the wiki does well"
+      ],
+      "main_gaps": [
+        "What the wiki misses"
+      ]
+    }
 
 tests:
-  - name: Stage1 Fact Extraction
-    # vars:
-      # source_code: file://data/agent.py.txt
-      # wiki_md: file://data/agent.py.md
+  - name: Stage1 Structural Coverage Judge
     assert:
-          - type: contains-json
+      - type: contains-json

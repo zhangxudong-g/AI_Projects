@@ -123,7 +123,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Run fact judge test cases')
-    parser.add_argument('--cases-yaml', type=str, default='cases_all.yaml', help='Cases YAML file path')
+    parser.add_argument('--cases-yaml', type=str, default='cases_all_4.yaml', help='Cases YAML file path')
     parser.add_argument('--base-output', type=str, default='results_output', help='Base output directory')
 
     args = parser.parse_args()

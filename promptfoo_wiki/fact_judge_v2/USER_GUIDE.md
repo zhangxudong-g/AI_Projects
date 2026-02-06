@@ -1,4 +1,4 @@
-# Engineering Explanation Judge 项目用户使用文档
+# Engineering Judge v2 项目用户使用文档
 
 ## 快速入门
 
@@ -6,20 +6,21 @@
 
 ## 项目概述
 
-Engineering Explanation Judge 是一个基于 promptfoo 框架构建的工程解释安全判断系统，专门用于评估代码解释性文档（如Wiki）的安全性和合理性。该系统通过多阶段评估流程，自动化地判断生成的代码解释文档是否安全可靠，不会误导工程师做出错误的修改决策。
+Engineering Judge v2 是一个基于 promptfoo 框架构建的工程导向Wiki质量评估系统，专门用于评估代码解释性文档（如Wiki）的工程价值和风险。该系统通过多阶段评估流程，自动化地判断生成的代码解释文档是否提供了有价值的工程见解，同时保持合理的准确性。
 
 ### 重构背景
 
-与传统的 Fact Judge 系统不同，Engineering Explanation Judge 专注于评估解释性文档的安全性，而非严格的事实一致性。其设计目标是判断"这种解释，会不会误导工程师做出错误修改？"，而不是"这是不是 100% 事实？"。
+与传统的 Fact Judge 系统不同，Engineering Judge v2 专注于评估解释性文档的工程价值，而非严格的事实一致性。其设计目标是判断"这份文档是否提供了有价值的工程见解，同时保持合理的准确性？"，而不是"是否100%覆盖了代码中的每一个元素？"。
 
 ### 核心功能
 
-Engineering Explanation Judge 系统采用三阶段评估流程：
+Engineering Judge v2 系统采用四阶段评估流程：
 
 0. **前置阶段（Pre-fact Extraction）**：从源代码中提取工程级锚点和事实，包括类、函数、方法、表等关键信息，为后续评估提供上下文。
-1. **第一阶段（Fact Extraction）**：从源代码和生成的Wiki文档中提取具体的事实信息。
-2. **第二阶段（Engineering Explanation Judge）**：基于提取的事实进行工程解释安全判断，评估解释的合理性、工程风险、边界遵循和实用性。
-3. **第三阶段（Risk-aware Scoring）**：根据风险感知进行评分，得出最终的分数和PASS/FAIL判定。
+1. **第一阶段（Structural Coverage Judge）**：判断 Wiki 是否"严重脱离代码结构"，评估核心工程角色的覆盖情况。
+2. **第一阶段半（Explanation Alignment Judge）**：判断 Wiki 的解释是否来自代码、合理抽象、没有编造不存在的机制。
+3. **第二阶段（Engineering Judge v2）**：评估理解支持、工程实用性、解释合理性、抽象质量和伪造风险。
+4. **第三阶段（Scoring v2）**：基于工程价值进行评分，采用风险扣分机制而非硬性FAIL。
 
 ### 系统流程图
 
@@ -28,18 +29,21 @@ graph TD
     A[开始] --> B[输入: 源代码和Wiki文档]
     B --> C[Stage 0: 前置提取事实（工程wiki级别）]
     C --> D[提取工程级锚点和事实，为后续评估提供上下文]
-    D --> E[Stage 1: 事实提取]
-    E --> F[提取基础事实信息]
-    F --> G[Stage 2: 工程解释安全判断]
-    G --> H[评估解释合理性、工程风险、边界遵循、实用性<br/>INTERPRETATION REASONABLENESS<br/>ENGINEERING RISK LEVEL<br/>BOUNDARY ADHERENCE<br/>USEFULNESS_LEVEL]
-    H --> I[Stage 3: 风险感知评分]
-    I --> J[基于风险的PASS/FAIL判定<br/>FAIL if: risk=HIGH OR boundary=BAD]
-    J --> K[输出: 评估结果]
+    D --> E[Stage 1: 结构覆盖判断]
+    E --> F[判断Wiki是否严重脱离代码结构，评估核心工程角色覆盖]
+    F --> G[Stage 1.5: 解释对齐判断]
+    G --> H[判断解释是否来自代码、合理抽象、无编造]
+    H --> I[Stage 2: 工程判断v2]
+    I --> J[评估理解支持、工程实用性、解释合理性、抽象质量、伪造风险<br/>COMPREHENSION_SUPPORT<br/>ENGINEERING_USEFULNESS<br/>EXPLANATION_REASONABLENESS<br/>ABSTRACTION_QUALITY<br/>FABRICATION_RISK]
+    J --> K[Stage 3: 工程价值评分]
+    K --> L[基于工程价值的PASS/FAIL判定<br/>FAIL if: high risk AND low reasonableness]
+    L --> M[输出: 评估结果]
 
-    C -.-> L[prepare_engineering_facts函数]
-    E -.-> M[stage1_fact_extractor.yaml]
-    G -.-> N[stage2_explanatory_judge.yaml]
-    I -.-> O[stage3_score.py]
+    C -.-> N[prepare_engineering_facts函数]
+    E -.-> O[stage1_fact_extractor.yaml]
+    G -.-> P[stage1_5_explanation_alignment.yaml]
+    I -.-> Q[stage2_explanatory_judge.yaml]
+    K -.-> R[stage3_score.py]
 
 ```
 
@@ -48,13 +52,15 @@ graph TD
 1. **开始** → **输入**: 接收源代码和Wiki文档作为输入
 2. **输入** → **Stage 0**: 执行前置提取事实阶段（工程wiki级别），使用prepare_engineering_facts函数
 3. **Stage 0** → **提取工程信息**: 提取工程级锚点和事实，为后续评估提供上下文
-4. **提取工程信息** → **Stage 1**: 执行事实提取阶段，使用stage1_fact_extractor.yaml配置文件
-5. **Stage 1** → **提取事实**: 从源代码和文档中提取基础事实信息
-6. **提取事实** → **Stage 2**: 执行工程解释安全判断，使用stage2_explanatory_judge.yaml配置文件
-7. **Stage 2** → **评估质量**: 评估解释合理性、工程风险、边界遵循和实用性
-8. **评估质量** → **Stage 3**: 执行风险感知评分，使用stage3_score.py脚本
-9. **Stage 3** → **计算分数**: 基于风险的PASS/FAIL判定（高风险或边界违反则FAIL）
-10. **计算分数** → **输出**: 输出评估结果
+4. **提取工程信息** → **Stage 1**: 执行结构覆盖判断，使用stage1_fact_extractor.yaml配置文件
+5. **Stage 1** → **判断覆盖**: 判断Wiki是否严重脱离代码结构，评估核心工程角色覆盖
+6. **判断覆盖** → **Stage 1.5**: 执行解释对齐判断，使用stage1_5_explanation_alignment.yaml配置文件
+7. **Stage 1.5** → **判断对齐**: 判断解释是否来自代码、合理抽象、无编造
+8. **判断对齐** → **Stage 2**: 执行工程判断v2，使用stage2_explanatory_judge.yaml配置文件
+9. **Stage 2** → **评估质量**: 评估理解支持、工程实用性、解释合理性、抽象质量和伪造风险
+10. **评估质量** → **Stage 3**: 执行工程价值评分，使用stage3_score.py脚本
+11. **Stage 3** → **计算分数**: 基于工程价值的PASS/FAIL判定（高风险且解释不合理则FAIL）
+12. **计算分数** → **输出**: 输出评估结果
 
 ### 技术架构
 
@@ -134,11 +140,12 @@ result = run_single_case(
 )
 ```
 
-此脚本会依次执行三个阶段：
+此脚本会依次执行四个阶段：
 0. 运行前置提取事实（prepare_engineering_facts函数）
-1. 运行事实提取器（stage1_fact_extractor.yaml）
-2. 运行工程解释安全判断器（stage2_explanatory_judge.yaml）
-3. 计算风险感知得分（stage3_score.py）
+1. 运行结构覆盖判断器（stage1_fact_extractor.yaml）
+2. 运行解释对齐判断器（stage1_5_explanation_alignment.yaml）
+3. 运行工程判断器v2（stage2_explanatory_judge.yaml）
+4. 计算工程价值得分（stage3_score.py）
 
 ### 批量案例运行
 
@@ -192,26 +199,38 @@ cases:
 
 - 使用指定的大语言模型（默认为 ollama:gpt-oss:120b）
 - 定义了详细的提示词，指导模型提取覆盖率、正确性、幻觉和有用性方面的事实
-- 输出JSON格式的结果，包含缺失项、错误匹配项、幻觉项等信息
+- 输出JSON格式的结果，评估结构覆盖情况
+
+### stage1_5_explanation_alignment.yaml
+
+第一阶段半配置文件，进行解释对齐判断：
+
+- 评估解释对齐（EXPLANATION_ALIGNMENT）：Wiki的解释是否来自代码
+- 评估合理抽象（REASONABLE_ABSTRACTIONS）：是否进行了合理的抽象
+- 评估伪造风险（FABRICATION_RISK）：是否存在编造不存在的元素
+- 识别可接受的抽象（ACCEPTABLE_ABSTRACTIONS）：列出合理的抽象方式
+- 识别可疑声明（SUSPECT_CLAIMS）：列出可能有问题的声明
+- 输出JSON格式的评估结果
 
 ### stage2_explanatory_judge.yaml
 
-第二阶段配置文件，基于提取的事实进行工程解释安全判断：
+第二阶段配置文件，进行工程判断v2：
 
-- 评估解释的合理性（INTERPRETATION REASONABLENESS）：解释是否合理，是否可从源码中推断
-- 评估工程风险等级（ENGINEERING RISK LEVEL）：是否可能导致错误的工程决策（核心维度）
-- 评估边界遵循（BOUNDARY ADHERENCE）：是否遵守层级与职责边界
-- 评估实用性（USEFULNESS）：是否真正帮助工程师理解代码
-- 定义了FAIL条件：当工程风险等级为HIGH或边界遵循为BAD时，直接判定为FAIL
+- 评估理解支持（COMPREHENSION_SUPPORT）：是否帮助新接手开发者建立认知模型
+- 评估工程实用性（ENGINEERING_USEFULNESS）：是否提供实用的工程价值
+- 评估解释合理性（EXPLANATION_REASONABLENESS）：抽象和解释是否合理且基于代码
+- 评估抽象质量（ABSTRACTION_QUALITY）：抽象层级是否适当
+- 评估伪造风险（FABRICATION_RISK）：是否存在编造不存在的元素或行为
 - 输出JSON格式的评估结果
 
 ### stage3_score.py
 
-第三阶段评分脚本，根据风险感知进行评分：
+第三阶段评分脚本，根据工程价值进行评分：
 
-- 实现了风险感知评分算法
-- 当工程风险等级为HIGH或边界遵循为BAD时，直接判定为FAIL
-- 根据解释合理性、边界遵循和实用性等因素计算最终分数
+- 实现了工程价值评分算法
+- 仅在高风险且解释不合理的情况下判定为FAIL
+- 根据理解支持、工程实用性、解释合理性和抽象质量等因素计算基础分数
+- 根据伪造风险进行扣分
 - 判断结果是PASS还是FAIL
 
 ## 常见问题解答
@@ -222,12 +241,18 @@ A: 你可以在 `stage1_fact_extractor.yaml` 和 `stage2_explanatory_judge.yaml`
 
 ### Q2: 评估结果中的分数是如何计算的？
 
-A: 最终分数由 `stage3_score.py` 中的风险感知评分算法计算得出，主要考虑以下几个方面：
-- 当工程风险等级为HIGH或边界遵循为BAD时，直接判定为FAIL，分数为0
-- 对于其他情况，分数基于以下因素计算：
-  - 实用性（满分40分）
-  - 解释合理性（满分30分）
-  - 边界遵循（满分30分）
+A: 最终分数由 `stage3_score.py` 中的工程价值评分算法计算得出，主要考虑以下几个方面：
+- 基础分数由以下因素构成：
+  - 理解支持（comprehension_support）
+  - 工程实用性（engineering_usefulness）
+  - 解释合理性（explanation_reasonableness）
+  - 抽象质量（abstraction_quality）
+- 风险扣分机制：
+  - 伪造风险为HIGH时，扣除40分
+  - 伪造风险为MEDIUM时，扣除20分
+  - 伪造风险为LOW时，不扣分
+- FAIL条件：
+  - 仅在伪造风险为HIGH且解释合理性为LOW时，才判定为FAIL
 
 最终分数范围在0-100之间。
 
@@ -374,7 +399,7 @@ python run_multi_cases.py --cases-yaml my_cases.yaml --base-output my_output
 
 ## 总结
 
-Engineering Explanation Judge 是一个强大的自动化文档质量评估工具，通过多阶段评估流程能够全面评估代码解释性文档的安全性和合理性。与传统的事实一致性评估不同，本系统专注于判断解释性文档是否会误导工程师做出错误的修改决策。通过本指南，你应该已经了解了如何安装、配置和使用该系统，以及如何根据需要自定义评估标准。
+Engineering Judge v2 是一个强大的自动化文档质量评估工具，通过多阶段评估流程能够全面评估代码解释性文档的工程价值和风险。与传统的事实一致性评估不同，本系统专注于判断解释性文档是否提供了有价值的工程见解，同时保持合理的准确性。通过本指南，你应该已经了解了如何安装、配置和使用该系统，以及如何根据需要自定义评估标准。
 
 新增的前置提取事实功能（工程wiki级别）能够对整个工程项目进行高层次的分析，提取项目结构、模块关系、依赖关系等关键信息，为后续的详细评估提供丰富的上下文。
 

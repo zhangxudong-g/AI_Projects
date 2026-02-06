@@ -1,0 +1,123 @@
+# 特殊字符和语言边界测试用例
+
+## 测试1: 特殊字符测试
+**文件**: special_chars_test.java
+```java
+public class SpecialCharsTest {
+    // 包含中文、日文、特殊符号的类
+    public String testSpecialChars() {
+        String chinese = "测试";
+        String japanese = "テスト";
+        String symbols = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
+        return chinese + japanese + symbols;
+    }
+    
+    // 包含表情符号和Unicode字符
+    public void testUnicode() {
+        String emoji = "😀🎉🚀";
+        String unicode = "α β γ δ ε";
+    }
+}
+```
+
+**文件**: special_chars_wiki.md
+```markdown
+# 特殊字符测试类
+
+这个类测试了各种特殊字符的处理。
+
+## 方法
+
+- `testSpecialChars()`: 测试中文、日文和符号
+- `testUnicode()`: 测试表情符号和Unicode字符
+
+## 注意事项
+
+- 确保所有字符都能正确显示
+- 遾免字符编码问题
+```
+
+---
+
+## 测试2: 不支持的语言测试
+**文件**: unsupported_lang_test.xyz
+```xyz
+THIS IS NOT A SUPPORTED LANGUAGE
+THIS FILE SHOULD CAUSE ISSUES
+IF THE SYSTEM HANDLES IT GRACEFULLY
+IT'S WORKING CORRECTLY
+```
+
+**文件**: unsupported_lang_wiki.md
+```markdown
+# Unsupported Language Test
+
+This tests how the system handles unsupported languages.
+```
+
+---
+
+## 测试3: 混合语言代码
+**文件**: mixed_lang_test.java
+```java
+// This is a mixed language file
+public class MixedLanguage {
+    // 这是一个混合语言类
+    public void englishMethod() {
+        // This method is in English
+    }
+    
+    public void 中文方法() {
+        // 这个方法是中文的
+    }
+    
+    public void méthodeFrançaise() {
+        // Cette méthode est en français
+    }
+}
+```
+
+**文件**: mixed_lang_wiki.md
+```markdown
+# 混合语言类文档
+
+## 功能
+
+这个类展示了混合语言的使用。
+
+## 方法
+
+- `englishMethod()`: 英文方法
+- `中文方法()`: 中文方法  
+- `méthodeFrançaise()`: 法文方法
+```
+
+---
+
+## 测试4: 语法错误代码
+**文件**: invalid_syntax_test.java
+```java
+public class InvalidSyntax {
+    // This has intentional syntax errors
+    public void unclosedMethod() {
+        System.out.println("Unclosed method
+        // Missing closing quote and parenthesis
+        
+    int incompleteVariable = ;  // Missing value
+    
+    // Unclosed block
+    if (true) {
+        System.out.println("Unclosed if");
+    // Missing closing brace
+    
+    // Invalid operator
+    int result = 5 =+ 3;  // Invalid operator combination
+}
+```
+
+**文件**: invalid_syntax_wiki.md
+```markdown
+# Invalid Syntax Test
+
+This wiki documents code with invalid syntax.
+```

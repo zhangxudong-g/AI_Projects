@@ -1,0 +1,1 @@
+public class SingleLineTest { public void method() {} }

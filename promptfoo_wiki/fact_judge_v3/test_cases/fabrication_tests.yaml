@@ -1,0 +1,103 @@
+# 伪造内容测试用例
+
+## 测试1: 编造不存在的函数/方法
+**文件**: fake_methods_test.java
+```java
+public class FakeMethodsTest {
+    public void realMethod() {
+        // This is a real method
+    }
+}
+```
+
+**文件**: fake_methods_wiki.md
+```markdown
+# Fake Methods Test
+
+This class contains several important methods:
+
+- `realMethod()`: A real method that does real things
+- `imaginaryMethod()`: A method that processes imaginary data
+- `fantasyFunction()`: A function that performs fantasy operations
+- `nonexistentRoutine()`: A routine that handles nonexistent data
+```
+
+---
+
+## 测试2: 编造不存在的业务逻辑
+**文件**: fake_business_logic.java
+```java
+public class SimpleCalculator {
+    public int add(int a, int b) {
+        return a + b;
+    }
+}
+```
+
+**文件**: fake_business_logic_wiki.md
+```markdown
+# Simple Calculator
+
+This calculator implements complex business logic for financial transactions.
+
+## Business Context
+
+The calculator is part of a critical financial system that handles millions of dollars daily. It must comply with international banking regulations and undergo regular audits.
+
+## Security Features
+
+- Encrypted computation
+- Transaction logging
+- Audit trail generation
+- Compliance checking
+
+## Performance Characteristics
+
+- Sub-millisecond response times
+- Handles 100k+ operations per second
+- Zero-downtime deployment
+```
+
+---
+
+## 测试3: 夸大代码功能
+**文件**: exaggerated_features.java
+```java
+public class SimpleClass {
+    private String value;
+    
+    public String getValue() {
+        return value;
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
+    }
+}
+```
+
+**文件**: exaggerated_features_wiki.md
+```markdown
+# Advanced Data Processing Framework
+
+This class implements a sophisticated data processing framework with cutting-edge technology.
+
+## Core Capabilities
+
+- AI-powered data transformation
+- Blockchain-based validation
+- Quantum-resistant encryption
+- Real-time analytics engine
+- Machine learning optimization
+- Cloud-native architecture
+- Microservices orchestration
+- Containerized deployment
+
+## Technical Specifications
+
+- Supports 100+ data formats
+- Integrates with 50+ external systems
+- Processes petabytes of data
+- Sub-nanosecond precision
+- 99.999% uptime guarantee
+```

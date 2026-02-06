@@ -1,8 +1,8 @@
-# Engineering Explanation Judge 高级功能指南
+# Engineering Judge v2 高级功能指南
 
 ## 概述
 
-本指南介绍Engineering Explanation Judge系统的高级功能，包括自定义配置、扩展选项和最佳实践。这些功能可以帮助您根据特定需求定制评估系统。
+本指南介绍Engineering Judge v2系统的高级功能，包括自定义配置、扩展选项和最佳实践。这些功能可以帮助您根据特定需求定制评估系统。
 
 ## 前置提取事实（工程wiki级别）
 
@@ -38,16 +38,17 @@ extraction_settings:
   identify_patterns: true         # 是否识别设计模式
 ```
 
-## 工程解释安全判断高级功能
+## 工程判断v2高级功能
 
 ### 功能概述
 
-工程解释安全判断（Engineering Explanation Judge）是Fact Judge系统的一个重要扩展，专门用于评估解释性文档的安全性，而非严格的事实一致性。该功能能够：
+工程判断v2（Engineering Judge v2）是Fact Judge系统的一个重要扩展，专门用于评估解释性文档的工程价值，而非严格的事实一致性。该功能能够：
 
-- 评估解释的合理性（Interpretation Reasonableness）
-- 评估工程风险等级（Engineering Risk Level）- 核心维度
-- 评估边界遵循（Boundary Adherence）- 层级与职责边界的区分
-- 评估实用性（Usefulness）- 是否真正帮助工程师理解代码
+- 评估理解支持（Comprehension Support）- 是否帮助新接手开发者建立认知模型
+- 评估工程实用性（Engineering Usefulness）- 是否提供实用的工程价值
+- 评估解释合理性（Explanation Reasonableness）- 抽象和解释是否合理且基于代码
+- 评估抽象质量（Abstraction Quality）- 抽象层级是否适当
+- 评估伪造风险（Fabrication Risk）- 是否存在编造不存在的元素或行为
 
 ### 配置选项
 
@@ -73,12 +74,11 @@ tests:
 
 ### FAIL 条件配置
 
-系统有明确的 FAIL 判定规则：
+系统有明确的 FAIL 判定规则（极小化）：
 
-- 当 engineering_risk_level == "HIGH" 时，直接 FAIL
-- 当 boundary_adherence == "BAD" 时，直接 FAIL
+- 仅当 fabrication_risk == "HIGH" 且 explanation_reasonableness == "LOW" 时，才会 FAIL
 
-这些条件确保了即使其他指标得分较高，高风险或边界违反的情况仍会被标记为 FAIL。
+这与之前的硬性FAIL不同，现在采用风险扣分机制，工程价值可以抵消中等风险。
 
 ### 使用高级选项
 
@@ -240,11 +240,11 @@ class CustomFactExtractor:
 - 监控资源使用情况
 - 调整分析深度以平衡准确性和性能
 
-## 风险感知评分高级功能
+## 工程价值评分高级功能
 
 ### 功能概述
 
-风险感知评分（Risk-aware Scoring）是第三阶段的核心功能，它根据工程解释安全判断的结果进行评分，重点关注风险因素而非传统的事实一致性。
+工程价值评分（Engineering Value Scoring）是第三阶段的核心功能，它根据工程判断v2的结果进行评分，重点关注工程价值而非传统的事实一致性。
 
 ### 配置选项
 
@@ -269,19 +269,23 @@ def final_score(stage2: Dict[str, Any]) -> Dict[str, Any]:
 
 系统采用加权评分机制：
 
-- 实用性（usefulness）：满分 40 分
-- 解释合理性（interpretation_reasonableness）：满分 30 分
-- 边界遵循（boundary_adherence）：满分 30 分
+- 理解支持（comprehension_support）：根据评级映射
+- 工程实用性（engineering_usefulness）：根据评级映射
+- 解释合理性（explanation_reasonableness）：根据评级映射
+- 抽象质量（abstraction_quality）：根据评级映射
 - 总分：100 分
 
 ### FAIL 条件配置
 
-与传统的评分系统不同，风险感知评分有明确的硬性FAIL条件：
+与传统的评分系统不同，工程价值评分采用软风险加权机制：
 
-- 当工程风险等级为HIGH时，直接FAIL
-- 当边界遵循为BAD时，直接FAIL
+- 仅当伪造风险为HIGH且解释合理性为LOW时，才会FAIL
+- 其他情况采用风险扣分机制：
+  - 伪造风险为HIGH时，扣除40分
+  - 伪造风险为MEDIUM时，扣除20分
+  - 伪造风险为LOW时，不扣分
 
-这些条件优先于分数计算，确保高风险内容被正确标记。
+这体现了"工程价值可以抵消中等风险"的原则。
 
 ## 结果可视化高级功能
 
@@ -324,14 +328,15 @@ def customize_output_format(case_results, cases_config, base_output: str = "outp
 ```python
 # 在format_results_with_llm函数中
 # 从details中提取各个字段
-interpretation_reasonableness = details_obj.get('interpretation_reasonableness', 'N/A')
-engineering_risk_level = details_obj.get('engineering_risk_level', 'N/A')
-boundary_adherence = details_obj.get('boundary_adherence', 'N/A')
-usefulness_level = details_obj.get('usefulness_level', 'N/A')
+comprehension_support = details_obj.get('comprehension_support', 'N/A')
+engineering_usefulness = details_obj.get('engineering_usefulness', 'N/A')
+explanation_reasonableness = details_obj.get('explanation_reasonableness', 'N/A')
+abstraction_quality = details_obj.get('abstraction_quality', 'N/A')
+fabrication_risk = details_obj.get('fabrication_risk', 'N/A')
 # ... 其他字段
 
 # 可以选择性地包含在flat_details中
-flat_details = f"Summary: {summary}<br/>Interpretation Reasonableness: {interpretation_reasonableness}<br/>Engineering Risk Level: {engineering_risk_level}<br/>Boundary Adherence: {boundary_adherence}<br/>Usefulness: {usefulness_level}"
+flat_details = f"Summary: {summary}<br/>Comprehension Support: {comprehension_support}<br/>Engineering Usefulness: {engineering_usefulness}<br/>Explanation Reasonableness: {explanation_reasonableness}<br/>Abstraction Quality: {abstraction_quality}<br/>Fabrication Risk: {fabrication_risk}"
 ```
 
 #### 自定义样式
@@ -351,14 +356,14 @@ details = f'<details><summary style="cursor: pointer; font-weight: bold;">{compa
 - **文件名**：输入源代码文件名
 - **结果**：PASS/FAIL状态
 - **分数**：最终得分
-- **详情**：包含Summary、解释合理性（Interpretation Reasonableness）、工程风险等级（Engineering Risk Level）、边界遵循（Boundary Adherence）和实用性（Usefulness Level）的可折叠详细信息
+- **详情**：包含Summary、理解支持（Comprehension Support）、工程实用性（Engineering Usefulness）、解释合理性（Explanation Reasonableness）、抽象质量（Abstraction Quality）和伪造风险（Fabrication Risk）的可折叠详细信息
 
 ### 与评估流程整合
 
 结果可视化功能无缝集成到批量评估流程中：
 
 1. **自动触发**：在`run_all_cases`函数执行完毕后自动调用
-2. **数据收集**：收集所有案例的`final_score.json`内容，包括解释合理性、工程风险等级、边界遵循和实用性等新维度
+2. **数据收集**：收集所有案例的`final_score.json`内容，包括理解支持、工程实用性、解释合理性、抽象质量和伪造风险等新维度
 3. **格式化输出**：将数据格式化为Markdown表格
 4. **文件生成**：生成带时间戳的Markdown文件
 
@@ -410,10 +415,10 @@ class CustomResultVisualizer:
 
 #### 结果分析策略
 
-1. **快速浏览**：使用表格快速定位高风险和边界违规案例
-2. **详细分析**：展开详情查看解释合理性、工程风险等级、边界遵循和实用性等具体评估信息
+1. **快速浏览**：使用表格快速定位高风险和低解释合理性案例
+2. **详细分析**：展开详情查看理解支持、工程实用性、解释合理性、抽象质量和伪造风险等具体评估信息
 3. **批量比较**：通过表格形式比较不同案例的表现
-4. **风险评估**：重点关注工程风险等级和边界遵循指标
+4. **工程价值评估**：重点关注理解支持和工程实用性指标
 
 #### 报告生成
 

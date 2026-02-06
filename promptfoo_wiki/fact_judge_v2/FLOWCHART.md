@@ -1,4 +1,4 @@
-# Engineering Explanation Judge 系统流程图
+# Engineering Judge v2 系统流程图
 
 ## 整体架构流程
 
@@ -7,34 +7,38 @@ graph TD
     A[开始] --> B[输入: 源代码和Wiki文档]
     B --> C[Stage 0: 前置提取事实（工程wiki级别）]
     C --> D[提取工程级锚点和事实，为后续评估提供上下文]
-    D --> E[Stage 1: 事实提取]
-    E --> F[提取基础事实信息]
-    F --> G[Stage 2: 工程解释安全判断]
-    G --> H[评估解释合理性、工程风险、边界遵循、实用性<br/>INTERPRETATION REASONABLENESS<br/>ENGINEERING RISK LEVEL<br/>BOUNDARY ADHERENCE<br/>USEFULNESS_LEVEL]
-    H --> I[Stage 3: 风险感知评分]
-    I --> J[基于风险的PASS/FAIL判定<br/>FAIL if: risk=HIGH OR boundary=BAD]
-    J --> K[输出: 评估结果]
+    D --> E[Stage 1: 结构覆盖判断]
+    E --> F[判断Wiki是否严重脱离代码结构，评估核心工程角色覆盖]
+    F --> G[Stage 1.5: 解释对齐判断]
+    G --> H[判断解释是否来自代码、合理抽象、无编造]
+    H --> I[Stage 2: 工程判断v2]
+    I --> J[评估理解支持、工程实用性、解释合理性、抽象质量、伪造风险<br/>COMPREHENSION_SUPPORT<br/>ENGINEERING_USEFULNESS<br/>EXPLANATION_REASONABLENESS<br/>ABSTRACTION_QUALITY<br/>FABRICATION_RISK]
+    J --> K[Stage 3: 工程价值评分]
+    K --> L[基于工程价值的PASS/FAIL判定<br/>FAIL if: high risk AND low reasonableness]
+    L --> M[输出: 评估结果]
 
-    C -.-> L[prepare_engineering_facts.py]
-    E -.-> M[stage1_fact_extractor.yaml]
-    G -.-> N[stage2_explanatory_judge.yaml]
-    I -.-> O[stage3_score.py]
-
-
+    C -.-> N[prepare_engineering_facts.py]
+    E -.-> O[stage1_fact_extractor.yaml]
+    G -.-> P[stage1_5_explanation_alignment.yaml]
+    I -.-> Q[stage2_explanatory_judge.yaml]
+    K -.-> R[stage3_score.py]
 ```
+
 
 ### 文本流程说明
 
 1. **开始** → **输入**: 接收源代码和Wiki文档作为输入
 2. **输入** → **Stage 0**: 执行前置提取事实阶段（工程wiki级别），使用prepare_engineering_facts.py
 3. **Stage 0** → **提取工程信息**: 提取工程级锚点和事实，为后续评估提供上下文
-4. **提取工程信息** → **Stage 1**: 执行事实提取阶段，使用stage1_fact_extractor.yaml
-5. **Stage 1** → **提取事实**: 从源代码和文档中提取基础事实信息
-6. **提取事实** → **Stage 2**: 执行工程解释安全判断，使用stage2_explanatory_judge.yaml
-7. **Stage 2** → **评估质量**: 评估解释合理性、工程风险、边界遵循和实用性
-8. **评估质量** → **Stage 3**: 执行风险感知评分，使用stage3_score.py
-9. **Stage 3** → **计算分数**: 基于风险的PASS/FAIL判定（高风险或边界违反则FAIL）
-10. **计算分数** → **输出**: 输出评估结果
+4. **提取工程信息** → **Stage 1**: 执行结构覆盖判断，使用stage1_fact_extractor.yaml
+5. **Stage 1** → **判断覆盖**: 判断Wiki是否严重脱离代码结构，评估核心工程角色覆盖
+6. **判断覆盖** → **Stage 1.5**: 执行解释对齐判断，使用stage1_5_explanation_alignment.yaml
+7. **Stage 1.5** → **判断对齐**: 判断解释是否来自代码、合理抽象、无编造
+8. **判断对齐** → **Stage 2**: 执行工程判断v2，使用stage2_explanatory_judge.yaml
+9. **Stage 2** → **评估质量**: 评估理解支持、工程实用性、解释合理性、抽象质量和伪造风险
+10. **评估质量** → **Stage 3**: 执行工程价值评分，使用stage3_score.py
+11. **Stage 3** → **计算分数**: 基于工程价值的PASS/FAIL判定（高风险且解释不合理则FAIL）
+12. **计算分数** → **输出**: 输出评估结果
 
 ## 详细组件交互图
 
@@ -50,21 +54,27 @@ graph TB
         A4[提取工程级锚点和事实]
     end
 
-    subgraph "Stage 1: 事实提取"
+    subgraph "Stage 1: 结构覆盖判断"
         B1[stage1_fact_extractor.yaml]
         B2[promptfoo eval]
         B3[extract.py - 提取JSON]
     end
 
-    subgraph "Stage 2: 工程解释安全判断"
+    subgraph "Stage 1.5: 解释对齐判断"
+        B4[stage1_5_explanation_alignment.yaml]
+        B5[promptfoo eval]
+        B6[extract.py - 提取JSON]
+    end
+
+    subgraph "Stage 2: 工程判断v2"
         C1[stage2_explanatory_judge.yaml]
         C2[promptfoo eval]
         C3[extract.py - 提取JSON]
     end
 
-    subgraph "Stage 3: 风险感知评分"
+    subgraph "Stage 3: 工程价值评分"
         D1[stage3_score.py]
-        D2[风险感知评分算法]
+        D2[工程价值评分算法]
     end
 
     subgraph "输出层"
@@ -76,9 +86,13 @@ graph TB
     A1 --> A3
     A2 --> A3
     A3 --> B1
+    A3 --> B4  # Stage 0 同时提供给 Stage 1 和 Stage 1.5
     B1 --> B2
     B2 --> B3
-    B3 --> C1
+    B4 --> B5
+    B5 --> B6
+    B3 --> C1  # Stage 1 结果传递给 Stage 2
+    B6 --> C1  # Stage 1.5 结果传递给 Stage 2
     C1 --> C2
     C2 --> C3
     C3 --> D1
@@ -86,17 +100,16 @@ graph TB
     D2 --> E1
     D2 --> E2
     D2 --> E3
-
-
 ```
 
 ### 组件交互文本说明
 
 - **输入层**: 提供源代码文件和Wiki文档
 - **Stage 0**: 使用prepare_engineering_facts.py脚本，提取工程级锚点和事实，为后续评估提供上下文
-- **Stage 1**: 使用stage1_fact_extractor.yaml配置文件，通过promptfoo eval执行事实提取，然后使用extract.py提取JSON格式结果
-- **Stage 2**: 使用stage2_explanatory_judge.yaml配置文件，接收Stage 1的JSON结果，通过promptfoo eval执行工程解释安全判断，再使用extract.py提取JSON格式结果
-- **Stage 3**: 使用stage3_score.py脚本，接收Stage 2的JSON结果，通过风险感知评分算法计算最终结果
+- **Stage 1**: 使用stage1_fact_extractor.yaml配置文件，通过promptfoo eval执行结构覆盖判断，然后使用extract.py提取JSON格式结果
+- **Stage 1.5**: 使用stage1_5_explanation_alignment.yaml配置文件，通过promptfoo eval执行解释对齐判断，再使用extract.py提取JSON格式结果
+- **Stage 2**: 使用stage2_explanatory_judge.yaml配置文件，接收Stage 1和Stage 1.5的JSON结果，通过promptfoo eval执行工程判断v2，再使用extract.py提取JSON格式结果
+- **Stage 3**: 使用stage3_score.py脚本，接收Stage 2的JSON结果，通过工程价值评分算法计算最终结果
 - **输出层**: 生成评估结果、最终分数和PASS/FAIL判定
 
 ## 脚本执行流程
@@ -107,20 +120,23 @@ sequenceDiagram
     participant run_multi_cases as run_multi_cases.py
     participant run_single_case as run_single_case_pipeline.py
     participant stage0 as Stage 0 (Pre-fact Extraction)
-    participant stage1 as Stage 1 (Fact Extractor)
-    participant stage2 as Stage 2 (Engineering Explanation Judge)
-    participant stage3 as Stage 3 (Risk-aware Scoring)
+    participant stage1 as Stage 1 (Structural Coverage Judge)
+    participant stage1_5 as Stage 1.5 (Explanation Alignment Judge)
+    participant stage2 as Stage 2 (Engineering Judge v2)
+    participant stage3 as Stage 3 (Engineering Value Scoring)
     participant formatter as 结果格式化器
 
     User->>run_multi_cases: 执行批量评估
     run_multi_cases->>run_single_case: 处理单个案例
     run_single_case->>stage0: 执行前置事实提取
     stage0-->>run_single_case: 返回工程事实
-    run_single_case->>stage1: 执行事实提取
-    stage1-->>run_single_case: 返回提取结果
-    run_single_case->>stage2: 执行工程解释安全判断
+    run_single_case->>stage1: 执行结构覆盖判断
+    stage1-->>run_single_case: 返回覆盖判断结果
+    run_single_case->>stage1_5: 执行解释对齐判断
+    stage1_5-->>run_single_case: 返回对齐判断结果
+    run_single_case->>stage2: 执行工程判断v2
     stage2-->>run_single_case: 返回判断结果
-    run_single_case->>stage3: 执行风险感知评分
+    run_single_case->>stage3: 执行工程价值评分
     stage3-->>run_single_case: 返回最终结果
     run_single_case-->>run_multi_cases: 返回案例结果
     run_multi_cases->>formatter: 格式化结果为Markdown表格
@@ -135,9 +151,10 @@ sequenceDiagram
 3. 对于每个案例，调用run_single_case_pipeline.py脚本处理单个案例
 4. run_single_case_pipeline.py脚本依次执行：
    - 调用Stage 0 (Pre-fact Extraction) 进行前置事实提取
-   - 接收Stage 0返回结果后，调用Stage 1 (Fact Extractor) 进行事实提取
-   - 接收Stage 1返回结果后，调用Stage 2 (Engineering Explanation Judge) 进行工程解释安全判断
-   - 接收Stage 2返回结果后，调用Stage 3 (Risk-aware Scoring) 进行风险感知评分
+   - 接收Stage 0返回结果后，调用Stage 1 (Structural Coverage Judge) 进行结构覆盖判断
+   - 接收Stage 1返回结果后，调用Stage 1.5 (Explanation Alignment Judge) 进行解释对齐判断
+   - 接收Stage 1.5返回结果后，调用Stage 2 (Engineering Judge v2) 进行工程判断
+   - 接收Stage 2返回结果后，调用Stage 3 (Engineering Value Scoring) 进行工程价值评分
 5. run_single_case_pipeline.py将最终结果返回给run_multi_cases.py
 6. run_multi_cases.py收集所有案例结果后，调用结果格式化器生成Markdown表格
 7. run_multi_cases.py返回所有案例结果和格式化的表格给用户
@@ -175,7 +192,7 @@ graph LR
     A[前置提取事实] --> B[项目结构分析]
     B --> C[模块关系提取]
     C --> D[上下文信息生成]
-    D --> E[传统三阶段评估]
+    D --> E[四阶段评估]
     E --> F[融合工程级上下文]
     F --> G[最终评估结果]
 
@@ -212,7 +229,7 @@ graph TD
     B --> C[收集所有案例结果]
     C --> D[读取每个案例的final_score.json]
     D --> E[提取关键信息]
-    E --> F[Summary<br/>Coverage Level<br/>Usefulness Level<br/>Correctness Level<br/>Hallucination Level<br/>Coverage Rate]
+    E --> F[Summary<br/>Comprehension Support<br/>Engineering Usefulness<br/>Explanation Reasonableness<br/>Abstraction Quality<br/>Fabrication Risk]
     F --> G[格式化为平铺显示]
     G --> H[生成可折叠HTML元素]
     H --> I[创建Markdown表格]

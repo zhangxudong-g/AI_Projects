@@ -1,0 +1,31 @@
+# 极简内容测试用例
+
+## 测试1: 单行代码 + 单行Wiki
+**文件**: single_line_test.java
+```java
+public class SingleLine { public void method() {} }
+```
+
+**文件**: single_line_wiki.md
+```markdown
+# Single Line Class
+
+This class has a method.
+```
+
+---
+
+## 测试2: 最小可行代码 + 最小可行Wiki
+**文件**: minimal_test.java
+```java
+class Minimal {
+    int x;
+}
+```
+
+**文件**: minimal_wiki.md
+```markdown
+# Minimal Class
+
+Has a field x.
+```

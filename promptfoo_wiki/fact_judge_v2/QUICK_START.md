@@ -1,8 +1,8 @@
-# Engineering Explanation Judge 快速入门指南
+# Engineering Judge v2 快速入门指南
 
 ## 概述
 
-Engineering Explanation Judge是一个基于promptfoo框架构建的工程解释安全判断系统，专门用于评估代码解释性文档（如Wiki）的安全性和合理性。本指南将帮助您快速安装、配置和运行Engineering Explanation Judge系统。
+Engineering Judge v2是一个基于promptfoo框架构建的工程导向Wiki质量评估系统，专门用于评估代码解释性文档（如Wiki）的工程价值和风险。本指南将帮助您快速安装、配置和运行Engineering Judge v2系统。
 
 ## 环境准备
 
