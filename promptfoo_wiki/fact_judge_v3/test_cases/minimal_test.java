@@ -1,3 +1,0 @@
-class MinimalTest {
-    int x;
-}
