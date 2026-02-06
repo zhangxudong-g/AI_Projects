@@ -1,0 +1,19 @@
+# engineering_judge_regression_case.yaml
+# 放在每个 case 目录下，例如：
+# data/engineering_judge_regression_cases_v2/AT_01_arch_fabrication/case.yaml
+
+files:
+  source: source.java    # 或 source.sql
+  wiki: wiki.md
+
+score_range:
+  - 0
+  - 20
+
+must:
+  explanation_reasonableness:
+    - LOW
+  fabrication_risk:
+    - HIGH
+
+result: PASS
