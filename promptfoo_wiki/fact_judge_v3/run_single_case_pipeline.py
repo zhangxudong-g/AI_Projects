@@ -1,4 +1,3 @@
-
 import subprocess
 import json
 from pathlib import Path
@@ -6,6 +5,52 @@ from pathlib import Path
 from stage0_pre_extractor import prepare_engineering_facts
 from stage3_score import final_score
 from utils import extract_llm_json
+
+ENGINEERING_ACTION_MAP = [
+    {
+        "min": 90,
+        "max": 100,
+        "label": "PRIMARY_REFERENCE",
+        "description": "可作为主要参考文档",
+        "action": "可直接用于理解、调试和修改代码",
+    },
+    {
+        "min": 70,
+        "max": 89,
+        "label": "SAFE_WITH_CAUTION",
+        "description": "可用于理解与修改，需关注风险点",
+        "action": "修改前需重点核对标注的风险或 TODO",
+    },
+    {
+        "min": 50,
+        "max": 69,
+        "label": "STRUCTURE_ONLY",
+        "description": "仅供理解结构，修改需对照源码",
+        "action": "不可仅依赖文档进行修改",
+    },
+    {
+        "min": 40,
+        "max": 49,
+        "label": "READ_ONLY_WARNING",
+        "description": "不建议用于修改",
+        "action": "仅用于初步了解，不可指导工程决策",
+    },
+    {
+        "min": 0,
+        "max": 39,
+        "label": "UNTRUSTWORTHY",
+        "description": "不可信",
+        "action": "不应作为任何工程依据",
+    },
+]
+
+
+def map_engineering_action(score: int) -> dict:
+    for rule in ENGINEERING_ACTION_MAP:
+        if rule["min"] <= score <= rule["max"]:
+            return rule
+    # fallback（理论上不会触发）
+    return ENGINEERING_ACTION_MAP[-1]
 
 
 # 统一的 shell 执行封装
@@ -143,11 +188,15 @@ def run_single_case(
     for k, v in vars_cfg.items():
         var_args_for_stage2.append(f"--var {k}=file://{v}")
     var_args_for_stage2.append(f"--var artifact_type={artifact_type}")
-    var_args_for_stage2.append(f"--var structural_coverage_results=file://{base_output}/{case_id}/stage1_result.json")
-    var_args_for_stage2.append(f"--var explanation_alignment_results=file://{base_output}/{case_id}/stage1_5_result.json")
+    var_args_for_stage2.append(
+        f"--var structural_coverage_results=file://{base_output}/{case_id}/stage1_result.json"
+    )
+    var_args_for_stage2.append(
+        f"--var explanation_alignment_results=file://{base_output}/{case_id}/stage1_5_result.json"
+    )
 
     # cfg = "stage2_explanatory_judge.yaml" # Engineering Judge v3
-    cfg = "stage2_explanatory_judge_v3.yaml" # Engineering Judge v3
+    cfg = "stage2_explanatory_judge_v3.yaml"  # Engineering Judge v3
     run(
         f"promptfoo eval --no-cache "
         f"--config {cfg} "
@@ -161,7 +210,14 @@ def run_single_case(
     stage2_data = extract_llm_json(stage2_out)
 
     final = final_score(stage2_data)
+    # 映射 engineering action
+    action = map_engineering_action(final["final_score"])
 
+    final["engineering_action"] = {
+        "level": action["label"],
+        "description": action["description"],
+        "recommended_action": action["action"],
+    }
     # 保存最终结果
     final_out.write_text(
         json.dumps(final, indent=2, ensure_ascii=False),
