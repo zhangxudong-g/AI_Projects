@@ -169,6 +169,34 @@ graph TD
 - explanation_alignment_results（Stage1.5输出）
 - artifact_type（代码类型，来自Stage 0）
 
+**Stage 2 输出格式**：
+```json
+{
+  "comprehension_support": "HIGH",
+  "engineering_usefulness": "MEDIUM",
+  "explanation_reasonableness": "HIGH",
+  "abstraction_quality": "GOOD",
+  "fabrication_risk": "LOW",
+  "fabrication_type": "NONE",
+  "summary": "文档提供了清晰的目的说明，但在工程实用性方面略显不足...",
+  "details": {
+    "specific_issues": [],
+    "strengths": ["comprehensive coverage of main functionality"],
+    "weaknesses": ["lacks detail on error handling"]
+  }
+}
+```
+
+**输出字段说明**：
+- **comprehension_support**: 理解支持度评级 (HIGH/MEDIUM/LOW)
+- **engineering_usefulness**: 工程实用性评级 (HIGH/MEDIUM/LOW)
+- **explanation_reasonableness**: 解释合理性评级 (HIGH/MEDIUM/LOW)
+- **abstraction_quality**: 抽象质量评级 (GOOD/OK/POOR)
+- **fabrication_risk**: 伪造风险评级 (LOW/MEDIUM/HIGH)
+- **fabrication_type**: 伪造类型 (NONE/ARCHITECTURAL/LOCAL/TERMINOLOGY)
+- **summary**: 评估摘要文本
+- **details**: 详细评估信息（可选）
+
 **评估维度详解**：
 
 ##### 2.1.1 理解支持 (Comprehension Support)
@@ -284,34 +312,6 @@ graph TD
   - `ARCHITECTURAL`: 架构级伪造
   - `LOCAL`: 局部伪造
   - `TERMINOLOGY`: 术语伪造
-
-**Stage 2 输出格式**：
-```json
-{
-  "comprehension_support": "HIGH",
-  "engineering_usefulness": "MEDIUM",
-  "explanation_reasonableness": "HIGH",
-  "abstraction_quality": "GOOD",
-  "fabrication_risk": "LOW",
-  "fabrication_type": "NONE",
-  "summary": "文档提供了清晰的目的说明，但在工程实用性方面略显不足...",
-  "details": {
-    "specific_issues": [],
-    "strengths": ["comprehensive coverage of main functionality"],
-    "weaknesses": ["lacks detail on error handling"]
-  }
-}
-```
-
-**输出字段说明**：
-- **comprehension_support**: 理解支持度评级 (HIGH/MEDIUM/LOW)
-- **engineering_usefulness**: 工程实用性评级 (HIGH/MEDIUM/LOW)
-- **explanation_reasonableness**: 解释合理性评级 (HIGH/MEDIUM/LOW)
-- **abstraction_quality**: 抽象质量评级 (GOOD/OK/POOR)
-- **fabrication_risk**: 伪造风险评级 (LOW/MEDIUM/HIGH)
-- **fabrication_type**: 伪造类型 (NONE/ARCHITECTURAL/LOCAL/TERMINOLOGY)
-- **summary**: 评估摘要文本
-- **details**: 详细评估信息（可选）
 
 #### Stage 3: 风险感知最终评分
 **功能定位**：
