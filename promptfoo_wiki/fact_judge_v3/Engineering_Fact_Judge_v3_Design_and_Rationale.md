@@ -139,6 +139,42 @@ The system may feel stricter than human reviewers who might accept reasonable-so
 
 The design represents a conscious decision to prioritize factual accuracy over other desirable qualities like helpfulness or comprehensiveness. This trade-off reflects the engineering principle that incorrect information is more harmful than incomplete information in technical contexts.
 
+## Engineering Judge v3.1 Important Updates (February 9, 2026)
+
+According to the DESIGN_v3.1.md document, the Engineering Judge v3 system has been upgraded to v3.1, with the following key improvements:
+
+### 1. New fabrication_type Field
+Added the `fabrication_type` field to Stage2 output to explicitly identify fabrication types:
+- `NONE`: No fabrication
+- `ARCHITECTURAL`: Introduction of architectures, responsibilities, or call relationships that don't exist in the source code
+- `LOCAL`: Local logic, field, or behavioral hallucinations
+- `TERMINOLOGY`: Fictional terms or concepts
+
+### 2. Mandatory Rules (Laws)
+#### Law 1: Architecture Fabrication Hard Override
+When `fabrication_type == "ARCHITECTURAL"`, force set:
+- `explanation_reasonableness = "LOW"`
+- `fabrication_risk = "HIGH"`
+
+#### Law 2: Abstraction Mismatch Score Cap
+When the following conditions are met, final score ≤ 50:
+- `explanation_reasonableness == "HIGH"`
+- `fabrication_risk == "LOW"`
+- `abstraction_quality` in ["OK", "POOR"]
+
+### 3. Stage2 Prompt Enhancement
+Added CRITICAL FABRICATION RULES with particular emphasis on:
+- Strict identification of architectural fabrications
+- Clear distinction of abstraction mismatches
+
+### 4. Engineering Action Recommendations
+The system now maps final scores to specific engineering action recommendations:
+- ≥ 90: Can be used as primary reference documentation
+- 70–89: Can be used for understanding and modification, but pay attention to risk points
+- 50–69: For understanding structure only, modifications require reference to source code
+- 40–49: Not recommended for modification
+- < 40: Untrustworthy
+
 ## Conclusion
 
 Engineering Fact Judge v3 serves as a critical quality gate in the evaluation pipeline, ensuring that generated engineering documentation remains grounded in source code reality. Through its focus on factual accuracy, comprehensive violation categories, and regression-driven design, it provides a reliable foundation for downstream evaluation stages while protecting against the propagation of fabricated or incorrect information that could mislead engineers.

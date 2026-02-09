@@ -195,6 +195,33 @@ cases:
 - `sqlparse`：用于SQL代码解析（可选）
 - `python-dotenv`：用于环境变量管理（可选）
 
+## 更新日志
+
+### 2026年2月9日更新
+
+今天对 Engineering Fact Judge v3 系统进行了重要更新，主要包括：
+
+#### 1. Engineering Judge v3.1 升级
+根据 DESIGN_v3.1.md 文档，实现了以下关键改进：
+
+- **新增 fabrication_type 字段**：在 Stage2 输出中添加了 `fabrication_type` 字段，用于明确标识伪造类型（NONE, ARCHITECTURAL, LOCAL, TERMINOLOGY）
+- **Architecture Fabrication 硬覆盖规则**：当 `fabrication_type == "ARCHITECTURAL"` 时，强制设置 `explanation_reasonableness = "LOW"` 和 `fabrication_risk = "HIGH"`
+- **Abstraction Mismatch 分数封顶**：当 `explanation_reasonableness == "HIGH"` 且 `fabrication_risk == "LOW"` 且 `abstraction_quality` 为 `"OK"` 或 `"POOR"` 时，将最终分数限制在 50 或以下
+- **更新 Stage2 Prompt**：添加了 CRITICAL FABRICATION RULES，强化对架构级伪造的识别
+
+#### 2. 结果报告增强
+- **工程操作建议显示**：在最终报告中添加了 `engineering_action` 信息，包括操作级别、描述和推荐操作
+- **更详细的评估维度**：在最终报告中显示所有评估维度的详细信息
+
+#### 3. 回归测试改进
+- **合并回归测试**：创建了 `run_both_regressions_standalone.py` 脚本，可以同时运行 positive 和 adversarial 回归测试
+- **修复变量传递问题**：解决了 `language` 参数被当作文件路径处理的问题
+- **改进编码处理**：在 subprocess 调用中添加了 `encoding='utf-8'` 以解决编码问题
+
+#### 4. 系统改进
+- **增强鲁棒性**：改进了文件路径处理逻辑，支持多种可能的文件名变体
+- **优化错误处理**：增强了错误处理和调试信息
+
 ## 开发者指南
 
 ### 扩展开发

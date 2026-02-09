@@ -299,7 +299,43 @@ final_score_value = clamp(score - risk_penalty, min_v=10, max_v=95)
 
 ---
 
-## 八、最终效果（你将得到什么）
+## 八、Engineering Judge v3.1 重要更新（2026年2月9日）
+
+根据 DESIGN_v3.1.md 文档，Engineering Judge v3 系统已升级至 v3.1，主要改进包括：
+
+### 1. 新增 fabrication_type 字段
+在 Stage2 输出中添加了 `fabrication_type` 字段，用于明确标识伪造类型：
+- `NONE`: 无伪造
+- `ARCHITECTURAL`: 引入源码中不存在的架构、职责、调用关系
+- `LOCAL`: 局部逻辑、字段、行为的脑补
+- `TERMINOLOGY`: 虚构术语、概念名
+
+### 2. 强制规则（Laws）
+#### Law 1：Architecture Fabrication 硬覆盖
+当 `fabrication_type == "ARCHITECTURAL"` 时，强制设置：
+- `explanation_reasonableness = "LOW"`
+- `fabrication_risk = "HIGH"`
+
+#### Law 2：Abstraction Mismatch 分数封顶
+当满足以下条件时，最终分数 ≤ 50：
+- `explanation_reasonableness == "HIGH"`
+- `fabrication_risk == "LOW"`
+- `abstraction_quality` in ["OK", "POOR"]
+
+### 3. Stage2 Prompt 增强
+添加了 CRITICAL FABRICATION RULES，特别强调：
+- 对架构级伪造的严格识别
+- 对抽象失配的明确区分
+
+### 4. 工程操作建议
+系统现在会根据最终分数映射到具体的工程操作建议：
+- ≥ 90: 可作为主要参考文档
+- 70–89: 可用于理解与修改，需关注风险点
+- 50–69: 仅供理解结构，修改需对照源码
+- 40–49: 不建议用于修改
+- < 40: 不可信
+
+## 九、最终效果（你将得到什么）
 
 * Wiki 写得烂 → **20~40**
 * 勉强能用 → **50~65**

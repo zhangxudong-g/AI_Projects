@@ -4,6 +4,7 @@ from datetime import datetime
 from run_single_case_pipeline import run_single_case
 
 DATA_DIR = Path("stage2_adversarial_regression_full")
+DATA_DIR = Path("stage2_positive_regression_full")
 
 
 def load_case_spec(case_dir: Path):
