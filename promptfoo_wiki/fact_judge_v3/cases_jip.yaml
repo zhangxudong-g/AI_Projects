@@ -1,0 +1,100 @@
+cases:
+  - id: jip_java_controller_001
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_GakureiboPrintOutController.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_GakureiboPrintOutController.java.md
+
+  - id: jip_java_controller_002
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_GKB001S006Controller.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_GKB001S006Controller.java.md
+
+  - id: jip_java_controller_003
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_GKB002S003HogosyaSetaiListController.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_GKB002S003HogosyaSetaiListController.java.md
+
+  - id: jip_java_controller_004
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_GKB002S005Controller.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_GKB002S005Controller.java.md
+
+  - id: jip_java_controller_005
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_GKB003S004Controller.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_GKB003S004Controller.java.md
+
+  - id: jip_java_controller_006
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_GKB004S011SetZokugaraController.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_GKB004S011SetZokugaraController.java.md
+
+  - id: jip_java_controller_007
+    vars:
+      source_code: data/JIP/sample_all/java/Controller_TabumonGakureiboSyokaiController.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Controller_TabumonGakureiboSyokaiController.java.md
+
+  - id: jip_java_repository_001
+    vars:
+      source_code: data/JIP/sample_all/java/Repository_GKB000EntityRepository.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Repository_GKB000EntityRepository.java.md
+
+  - id: jip_java_repository_002
+    vars:
+      source_code: data/JIP/sample_all/java/Repository_GKB0010Repository.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Repository_GKB0010Repository.java.md
+
+  - id: jip_java_repository_003
+    vars:
+      source_code: data/JIP/sample_all/java/Repository_GKB0020Repository.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Repository_GKB0020Repository.java.md
+
+  - id: jip_java_service_001
+    vars:
+      source_code: data/JIP/sample_all/java/Service_GKB001S024_GakureiboSyukakkuHistoryService.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Service_GKB001S024_GakureiboSyukakkuHistoryService.java.md
+
+  - id: jip_java_service_002
+    vars:
+      source_code: data/JIP/sample_all/java/Service_GKB002S023_GakureiboInitService.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Service_GKB002S023_GakureiboInitService.java.md
+
+  - id: jip_java_service_003
+    vars:
+      source_code: data/JIP/sample_all/java/Service_JIA100S003_InsertHakkoLogService.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/Service_JIA100S003_InsertHakkoLogService.java.md
+
+  - id: jip_java_view_001
+    vars:
+      source_code: data/JIP/sample_all/java/View_JID000S004ViewRow.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/View_JID000S004ViewRow.java.md
+
+  - id: jip_java_view_002
+    vars:
+      source_code: data/JIP/sample_all/java/View_JID000S005ViewRow.java
+      wiki_md: data/JIP/wiki_cache/sample_all/java/View_JID000S005ViewRow.java.md
+
+  - id: jip_sql_001
+    vars:
+      source_code: data/JIP/sample_all/sql/JIBSOJHJKNCHK.SQL
+      wiki_md: data/JIP/wiki_cache/sample_all/sql/JIBSOJHJKNCHK.SQL.md
+
+  - id: jip_sql_002
+    vars:
+      source_code: data/JIP/sample_all/sql/GKBPA00060B.SQL
+      wiki_md: data/JIP/wiki_cache/sample_all/sql/GKBPA00060B.SQL.md
+
+  - id: jip_sql_003
+    vars:
+      source_code: data/JIP/sample_all/sql/GKBFKHMCTRL.SQL
+      wiki_md: data/JIP/wiki_cache/sample_all/sql/GKBFKHMCTRL.SQL.md
+
+  - id: jip_sql_004
+    vars:
+      source_code: data/JIP/sample_all/sql/GKBPA00040B.SQL
+      wiki_md: data/JIP/wiki_cache/sample_all/sql/GKBPA00040B.SQL.md
+
+  - id: jip_sql_005
+    vars:
+      source_code: data/JIP/sample_all/sql/JIBSOIEUPDB.SQL
+      wiki_md: data/JIP/wiki_cache/sample_all/sql/JIBSOIEUPDB.SQL.md
