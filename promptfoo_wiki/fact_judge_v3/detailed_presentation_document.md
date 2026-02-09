@@ -175,16 +175,16 @@ graph TD
 **定义**：新开发者能否快速建立整体心智模型
 
 **评估标准**：
-- **HIGH**: 
+- **HIGH**:
   - 清晰目的：文件存在的意义明确
   - 清晰角色：在更大系统中的作用明确
   - 重大认知负荷问题得到解决：混淆或高认知负载部分得到承认
 
-- **MEDIUM**: 
+- **MEDIUM**:
   - 总体思路可理解
   - 但重要上下文缺失
 
-- **LOW**: 
+- **LOW**:
   - 只能看到表面行为或代码结构
 
 **示例**：
@@ -196,16 +196,16 @@ graph TD
 **定义**：是否能指导实际修改/排查问题
 
 **评估标准**：
-- **HIGH**: 
+- **HIGH**:
   - 明确指出关键分支、标志、条件或风险
   - 帮助读者知道哪里容易出错
   - 指导下一步查看位置
 
-- **MEDIUM**: 
+- **MEDIUM**:
   - 有助于理解
   - 有限用于实际更改
 
-- **LOW**: 
+- **LOW**:
   - 工程上几乎不可用
 
 **示例**：
@@ -217,16 +217,16 @@ graph TD
 **定义**：解释是否克制、可辩护
 
 **评估标准**：
-- **HIGH**: 
+- **HIGH**:
   - 解释与代码强一致
   - 基于代码的主张有明确支持
   - 推断适度且标注清楚
 
-- **MEDIUM**: 
+- **MEDIUM**:
   - 有合理抽象
   - 但略模糊
 
-- **LOW**: 
+- **LOW**:
   - 解释跳跃
   - 结论先行
 
@@ -239,16 +239,16 @@ graph TD
 **定义**：抽象是否服务于理解而非炫耀
 
 **评估标准**：
-- **GOOD**: 
+- **GOOD**:
   - 抽象层级恰好
   - 明显改善理解
   - 避免过度具体或过度抽象
 
-- **OK**: 
+- **OK**:
   - 有一些抽象问题
   - 但仍然可用
 
-- **POOR**: 
+- **POOR**:
   - 要么复述代码
   - 要么空谈架构
 
@@ -261,15 +261,15 @@ graph TD
 **定义**：文档中虚构内容的风险程度
 
 **评估标准**：
-- **LOW**: 
+- **LOW**:
   - 无发明的概念、责任或保证
   - 所有解释都可追溯到代码结构或注释
 
-- **MEDIUM**: 
+- **MEDIUM**:
   - 一些推断行为或意图存在
   - 但谨慎表述，不会误导工程决策
 
-- **HIGH**: 
+- **HIGH**:
   - 发明行为、业务规则、保证或系统角色
   - 可能误导工程决策
 
@@ -289,14 +289,29 @@ graph TD
 ```json
 {
   "comprehension_support": "HIGH",
-  "engineering_usefulness": "MEDIUM", 
+  "engineering_usefulness": "MEDIUM",
   "explanation_reasonableness": "HIGH",
   "abstraction_quality": "GOOD",
   "fabrication_risk": "LOW",
   "fabrication_type": "NONE",
-  "summary": "文档提供了清晰的目的说明，但在工程实用性方面略显不足..."
+  "summary": "文档提供了清晰的目的说明，但在工程实用性方面略显不足...",
+  "details": {
+    "specific_issues": [],
+    "strengths": ["comprehensive coverage of main functionality"],
+    "weaknesses": ["lacks detail on error handling"]
+  }
 }
 ```
+
+**输出字段说明**：
+- **comprehension_support**: 理解支持度评级 (HIGH/MEDIUM/LOW)
+- **engineering_usefulness**: 工程实用性评级 (HIGH/MEDIUM/LOW)
+- **explanation_reasonableness**: 解释合理性评级 (HIGH/MEDIUM/LOW)
+- **abstraction_quality**: 抽象质量评级 (GOOD/OK/POOR)
+- **fabrication_risk**: 伪造风险评级 (LOW/MEDIUM/HIGH)
+- **fabrication_type**: 伪造类型 (NONE/ARCHITECTURAL/LOCAL/TERMINOLOGY)
+- **summary**: 评估摘要文本
+- **details**: 详细评估信息（可选）
 
 #### Stage 3: 风险感知最终评分
 **功能定位**：
@@ -311,20 +326,44 @@ graph TD
 - abstraction_quality：抽象质量（Stage 2输出）
 - fabrication_risk：伪造风险（Stage 2输出）
 - fabrication_type：伪造类型（Stage 2输出，v3.1新增）
+- critical_fact_error：关键事实错误（可选，v3.1新增）
+
+**评分指标详解**：
+
+##### 3.1 评分指标权重分配
+- **工程实用性 (35分满分)**：权重最高，反映文档对实际工程工作的指导价值
+  - HIGH: 35分
+  - MEDIUM: 20分
+  - LOW: 5分
+
+- **理解支持 (25分满分)**：反映文档对理解代码的帮助程度
+  - HIGH: 25分
+  - MEDIUM: 15分
+  - LOW: 5分
+
+- **解释合理性 (20分满分)**：反映文档解释的准确性
+  - HIGH: 20分
+  - MEDIUM: 12分
+  - LOW: 4分
+
+- **抽象质量 (20分满分)**：反映文档抽象层级的合理性
+  - GOOD: 20分
+  - OK: 12分
+  - POOR: 4分
 
 **评分算法详解**：
 
-##### 3.1 基础分计算
+##### 3.2 基础分计算
 ```python
-# 基础分映射
+# 各维度基础分计算
 comprehension_support_score = {
     "HIGH": 25,
-    "MEDIUM": 15, 
+    "MEDIUM": 15,
     "LOW": 5,
 }[comprehension_support]
 
 engineering_usefulness_score = {
-    "HIGH": 35,
+    "HIGH": 35,  # 权重最高
     "MEDIUM": 20,
     "LOW": 5,
 }[engineering_usefulness]
@@ -341,52 +380,65 @@ abstraction_quality_score = {
     "POOR": 4,
 }[abstraction_quality]
 
+# 原始总分
 raw_score = comprehension_support_score + engineering_usefulness_score + \
            explanation_reasonableness_score + abstraction_quality_score
 ```
 
-##### 3.2 风险扣分
+##### 3.3 风险扣分机制
 ```python
+# 根据伪造风险等级进行扣分
 risk_penalty = 0
 if fabrication_risk == "HIGH":
-    risk_penalty = 40
+    risk_penalty = 40  # 高风险扣40分
 elif fabrication_risk == "MEDIUM":
-    risk_penalty = 20
+    risk_penalty = 20  # 中风险扣20分
+else:  # LOW
+    risk_penalty = 0   # 低风险不扣分
 
+# 应用风险扣分
 adjusted_score = raw_score - risk_penalty
 ```
 
-##### 3.3 v3.1 版本新增规则
+##### 3.4 v3.1 版本新增规则
 
-**Law 1: Architecture Fabrication 硬覆盖**
-```python
-if fabrication_type == "ARCHITECTURAL":
-    explanation_reasonableness = "LOW"
-    fabrication_risk = "HIGH"
-    # 重新计算分数
-```
+**Law 1: Architecture Fabrication 硬覆盖规则**
+- **触发条件**：`fabrication_type == "ARCHITECTURAL"`
+- **强制操作**：
+  - `explanation_reasonableness = "LOW"`
+  - `fabrication_risk = "HIGH"`
+- **影响**：重新计算分数，应用高风险扣分
 
-**Law 2: Abstraction Mismatch 分数封顶**
-```python
-if (explanation_reasonableness == "HIGH" and 
-    fabrication_risk == "LOW" and 
-    abstraction_quality in ["OK", "POOR"]):
-    final_score_value = min(final_score_value, 50)
-```
+**Law 2: Abstraction Mismatch 分数封顶规则**
+- **触发条件**：`explanation_reasonableness == "HIGH"` 且 `fabrication_risk == "LOW"` 且 `abstraction_quality` in ["OK", "POOR"]
+- **限制**：`final_score_value = min(final_score_value, 50)`
+- **影响**：即使解释合理且无风险，若抽象质量不佳，分数不超过50
 
-##### 3.4 分辨率增强层
+##### 3.5 分辨率增强与边界调整
 ```python
-# 分档吸附
+# 1. 分档吸附：将分数吸附到工程友好的离散档位
 bands = [10, 20, 30, 40, 50, 60, 70, 80, 90, 95]
-snapped_score = min(bands, key=lambda b: abs(b - score))
+snapped_score = min(bands, key=lambda b: abs(b - adjusted_score))
 
-# 真实性奖励下限
+# 2. 真实性奖励下限：合理解释+低风险的文档最低60分
 if explanation_reasonableness == "HIGH" and fabrication_risk == "LOW":
     snapped_score = max(snapped_score, 60)
 
-# 关键事实错误上限
+# 3. 关键事实错误上限：有关键错误的文档最高40分
 if critical_fact_error:
     snapped_score = min(snapped_score, 40)
+
+# 4. 边界限制：确保分数在0-100范围内
+final_score_value = max(0, min(100, snapped_score))
+```
+
+##### 3.6 PASS/FAIL 判定
+```python
+# FAIL 判定：高风险+低合理性
+if fabrication_risk == "HIGH" and explanation_reasonableness == "LOW":
+    result = "FAIL"
+else:
+    result = "PASS"
 ```
 
 **输出格式**：
@@ -411,6 +463,13 @@ if critical_fact_error:
 }
 ```
 
+**输出字段说明**：
+- **final_score**: 最终得分 (0-100)
+- **result**: 评估结果 ("PASS"/"FAIL")
+- **summary**: 评估摘要文本
+- **engineering_action**: 工程操作建议对象
+- **details**: 详细评估信息（各维度原始评分）
+
 ## 3. 评分标准详解
 
 ### 3.1 评分范围与含义
@@ -429,71 +488,207 @@ if critical_fact_error:
 ```json
 {
   "comprehension_support": "HIGH",
-  "engineering_usefulness": "HIGH", 
+  "engineering_usefulness": "HIGH",
   "explanation_reasonableness": "HIGH",
   "abstraction_quality": "GOOD",
   "fabrication_risk": "LOW",
-  "fabrication_type": "NONE"
+  "fabrication_type": "NONE",
+  "critical_fact_error": false
 }
 ```
 
-计算过程：
-- 基础分：25(HIGH) + 35(HIGH) + 20(HIGH) + 20(GOOD) = 100
-- 风险扣分：0 (LOW风险)
-- 调整后：100 (但最高95)
-- 真实性奖励：max(95, 60) = 95
-- 最终分数：95 (A级 - 可作为主要参考文档)
+**完整计算过程**：
+1. **基础分计算**：
+   - comprehension_support_score: 25 (HIGH)
+   - engineering_usefulness_score: 35 (HIGH) ← 权重最高
+   - explanation_reasonableness_score: 20 (HIGH)
+   - abstraction_quality_score: 20 (GOOD)
+   - raw_score: 25 + 35 + 20 + 20 = 100
+
+2. **风险扣分**：
+   - fabrication_risk: "LOW" → risk_penalty: 0
+   - adjusted_score: 100 - 0 = 100
+
+3. **v3.1 规则检查**：
+   - Law 1 (Architecture Fabrication): 不触发 (fabrication_type != "ARCHITECTURAL")
+   - Law 2 (Abstraction Mismatch): 不触发 (abstraction_quality == "GOOD")
+
+4. **分辨率增强**：
+   - 分档吸附: closest to 100 in [10, 20, 30, 40, 50, 60, 70, 80, 90, 95] → 95
+   - 真实性奖励: explanation_reasonableness="HIGH" 且 fabrication_risk="LOW" → max(95, 60) = 95
+   - 关键错误限制: critical_fact_error=false → 无影响
+
+5. **边界调整**：
+   - final_score_value: 95 (在0-100范围内)
+
+6. **PASS/FAIL判定**：
+   - fabrication_risk="LOW" 且 explanation_reasonableness="HIGH" → result="PASS"
+
+**最终结果**：95分 (PRIMARY_REFERENCE - 可作为主要参考文档)
 
 #### 示例2：架构伪造文档
 ```json
 {
   "comprehension_support": "HIGH",
-  "engineering_usefulness": "HIGH", 
+  "engineering_usefulness": "HIGH",
   "explanation_reasonableness": "HIGH",  // 原值
   "abstraction_quality": "GOOD",
   "fabrication_risk": "LOW",  // 原值
-  "fabrication_type": "ARCHITECTURAL"  // 关键
+  "fabrication_type": "ARCHITECTURAL",  // 关键
+  "critical_fact_error": false
 }
 ```
 
-计算过程：
-- Law 1 触发：explanation_reasonableness = "LOW", fabrication_risk = "HIGH"
-- 基础分：25(HIGH) + 35(HIGH) + 4(LOW) + 20(GOOD) = 84
-- 风险扣分：40 (HIGH风险)
-- 调整后：84 - 40 = 44
-- 最终分数：44 (E级 - 不可信)
+**完整计算过程**：
+1. **基础分计算**（初始）：
+   - raw_score: 25 + 35 + 20 + 20 = 100
+
+2. **v3.1 规则检查**：
+   - Law 1 (Architecture Fabrication): 触发！
+     - explanation_reasonableness = "LOW"
+     - fabrication_risk = "HIGH"
+
+3. **重新计算**（应用Law 1后）：
+   - comprehension_support_score: 25 (HIGH)
+   - engineering_usefulness_score: 35 (HIGH)
+   - explanation_reasonableness_score: 4 (LOW) ← 降级
+   - abstraction_quality_score: 20 (GOOD)
+   - raw_score: 25 + 35 + 4 + 20 = 84
+
+4. **风险扣分**（更新后）：
+   - fabrication_risk: "HIGH" → risk_penalty: 40
+   - adjusted_score: 84 - 40 = 44
+
+5. **后续规则检查**：
+   - Law 2 (Abstraction Mismatch): 不触发 (explanation_reasonableness == "LOW")
+
+6. **分辨率增强**：
+   - 分档吸附: closest to 44 in [10, 20, 30, 40, 50, 60, 70, 80, 90, 95] → 40
+   - 真实性奖励: 不适用 (explanation_reasonableness != "HIGH")
+   - 关键错误限制: critical_fact_error=false → 无影响
+
+7. **PASS/FAIL判定**：
+   - fabrication_risk="HIGH" 且 explanation_reasonableness="LOW" → result="FAIL"
+
+**最终结果**：40分 (READ_ONLY_WARNING - 不建议用于修改)，结果为FAIL
 
 #### 示例3：抽象失配文档
 ```json
 {
   "comprehension_support": "HIGH",
-  "engineering_usefulness": "HIGH", 
+  "engineering_usefulness": "HIGH",
   "explanation_reasonableness": "HIGH",
   "abstraction_quality": "OK",  // 关键
   "fabrication_risk": "LOW",
-  "fabrication_type": "NONE"
+  "fabrication_type": "NONE",
+  "critical_fact_error": false
 }
 ```
 
-计算过程：
-- 基础分：25 + 35 + 20 + 12 = 92
-- 风险扣分：0
-- Law 2 触发（HIGH+LOW+OK）：min(92, 50) = 50
-- 最终分数：50 (C级 - 仅供理解结构）
+**完整计算过程**：
+1. **基础分计算**：
+   - comprehension_support_score: 25 (HIGH)
+   - engineering_usefulness_score: 35 (HIGH)
+   - explanation_reasonableness_score: 20 (HIGH)
+   - abstraction_quality_score: 12 (OK) ← 较低分
+   - raw_score: 25 + 35 + 20 + 12 = 92
+
+2. **风险扣分**：
+   - fabrication_risk: "LOW" → risk_penalty: 0
+   - adjusted_score: 92 - 0 = 92
+
+3. **v3.1 规则检查**：
+   - Law 1 (Architecture Fabrication): 不触发
+   - Law 2 (Abstraction Mismatch): 触发！
+     - 条件: explanation_reasonableness="HIGH" AND fabrication_risk="LOW" AND abstraction_quality="OK"
+     - 操作: final_score_value = min(92, 50) = 50
+
+4. **后续处理**：
+   - 真实性奖励: 不适用 (分数已被封顶)
+   - 关键错误限制: critical_fact_error=false → 无影响
+
+5. **PASS/FAIL判定**：
+   - fabrication_risk="LOW" 且 explanation_reasonableness="HIGH" → result="PASS"
+
+**最终结果**：50分 (STRUCTURE_ONLY - 仅供理解结构，修改需对照源码)
+
+#### 示例4：关键事实错误文档
+```json
+{
+  "comprehension_support": "HIGH",
+  "engineering_usefulness": "HIGH",
+  "explanation_reasonableness": "HIGH",
+  "abstraction_quality": "GOOD",
+  "fabrication_risk": "LOW",
+  "fabrication_type": "NONE",
+  "critical_fact_error": true  // 关键
+}
+```
+
+**完整计算过程**：
+1. **基础分计算**：
+   - raw_score: 25 + 35 + 20 + 20 = 100
+
+2. **风险扣分**：
+   - adjusted_score: 100 - 0 = 100
+
+3. **v3.1 规则检查**：
+   - Law 1: 不触发
+   - Law 2: 不触发
+
+4. **分辨率增强**：
+   - 分档吸附: 95
+   - 真实性奖励: max(95, 60) = 95
+   - 关键错误限制: critical_fact_error=true → min(95, 40) = 40 ← 最终限制
+
+5. **PASS/FAIL判定**：
+   - result="PASS" (因为关键错误不影响PASS/FAIL判定)
+
+**最终结果**：40分 (READ_ONLY_WARNING - 不建议用于修改)，结果为PASS
 
 ### 3.3 评分影响因素分析
 
 #### 3.3.1 正面影响因素
 1. **理解支持度高**：文档帮助新开发者建立正确的心智模型
+   - 清晰说明文件目的和角色
+   - 解释复杂或易混淆的部分
+   - 提供足够的上下文信息
+
 2. **工程实用性强**：文档指导实际的修改和调试工作
+   - 指出关键分支、标志、条件或风险点
+   - 帮助开发者了解哪里容易出错
+   - 指导下一步查看的位置
+
 3. **解释合理**：文档内容有代码支持，不过度推断
+   - 解释与代码实现保持一致
+   - 对推断性内容明确标注
+   - 避免结论先行的解释
+
 4. **抽象质量好**：文档抽象层级恰当，有助于理解
+   - 避免过度具体（代码复述）
+   - 避免过度抽象（空谈架构）
+   - 选择合适的抽象层级
 
 #### 3.3.2 负面影响因素
 1. **伪造风险高**：文档包含虚构内容
+   - 发明代码中不存在的概念、责任或保证
+   - 声称代码具有未实现的功能
+   - 推断未出现在代码中的业务规则
+
 2. **架构伪造**：文档描述不存在的架构元素
+   - 发明服务、控制器、框架或系统组件
+   - 声称存在未实现的架构模式
+   - 描述未实现的系统集成点
+
 3. **抽象失配**：文档抽象层级与实际不符
+   - 解释合理但抽象质量不佳（OK/POOR）
+   - 过度具体化（复述代码细节）
+   - 过度抽象化（空谈概念）
+
 4. **关键事实错误**：文档包含严重错误信息
+   - 与代码实现严重不符的描述
+   - 可能导致工程决策错误的信息
+   - 影响系统理解和修改的错误
 
 ## 4. 伪造违规类别详解
 
