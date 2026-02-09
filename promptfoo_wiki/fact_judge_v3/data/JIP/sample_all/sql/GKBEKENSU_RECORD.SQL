@@ -1,0 +1,6 @@
+CREATE OR REPLACE TYPE GKBEKENSU_RECORD FORCE AS OBJECT (
+     CNT     NUMBER,          --件数
+     NAIYOU  NVARCHAR2(1000), --件数名称
+     KBN     NUMBER           --件数区分 INFO：0、INPUT：1、OUTPUT：2
+);
+/
