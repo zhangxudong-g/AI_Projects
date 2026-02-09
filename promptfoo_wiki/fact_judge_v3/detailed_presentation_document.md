@@ -1000,11 +1000,20 @@ print(f"详细信息: {result['details']}")
 
 #### 5.3.1 命令行运行
 ```bash
-# 使用默认配置
-python run_multi_cases.py
+# 使用默认配置（resume 模式：跳过已完成的案例，运行剩余案例）
+python run_multi_cases_unified.py
 
-# 指定配置文件和输出目录
-python run_multi_cases.py --cases-yaml my_cases.yaml --base-output my_output
+# all 模式：运行所有测试案例，从头开始
+python run_multi_cases_unified.py all --cases my_cases.yaml --output my_output
+
+# resume 模式：支持断点续传，跳过已完成的案例（默认模式）
+python run_multi_cases_unified.py resume --cases my_cases.yaml --output my_output
+
+# retry 模式：仅重跑失败的案例
+python run_multi_cases_unified.py retry --cases my_cases.yaml --output my_output
+
+# 使用简短参数
+python run_multi_cases_unified.py all -c my_cases.yaml -o my_output
 ```
 
 #### 5.3.2 结果可视化

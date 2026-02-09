@@ -112,14 +112,30 @@ print(f"评估结果: {result['result']}")
 ### 批量案例运行
 
 ```bash
-python run_multi_cases.py
+# 使用默认设置（resume 模式：跳过已完成的案例，运行剩余案例）
+python run_multi_cases_unified.py
 ```
 
-或者使用命令行参数指定配置文件和输出目录：
+或者使用不同的执行模式和参数：
 
 ```bash
-python run_multi_cases.py --cases-yaml my_cases.yaml --base-output my_output
+# all 模式：运行所有测试案例，从头开始
+python run_multi_cases_unified.py all --cases my_cases.yaml --output my_output
+
+# resume 模式：支持断点续传，跳过已完成的案例（默认模式）
+python run_multi_cases_unified.py resume --cases my_cases.yaml --output my_output
+
+# retry 模式：仅重跑失败的案例
+python run_multi_cases_unified.py retry --cases my_cases.yaml --output my_output
+
+# 使用简短参数
+python run_multi_cases_unified.py all -c my_cases.yaml -o my_output
 ```
+
+**执行模式说明：**
+- `all`：运行所有测试案例，从头开始（相当于旧版本的 `--simple` 模式）
+- `resume`：支持断点续传，跳过已完成的案例（默认模式）
+- `retry`：仅重跑失败的案例（相当于旧版本的 `--retry-failed` 模式）
 
 ### 对抗性回归测试
 

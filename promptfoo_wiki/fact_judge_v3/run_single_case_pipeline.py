@@ -7,20 +7,37 @@ from stage3_score import final_score
 from utils import extract_llm_json, map_engineering_action
 
 
-# 统一的 shell 执行封装
-def run(cmd: str, cwd: Path | None = None):
+def run_cmd(cmd: str):
     """
     统一的 shell 执行封装
     - shell=True：兼容 Windows
-    - cwd：解决 promptfoo 相对路径问题（核心）
     """
     print(f"[RUN] {cmd}")
-    subprocess.run(
-        cmd,
-        shell=True,
-        check=True,
-        # cwd=str(cwd.resolve()) if cwd else None,  # 去掉绝对路径
-    )
+    subprocess.run(cmd, shell=True, check=True)
+
+
+def _build_var_args(vars_dict: dict) -> list[str]:
+    """构建变量参数列表"""
+    return [f"--var {k}=file://{v}" for k, v in vars_dict.items()]
+
+
+def _detect_language(vars_cfg: dict) -> str:
+    """根据文件扩展名自动确定语言"""
+    source_code_path = Path(vars_cfg["source_code"])
+    
+    if "language" in vars_cfg:
+        return vars_cfg["language"]
+    
+    ext = source_code_path.suffix.lower()
+    language_mapping = {
+        ".sql": "sql",
+        ".plsql": "sql",
+        ".py": "python",
+        ".txt": "python",
+        ".java": "java"
+    }
+    
+    return language_mapping.get(ext, "java")
 
 
 def run_single_case(
@@ -47,42 +64,24 @@ def run_single_case(
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # case 根目录 = yaml 所在目录
-    # case_root = output_dir.parents[1]
-    # print(f"[CWD ] {case_root}  {vars_cfg}")
-
     print(f"[CASE] {case_id}")
-    # print(f"[CWD ] {case_root}")
+    
+    # 定义输出文件路径
     stage1_out = (output_dir / "stage1.json").resolve()
     stage1_result_out = (output_dir / "stage1_result.json").resolve()
     stage1_5_out = (output_dir / "stage1_5.json").resolve()
     stage1_5_result_out = (output_dir / "stage1_5_result.json").resolve()
     stage2_out = (output_dir / "stage2.json").resolve()
     final_out = (output_dir / "final_score.json").resolve()
-    # 拼 --var 参数
-    var_args = []
-    for k, v in vars_cfg.items():
-        # file:// + 绝对路径（最稳）
-        # abs_path = (case_root / v).resolve()
-        var_args.append(f"--var {k}=file://{v}")
+    
+    # 构建基础变量参数
+    var_args = _build_var_args(vars_cfg)
+    
     # ======================
     # Stage 0 前置提取事实（工程wiki级别的）
     # ======================
     source_code_path = Path(vars_cfg["source_code"])
-    # 根据文件扩展名自动确定语言
-    if "language" in vars_cfg:
-        language = vars_cfg["language"]
-    else:
-        ext = source_code_path.suffix.lower()
-        if ext in [".sql", ".plsql"]:
-            language = "sql"
-        elif ext in [".py", "txt"]:
-            language = "python"
-        elif ext in [".java"]:
-            language = "java"
-        else:
-            language = "java"  # 默认值
-
+    language = _detect_language(vars_cfg)
     source_code = source_code_path.read_text(encoding="utf-8")
 
     engineering_facts = prepare_engineering_facts(
@@ -98,15 +97,15 @@ def run_single_case(
     # ======================
     # Stage 1: Structural Coverage Judge
     # ======================
-    run(
+    run_cmd(
         f"promptfoo eval --no-cache "
         f"--config stage1_fact_extractor.yaml "
-        f"{" ".join(var_args)} "
-        f"--output {stage1_out}",
+        f"{' '.join(var_args)} "
+        f"--output {stage1_out}"
     )
+    
     # 将 Stage 1 结果保存为单独的文件，供 Stage 2 使用
     stage1_data = extract_llm_json(stage1_out)
-
     stage1_result_out.write_text(
         json.dumps(stage1_data, indent=4, ensure_ascii=False),
         encoding="utf-8",
@@ -115,20 +114,18 @@ def run_single_case(
     # ======================
     # Stage 1.5: Explanation Alignment Judge
     # ======================
-    var_args_1_5 = []
-    for k, v in vars_cfg.items():
-        var_args_1_5.append(f"--var {k}=file://{v}")
+    var_args_1_5 = _build_var_args(vars_cfg)
     var_args_1_5.append(f"--var artifact_type={artifact_type}")
 
-    run(
+    run_cmd(
         f"promptfoo eval --no-cache "
         f"--config stage1_5_explanation_alignment.yaml "
-        f"{" ".join(var_args_1_5)} "
-        f"--output {stage1_5_out}",
+        f"{' '.join(var_args_1_5)} "
+        f"--output {stage1_5_out}"
     )
+    
     # 将 Stage 1.5 结果保存为单独的文件，供 Stage 2 使用
     stage1_5_data = extract_llm_json(stage1_5_out)
-
     stage1_5_result_out.write_text(
         json.dumps(stage1_5_data, indent=4, ensure_ascii=False),
         encoding="utf-8",
@@ -138,9 +135,7 @@ def run_single_case(
     # Stage 2: Engineering Judge v3
     # ======================
     # 为 Stage 2 创建新的参数列表，确保所有必要变量都传递
-    var_args_for_stage2 = []
-    for k, v in vars_cfg.items():
-        var_args_for_stage2.append(f"--var {k}=file://{v}")
+    var_args_for_stage2 = _build_var_args(vars_cfg)
     var_args_for_stage2.append(f"--var artifact_type={artifact_type}")
     var_args_for_stage2.append(
         f"--var structural_coverage_results=file://{base_output}/{case_id}/stage1_result.json"
@@ -149,29 +144,28 @@ def run_single_case(
         f"--var explanation_alignment_results=file://{base_output}/{case_id}/stage1_5_result.json"
     )
 
-    # cfg = "stage2_explanatory_judge.yaml" # Engineering Judge v3
     cfg = "stage2_explanatory_judge_v3.yaml"  # Engineering Judge v3
-    run(
+    run_cmd(
         f"promptfoo eval --no-cache "
         f"--config {cfg} "
-        f"{" ".join(var_args_for_stage2)} "
-        f"--output {stage2_out}",
+        f"{' '.join(var_args_for_stage2)} "
+        f"--output {stage2_out}"
     )
 
     # ======================
     # Stage 3
     # ======================
     stage2_data = extract_llm_json(stage2_out)
-
     final = final_score(stage2_data)
+    
     # 映射 engineering action
     action = map_engineering_action(final["final_score"])
-
     final["engineering_action"] = {
         "level": action["label"],
         "description": action["description"],
         "recommended_action": action["action"],
     }
+    
     # 保存最终结果
     final_out.write_text(
         json.dumps(final, indent=2, ensure_ascii=False),
