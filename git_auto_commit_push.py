@@ -73,44 +73,52 @@ def get_current_branch() -> str:
 def auto_commit_and_push(commit_message: str = "Auto-commit on work completion") -> bool:
     """
     自动执行Git提交和推送操作
-    
+
     Args:
         commit_message: 提交消息
-        
+
     Returns:
         bool: 操作是否成功
     """
     print(f"开始执行自动提交和推送...")
-    
+
     # 检查是否在Git仓库中
     success, _ = run_git_command("git rev-parse --git-dir")
     if not success:
         print("错误：当前目录不是一个Git仓库")
         return False
-    
+
+    # 拉取最新更改以避免冲突
+    print("正在拉取最新更改...")
+    current_branch = get_current_branch()
+    pull_success, pull_output = run_git_command(f"git pull origin {current_branch} --no-rebase")
+    if not pull_success:
+        print(f"拉取最新更改时出现问题: {pull_output}")
+        # 即使拉取有问题也继续，因为可能是因为本地分支比远程新
+
     # 检查是否有更改需要提交
     if not has_changes_to_commit():
         print("没有检测到更改，无需提交")
         return True
-    
+
     # 添加所有更改
     print("正在添加所有更改...")
     success, output = run_git_command("git add .")
     if not success:
         print(f"添加更改失败: {output}")
         return False
-    
+
     # 执行提交
     print(f"正在执行提交: {commit_message}")
     success, output = run_git_command(f'git commit -m "{commit_message}"')
     if not success:
         print(f"提交失败: {output}")
         return False
-    
+
     # 获取当前分支
     current_branch = get_current_branch()
     print(f"当前分支: {current_branch}")
-    
+
     # 推送到远程仓库
     print(f"正在推送更改到远程仓库...")
     success, output = run_git_command(f"git push origin {current_branch}")
@@ -124,7 +132,7 @@ def auto_commit_and_push(commit_message: str = "Auto-commit on work completion")
         if not set_upstream_success:
             print(f"设置上游分支并推送也失败了: {set_upstream_output}")
             return False
-    
+
     print("自动提交和推送操作成功完成！")
     return True
 

@@ -20,6 +20,7 @@ Operational guidelines:
 - If uncertain about the nature of changes, default to a general message like "chore: auto-commit on work completion"
 - Verify that there are actually changes to commit before proceeding
 - If there are uncommitted changes but nothing staged, stage all changes before committing
+- Execute git pull to get latest changes before committing to avoid conflicts
 - Execute git push after successful commit to sync with remote repository
 - Handle upstream branch setup if pushing to a new remote branch
 - In case of Git errors, report them clearly to the user
