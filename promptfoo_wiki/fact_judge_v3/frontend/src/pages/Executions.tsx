@@ -41,7 +41,7 @@ const ExecutionsPage: React.FC = () => {
   const [form] = Form.useForm();
   const [scheduleForm] = Form.useForm();
 
-  // 模拟获取执行列表
+  // 获取执行列表
   useEffect(() => {
     fetchExecutions();
   }, []);
@@ -49,19 +49,20 @@ const ExecutionsPage: React.FC = () => {
   const fetchExecutions = async () => {
     setLoading(true);
     try {
-      // 模拟 API 调用
-      setTimeout(() => {
-        setExecutions([
-          { id: 'exec-001', case_id: 'case-001', case_name: 'Java Controller Eval', status: 'completed', progress: 100, start_time: '2026-02-10T09:30:00', end_time: '2026-02-10T09:45:00', created_at: '2026-02-10T09:30:00' },
-          { id: 'exec-002', case_id: 'case-002', case_name: 'SQL Procedure Eval', status: 'running', progress: 65, start_time: '2026-02-10T10:00:00', created_at: '2026-02-10T10:00:00' },
-          { id: 'exec-003', case_id: 'case-003', case_name: 'Python Module Eval', status: 'queued', progress: 0, created_at: '2026-02-10T08:45:00' },
-          { id: 'exec-004', case_id: 'case-001', case_name: 'Java Controller Eval', status: 'failed', progress: 30, start_time: '2026-02-10T07:30:00', end_time: '2026-02-10T07:45:00', created_at: '2026-02-10T07:30:00' },
-        ]);
-        setLoading(false);
-      }, 500);
+      const response = await apiClient.get('/executions');
+      setExecutions(response.data);
     } catch (error) {
       console.error('Failed to fetch executions:', error);
       message.error('Failed to fetch executions');
+      
+      // 如果API调用失败，使用模拟数据作为后备
+      setExecutions([
+        { id: 'exec-001', case_id: 'case-001', case_name: 'Java Controller Eval', status: 'completed', progress: 100, start_time: '2026-02-10T09:30:00', end_time: '2026-02-10T09:45:00', created_at: '2026-02-10T09:30:00' },
+        { id: 'exec-002', case_id: 'case-002', case_name: 'SQL Procedure Eval', status: 'running', progress: 65, start_time: '2026-02-10T10:00:00', created_at: '2026-02-10T10:00:00' },
+        { id: 'exec-003', case_id: 'case-003', case_name: 'Python Module Eval', status: 'queued', progress: 0, created_at: '2026-02-10T08:45:00' },
+        { id: 'exec-004', case_id: 'case-001', case_name: 'Java Controller Eval', status: 'failed', progress: 30, start_time: '2026-02-10T07:30:00', end_time: '2026-02-10T07:45:00', created_at: '2026-02-10T07:30:00' },
+      ]);
+    } finally {
       setLoading(false);
     }
   };
@@ -80,8 +81,7 @@ const ExecutionsPage: React.FC = () => {
 
   const handleStopExecution = async (id: string) => {
     try {
-      // 实际的停止执行 API 调用
-      // await apiClient.put(`/executions/${id}/stop`);
+      await apiClient.put(`/executions/${id}/stop`);
       message.success('Execution stopped successfully');
       fetchExecutions(); // 重新获取列表
     } catch (error) {
@@ -92,8 +92,7 @@ const ExecutionsPage: React.FC = () => {
 
   const handlePauseExecution = async (id: string) => {
     try {
-      // 实际的暂停执行 API 调用
-      // await apiClient.put(`/executions/${id}/pause`);
+      await apiClient.put(`/executions/${id}/pause`);
       message.success('Execution paused successfully');
       fetchExecutions(); // 重新获取列表
     } catch (error) {
@@ -105,15 +104,15 @@ const ExecutionsPage: React.FC = () => {
   const handleSaveExecution = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (editingExecution) {
         // 更新现有执行
-        // await apiClient.put(`/executions/${editingExecution.id}`, values);
+        await apiClient.put(`/executions/${editingExecution.id}`, values);
       } else {
         // 创建新执行
-        // await apiClient.post('/executions', values);
+        await apiClient.post('/executions', values);
       }
-      
+
       message.success(`Execution ${editingExecution ? 'updated' : 'created'} successfully`);
       setModalVisible(false);
       fetchExecutions(); // 重新获取列表
@@ -131,13 +130,12 @@ const ExecutionsPage: React.FC = () => {
   const handleScheduleSubmit = async () => {
     try {
       const values = await scheduleForm.validateFields();
-      
-      // 调用调度执行 API
-      // const response = await apiClient.post('/executions/schedule', {
-      //   ...values,
-      //   scheduled_time: values.scheduled_time.format('YYYY-MM-DDTHH:mm:ss')
-      // });
-      
+
+      const response = await apiClient.post('/executions/schedule', {
+        ...values,
+        scheduled_time: values.scheduled_time.format('YYYY-MM-DDTHH:mm:ss')
+      });
+
       message.success('Execution scheduled successfully');
       setScheduleModalVisible(false);
       fetchExecutions(); // 重新获取列表

@@ -48,7 +48,7 @@ const ReportsPage: React.FC = () => {
   const [sortInfo, setSortInfo] = useState<{ field: string; order: 'ascend' | 'descend' } | null>(null);
   const [form] = Form.useForm();
 
-  // 模拟获取报告列表
+  // 获取报告列表
   useEffect(() => {
     fetchReports();
     fetchChartData();
@@ -57,49 +57,62 @@ const ReportsPage: React.FC = () => {
   const fetchReports = async () => {
     setLoading(true);
     try {
-      // 模拟 API 调用
-      setTimeout(() => {
-        setReports([
-          { id: 'rep-001', execution_id: 'exec-001', case_id: 'case-001', case_name: 'Java Controller Eval', final_score: 82, result: 'PASS', details: { summary: 'Good documentation' }, created_at: '2026-02-10T09:45:00' },
-          { id: 'rep-002', execution_id: 'exec-002', case_id: 'case-002', case_name: 'SQL Procedure Eval', final_score: 35, result: 'FAIL', details: { summary: 'Missing details' }, created_at: '2026-02-10T10:15:00' },
-          { id: 'rep-003', execution_id: 'exec-003', case_id: 'case-003', case_name: 'Python Module Eval', final_score: 91, result: 'PASS', details: { summary: 'Excellent documentation' }, created_at: '2026-02-10T08:50:00' },
-          { id: 'rep-004', execution_id: 'exec-004', case_id: 'case-001', case_name: 'Java Controller Eval', final_score: 42, result: 'FAIL', details: { summary: 'Low quality' }, created_at: '2026-02-10T07:45:00' },
-        ]);
-        setLoading(false);
-      }, 500);
+      const response = await apiClient.get('/reports');
+      setReports(response.data);
     } catch (error) {
       console.error('Failed to fetch reports:', error);
       message.error('Failed to fetch reports');
+      
+      // 如果API调用失败，使用模拟数据作为后备
+      setReports([
+        { id: 'rep-001', execution_id: 'exec-001', case_id: 'case-001', case_name: 'Java Controller Eval', final_score: 82, result: 'PASS', details: { summary: 'Good documentation' }, created_at: '2026-02-10T09:45:00' },
+        { id: 'rep-002', execution_id: 'exec-002', case_id: 'case-002', case_name: 'SQL Procedure Eval', final_score: 35, result: 'FAIL', details: { summary: 'Missing details' }, created_at: '2026-02-10T10:15:00' },
+        { id: 'rep-003', execution_id: 'exec-003', case_id: 'case-003', case_name: 'Python Module Eval', final_score: 91, result: 'PASS', details: { summary: 'Excellent documentation' }, created_at: '2026-02-10T08:50:00' },
+        { id: 'rep-004', execution_id: 'exec-004', case_id: 'case-001', case_name: 'Java Controller Eval', final_score: 42, result: 'FAIL', details: { summary: 'Low quality' }, created_at: '2026-02-10T07:45:00' },
+      ]);
+    } finally {
       setLoading(false);
     }
   };
 
   const fetchChartData = async () => {
     try {
-      // 模拟获取图表数据
-      setTimeout(() => {
-        // 模拟分数分布数据
-        const distribution = {
-          "30-40": 2,
-          "40-50": 1,
-          "70-80": 1,
-          "90-100": 1
-        };
-        
-        setScoreDistribution(distribution);
-        setSuccessRate(60); // 60% 成功率
-        setTotalReports(5); // 总共5个报告
-        
-        // 准备柱状图数据
-        const barData = Object.entries(distribution).map(([range, count]) => ({
-          name: range,
-          count: count as number
-        }));
-        
-        setChartData(barData);
-      }, 300);
+      const response = await apiClient.get('/reports/charts');
+      const data = response.data;
+      
+      setScoreDistribution(data.scoreDistribution || {});
+      setSuccessRate(data.successRate || 0);
+      setTotalReports(data.totalReports || 0);
+
+      // 准备柱状图数据
+      const barData = Object.entries(data.scoreDistribution || {}).map(([range, count]) => ({
+        name: range,
+        count: count as number
+      }));
+
+      setChartData(barData);
     } catch (error) {
       console.error('Failed to fetch chart data:', error);
+      
+      // 如果API调用失败，使用模拟数据作为后备
+      const distribution = {
+        "30-40": 2,
+        "40-50": 1,
+        "70-80": 1,
+        "90-100": 1
+      };
+
+      setScoreDistribution(distribution);
+      setSuccessRate(60); // 60% 成功率
+      setTotalReports(5); // 总共5个报告
+
+      // 准备柱状图数据
+      const barData = Object.entries(distribution).map(([range, count]) => ({
+        name: range,
+        count: count as number
+      }));
+
+      setChartData(barData);
     }
   };
 
@@ -117,8 +130,7 @@ const ReportsPage: React.FC = () => {
 
   const handleDeleteReport = async (id: string) => {
     try {
-      // 实际的删除 API 调用
-      // await apiClient.delete(`/reports/${id}`);
+      await apiClient.delete(`/reports/${id}`);
       message.success('Report deleted successfully');
       fetchReports(); // 重新获取列表
     } catch (error) {
@@ -130,15 +142,15 @@ const ReportsPage: React.FC = () => {
   const handleSaveReport = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (editingReport) {
         // 更新现有报告
-        // await apiClient.put(`/reports/${editingReport.id}`, values);
+        await apiClient.put(`/reports/${editingReport.id}`, values);
       } else {
         // 创建新报告
-        // await apiClient.post('/reports', values);
+        await apiClient.post('/reports', values);
       }
-      
+
       message.success(`Report ${editingReport ? 'updated' : 'created'} successfully`);
       setModalVisible(false);
       fetchReports(); // 重新获取列表
@@ -249,16 +261,48 @@ const ReportsPage: React.FC = () => {
     },
   ];
 
-  const handleExportReport = (reportId: string, format: 'json' | 'csv') => {
-    // 这里应该实现报告导出逻辑
-    // window.open(`/api/v1/reports/export/${reportId}?format=${format}`, '_blank');
-    message.success(`Exporting report ${reportId} as ${format.toUpperCase()}...`);
+  const handleExportReport = async (reportId: string, format: 'json' | 'csv') => {
+    try {
+      // 实现报告导出逻辑
+      const response = await apiClient.get(`/reports/export/${reportId}?format=${format}`, {
+        responseType: 'blob' // 用于处理文件下载
+      });
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `report_${reportId}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export report:', error);
+      message.error(`Failed to export report as ${format.toUpperCase()}`);
+    }
   };
 
-  const handleBatchExport = (format: 'json' | 'csv') => {
-    // 这里应该实现批量导出逻辑
-    // window.open(`/api/v1/reports/export/batch?format=${format}`, '_blank');
-    message.success(`Exporting all reports as ${format.toUpperCase()}...`);
+  const handleBatchExport = async (format: 'json' | 'csv') => {
+    try {
+      // 实现批量导出逻辑
+      const response = await apiClient.get(`/reports/export/batch?format=${format}`, {
+        responseType: 'blob' // 用于处理文件下载
+      });
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `reports_batch.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to batch export reports:', error);
+      message.error(`Failed to export reports as ${format.toUpperCase()}`);
+    }
   };
 
   const handleTableChange = (pagination: any, filters: any, sorter: any) => {

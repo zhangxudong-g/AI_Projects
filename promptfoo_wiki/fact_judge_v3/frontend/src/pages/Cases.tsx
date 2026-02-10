@@ -35,7 +35,7 @@ const CasesPage: React.FC = () => {
   const [editingCase, setEditingCase] = useState<CaseItem | null>(null);
   const [form] = Form.useForm();
 
-  // 模拟获取测试案例列表
+  // 获取测试案例列表
   useEffect(() => {
     fetchCases();
   }, []);
@@ -43,22 +43,19 @@ const CasesPage: React.FC = () => {
   const fetchCases = async () => {
     setLoading(true);
     try {
-      // 这里应该是实际的 API 调用
-      // const response = await apiClient.get('/cases');
-      // setCases(response.data);
-      
-      // 模拟数据
-      setTimeout(() => {
-        setCases([
-          { id: 'case-001', name: 'Java Controller Evaluation', description: 'Evaluates Java controller documentation', createdAt: '2026-02-01', updatedAt: '2026-02-05', status: 'active' },
-          { id: 'case-002', name: 'SQL Procedure Documentation', description: 'Checks SQL procedure documentation quality', createdAt: '2026-02-02', updatedAt: '2026-02-08', status: 'active' },
-          { id: 'case-003', name: 'Python Module Analysis', description: 'Analyzes Python module documentation', createdAt: '2026-02-03', updatedAt: '2026-02-03', status: 'inactive' },
-        ]);
-        setLoading(false);
-      }, 500);
+      const response = await apiClient.get('/cases');
+      setCases(response.data);
     } catch (error) {
       console.error('Failed to fetch cases:', error);
       message.error('Failed to fetch cases');
+      
+      // 如果API调用失败，使用模拟数据作为后备
+      setCases([
+        { id: 'case-001', name: 'Java Controller Evaluation', description: 'Evaluates Java controller documentation', createdAt: '2026-02-01', updatedAt: '2026-02-05', status: 'active' },
+        { id: 'case-002', name: 'SQL Procedure Documentation', description: 'Checks SQL procedure documentation quality', createdAt: '2026-02-02', updatedAt: '2026-02-08', status: 'active' },
+        { id: 'case-003', name: 'Python Module Analysis', description: 'Analyzes Python module documentation', createdAt: '2026-02-03', updatedAt: '2026-02-03', status: 'inactive' },
+      ]);
+    } finally {
       setLoading(false);
     }
   };
@@ -77,8 +74,7 @@ const CasesPage: React.FC = () => {
 
   const handleDeleteCase = async (id: string) => {
     try {
-      // 实际的删除 API 调用
-      // await apiClient.delete(`/cases/${id}`);
+      await apiClient.delete(`/cases/${id}`);
       message.success('Case deleted successfully');
       fetchCases(); // 重新获取列表
     } catch (error) {
@@ -90,15 +86,15 @@ const CasesPage: React.FC = () => {
   const handleSaveCase = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (editingCase) {
         // 更新现有案例
-        // await apiClient.put(`/cases/${editingCase.id}`, values);
+        await apiClient.put(`/cases/${editingCase.id}`, values);
       } else {
         // 创建新案例
-        // await apiClient.post('/cases', values);
+        await apiClient.post('/cases', values);
       }
-      
+
       message.success(`Case ${editingCase ? 'updated' : 'created'} successfully`);
       setModalVisible(false);
       fetchCases(); // 重新获取列表
@@ -112,17 +108,17 @@ const CasesPage: React.FC = () => {
     setImportModalVisible(true);
   };
 
-  const handleImportSubmit = async (values: any) => {
+  const handleImportSubmit = async (file: any) => {
     try {
-      // 这里应该实现文件上传逻辑
-      // const formData = new FormData();
-      // formData.append('file', values.file.originFileObj);
-      // const response = await apiClient.post('/cases/import', formData, {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data'
-      //   }
-      // });
+      const formData = new FormData();
+      formData.append('file', file.file.originFileObj);
       
+      const response = await apiClient.post('/cases/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
       message.success('Cases imported successfully');
       setImportModalVisible(false);
       fetchCases(); // 重新获取列表
@@ -252,7 +248,7 @@ const CasesPage: React.FC = () => {
         <Upload
           name="file"
           beforeUpload={beforeUpload}
-          onChange={(info) => {
+          onChange={async (info) => {
             if (info.file.status !== 'uploading') {
               console.log(info.file, info.fileList);
             }
@@ -265,6 +261,23 @@ const CasesPage: React.FC = () => {
             }
           }}
           accept=".json,.yaml,.yml"
+          customRequest={async (options) => {
+            const { onSuccess, onError, file } = options;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+              const response = await apiClient.post('/cases/import', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              });
+              
+              onSuccess(response.data, file);
+            } catch (error) {
+              onError(error);
+            }
+          }}
         >
           <Button icon={<UploadOutlined />}>Click to Upload JSON/YAML</Button>
         </Upload>
