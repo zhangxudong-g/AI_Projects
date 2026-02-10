@@ -59,11 +59,11 @@ class TestEndToEndFlow(unittest.TestCase):
             "/api/v1/reports/"
         ]
         
-        for endpoint in endpoints:
+        for endpoint in endpoints_to_check:
             try:
                 response = self.client.get(endpoint, headers={"Authorization": "Bearer fake-token"})
                 # 我们只关心端点是否存在，而不是认证是否成功
-                self.assertIn(response.status_code, [200, 401, 403, 422], 
+                self.assertIn(response.status_code, [200, 401, 403, 422],
                              f"Endpoint {endpoint} should be accessible (got {response.status_code})")
             except Exception as e:
                 self.fail(f"Failed to access endpoint {endpoint}: {str(e)}")
