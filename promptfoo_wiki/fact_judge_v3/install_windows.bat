@@ -123,7 +123,8 @@ echo Installing Frontend Environment
 echo ================================================
 echo.
 
-REM Navigate to frontend directory
+REM Change to frontend directory
+echo Changing to frontend directory...
 cd frontend
 
 REM Install frontend dependencies
