@@ -125,7 +125,7 @@ def auto_commit_and_push(commit_message: str = "Auto-commit on work completion")
             print(f"设置上游分支并推送也失败了: {set_upstream_output}")
             return False
     
-    print("✅ 自动提交和推送操作成功完成！")
+    print("自动提交和推送操作成功完成！")
     return True
 
 
