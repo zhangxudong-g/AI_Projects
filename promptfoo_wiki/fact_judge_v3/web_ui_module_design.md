@@ -10,6 +10,15 @@ Engineering Judge v3 是一个基于 promptfoo 框架构建的工程导向 Wiki 
 - 实现所有核心功能的 Web 化
 - 保持与现有 CLI 的完全兼容
 - 支持实时监控和可视化报告
+- 提供友好的用户体验和无障碍访问
+- 支持多语言国际化 (i18n)
+
+### 1.3 设计原则
+- **用户中心设计**: 以用户需求为核心，简化复杂操作流程
+- **响应式设计**: 适配桌面端、平板和移动端设备
+- **渐进式增强**: 在基本功能基础上逐步添加高级特性
+- **可访问性**: 遵循 WCAG 2.1 AA 标准，确保所有用户都能使用
+- **性能优先**: 优化加载速度和交互响应时间
 
 ## 2. 系统架构
 
@@ -28,10 +37,35 @@ Engineering Judge v3 是一个基于 promptfoo 框架构建的工程导向 Wiki 
 ```
 
 ### 2.2 技术栈
-- **前端**: React 18 + TypeScript + Ant Design
-- **后端**: FastAPI + PostgreSQL + Redis
-- **任务队列**: Celery
-- **实时通信**: WebSocket
+
+#### 2.2.1 前端技术栈
+- **框架**: React 18 + TypeScript
+- **UI 库**: Ant Design 5.x + 自定义主题
+- **状态管理**: Redux Toolkit 或 Zustand
+- **路由**: React Router v6
+- **HTTP 客户端**: Axios 或 SWR
+- **表单处理**: React Hook Form + Zod 验证
+- **国际化**: react-i18next
+- **图表库**: Recharts / ECharts
+- **代码编辑器**: Monaco Editor
+- **样式**: Tailwind CSS + CSS Modules
+
+#### 2.2.2 后端技术栈
+- **Web 框架**: FastAPI (Python 3.9+)
+- **数据库**: SQLite 3 (主库) + 内存缓存 (会话/临时数据)
+- **ORM**: SQLAlchemy 2.x
+- **异步任务**: Celery + RabbitMQ 或内置任务队列
+- **实时通信**: WebSocket + Starlette
+- **API 文档**: 自动生成 OpenAPI/Swagger
+- **认证授权**: JWT + OAuth2
+- **日志系统**: Structlog + Loguru
+
+#### 2.2.3 部署与运维
+- **容器化**: Docker + Docker Compose
+- **反向代理**: Nginx
+- **监控**: Prometheus + Grafana (可选)
+- **日志收集**: 简单日志文件 + 可选 ELK Stack
+- **CI/CD**: GitHub Actions
 
 ## 3. 功能模块设计
 
@@ -317,26 +351,76 @@ interface UserPreferences {
 ## 4. API 设计规范
 
 ### 4.1 RESTful API 设计
-- 使用标准 HTTP 方法 (GET, POST, PUT, DELETE)
+- 使用标准 HTTP 方法 (GET, POST, PUT, PATCH, DELETE)
 - 使用名词复数形式表示资源
 - 使用 HTTP 状态码表示操作结果
 - 返回 JSON 格式数据
+- 遵循 HATEOAS 原则提供资源链接
+- 使用版本控制 (如 /api/v1/)
 
-### 4.2 错误处理
+### 4.2 请求/响应格式
+
+#### 4.2.1 成功响应格式
+```typescript
+interface SuccessResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  timestamp: string;
+  requestId: string;
+}
+```
+
+#### 4.2.2 错误响应格式
 ```typescript
 interface ErrorResponse {
+  success: boolean;
   error: {
-    code: string;
-    message: string;
-    details?: any;
+    code: string;        // 如: VALIDATION_ERROR, AUTH_FAILED
+    message: string;     // 人类可读的错误信息
+    details?: any;       // 具体错误详情
+    timestamp: string;   // 错误发生时间
+    requestId: string;   // 请求ID，用于调试
   };
+}
+
+// 验证错误特殊格式
+interface ValidationError {
+  field: string;
+  message: string;
+  value?: any;
 }
 ```
 
 ### 4.3 分页和过滤
 - 支持标准分页参数 (page, size)
 - 支持排序参数 (sort, order)
-- 支持过滤参数 (filter)
+- 支持过滤参数 (filter, search)
+- 使用统一的分页响应格式：
+
+```typescript
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    size: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+```
+
+### 4.4 API 版本控制
+- 使用 URL 路径版本控制: `/api/v1/resource`
+- 支持向后兼容性
+- 提供版本迁移指南
+
+### 4.5 速率限制
+- 实现基于 IP 和用户的身份的速率限制
+- 使用 HTTP 响应头返回速率限制信息
+- 提供清晰的错误信息告知用户何时可以重试
 
 ## 5. 安全设计
 
@@ -348,48 +432,225 @@ interface ErrorResponse {
 ### 5.2 授权机制
 - 基于角色的访问控制 (RBAC)
 - 细粒度权限控制
-- API 速率限制
+- 基于令牌的 API 速率限制
 
 ### 5.3 数据安全
 - 敏感数据加密存储
 - 输入验证和清理
 - 防止常见 Web 攻击 (XSS, CSRF, SQL注入)
 
-## 6. 性能优化
+## 6. 数据库设计
 
-### 6.1 前端优化
+### 6.1 设计原则
+- **简约设计**: 只包含必要实体，避免过度设计
+- **轻量化**: 使用 SQLite 作为主要数据库，减少运维复杂度
+- **嵌入式**: 无需独立数据库服务器，简化部署
+- **扩展性**: 预留扩展字段，支持未来功能扩展
+
+### 6.2 核心实体设计
+
+#### 6.2.1 用户表 (users)
+```sql
+CREATE TABLE users (
+    id TEXT PRIMARY KEY, -- 使用UUID字符串
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'user', -- admin, user, viewer
+    is_active BOOLEAN DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### 6.2.2 案例表 (cases)
+```sql
+CREATE TABLE cases (
+    id TEXT PRIMARY KEY, -- 使用UUID字符串
+    name TEXT NOT NULL,
+    description TEXT,
+    config_yaml TEXT NOT NULL, -- 存储YAML配置
+    created_by TEXT, -- 外键引用users.id
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### 6.2.3 执行记录表 (executions)
+```sql
+CREATE TABLE executions (
+    id TEXT PRIMARY KEY, -- 使用UUID字符串
+    case_id TEXT, -- 外键引用cases.id
+    user_id TEXT, -- 外键引用users.id
+    status TEXT DEFAULT 'queued', -- queued, running, completed, failed, stopped
+    progress INTEGER DEFAULT 0, -- 执行进度百分比
+    start_time DATETIME,
+    end_time DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### 6.2.4 报告表 (reports)
+```sql
+CREATE TABLE reports (
+    id TEXT PRIMARY KEY, -- 使用UUID字符串
+    execution_id TEXT UNIQUE, -- 外键引用executions.id
+    case_id TEXT, -- 外键引用cases.id
+    final_score INTEGER,
+    result TEXT, -- PASS, FAIL
+    details TEXT, -- JSON字符串存储详细的评估结果
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### 6.2.5 系统配置表 (system_configs)
+```sql
+CREATE TABLE system_configs (
+    id TEXT PRIMARY KEY, -- 使用UUID字符串
+    config_key TEXT UNIQUE NOT NULL,
+    config_value TEXT,
+    description TEXT,
+    updated_by TEXT, -- 外键引用users.id
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 6.3 索引策略
+- 为主键自动创建索引
+- 在经常查询的字段上创建索引 (如 users.username, cases.created_at)
+- 为外键关系创建索引以提高JOIN性能
+
+### 6.4 缓存策略
+- **应用层缓存**: 使用内存缓存 (如 Python 的 functools.lru_cache 或 cachetools)
+- **会话管理**: 基于 JWT 的无状态会话，减少服务器端存储需求
+- **静态数据缓存**: 缓存配置信息和常用查询结果
+- **实现示例**: 
+  - 使用 FastAPI 的内置依赖注入系统管理缓存实例
+  - 采用内存字典或第三方库 (如 diskcache) 实现跨进程缓存
+  - 为不同类型的缓存数据设置合适的过期时间
+
+### 6.5 SQLite 优化
+- 使用 WAL 模式提高并发性能
+- 合理设置缓存大小
+- 定期执行 VACUUM 清理碎片
+- 使用 PRAGMA 设置优化性能参数
+
+## 7. 测试策略
+
+### 7.1 前端测试
+- **单元测试**: 使用 Jest + React Testing Library
+- **集成测试**: 测试组件间交互
+- **端到端测试**: 使用 Playwright 或 Cypress
+- **视觉回归测试**: 确保 UI 一致性
+- **可访问性测试**: 使用 axe-core 进行自动化检查
+
+### 7.2 后端测试
+- **单元测试**: 使用 pytest 进行函数和类测试
+- **集成测试**: 测试 API 端点和数据库交互
+- **契约测试**: 确保 API 向后兼容性
+- **性能测试**: 使用 Locust 进行负载测试
+- **安全测试**: 自动化漏洞扫描
+
+### 7.3 测试覆盖率
+- 目标: 前端和后端均达到 85% 以上覆盖率
+- 集成到 CI/CD 流水线
+- 生成测试报告和覆盖率报告
+
+## 8. 性能优化
+
+### 8.1 前端优化
 - 代码分割和懒加载
 - 组件虚拟化
 - 数据缓存策略
 - 图片优化
+- 预加载和预获取策略
+- 减少第三方库依赖
 
-### 6.2 后端优化
+### 8.2 后端优化
 - 数据库查询优化
-- 缓存策略 (Redis)
+- 应用层缓存策略 (内存缓存)
 - 异步处理
 - 连接池管理
+- API 响应压缩
+- 数据库索引优化
 
-### 6.3 网络优化
+### 8.3 网络优化
 - HTTP/2 支持
 - 静态资源压缩
 - CDN 加速
+- 请求合并和批处理
 
-## 7. 部署架构
+## 9. Windows 兼容性与部署
 
-### 7.1 容器化部署
-- Docker 容器化
-- Docker Compose 编排
-- 环境变量管理
+### 9.1 Windows 环境适配
+- **Python 环境**: 使用 Python 3.9+ 和虚拟环境
+- **路径处理**: 使用 pathlib 处理跨平台路径差异
+- **进程管理**: 使用 Windows 服务或任务计划程序管理后台任务
+- **文件编码**: 统一使用 UTF-8 编码
 
-### 7.2 监控和日志
+### 9.2 Windows 服务部署
+- **服务创建**: 使用 NSSM (Non-Sucking Service Manager) 或 winsw 创建 Windows 服务
+- **进程守护**: 实现自动重启和错误恢复机制
+- **日志管理**: 配置 Windows 事件日志或文件日志
+
+### 9.3 任务队列在 Windows 上的实现
+- **Celery 替代**: 使用 APScheduler 或直接使用 asyncio 实现定时任务
+- **后台任务**: 利用 Windows 任务计划程序执行周期性任务
+- **异步处理**: 采用 Python 内置的 asyncio 或 concurrent.futures
+
+### 9.4 性能考虑
+- **内存管理**: Windows 环境下的内存使用优化
+- **并发处理**: 适应 Windows 的异步 I/O 模型
+
+## 10. 国际化与本地化
+
+### 10.1 国际化策略
+- 使用 react-i18next 进行前端国际化
+- 支持动态语言切换
+- 提供 RTL (Right-to-Left) 语言支持
+- 日期、数字、货币格式本地化
+
+### 10.2 语言包管理
+- 统一的语言包结构
+- 支持嵌套命名空间
+- 提供翻译记忆库
+- 支持复数形式和上下文翻译
+
+### 10.3 本地化内容
+- 日期时间格式本地化
+- 数字和货币格式本地化
+- 文本方向 (LTR/RTL) 支持
+- 文化特定内容展示
+
+## 11. 部署架构
+
+### 11.1 部署选项
+- **容器化部署**:
+  - Docker 容器化 (适用于 Linux 环境)
+  - Docker Compose 编排
+  - 环境变量管理
+  - 多阶段构建优化镜像大小
+- **Windows 原生部署**:
+  - Python 虚拟环境
+  - 直接运行 FastAPI 应用
+  - Windows 服务或任务计划程序管理后台任务
+
+### 11.2 CI/CD 流水线
+- 自动化测试 (单元测试、集成测试、E2E测试)
+- 自动化构建和部署
+- 金丝雀发布策略
+- 回滚机制
+
+### 11.3 监控和日志
 - 应用性能监控
 - 错误追踪
 - 日志聚合
 - 健康检查
+- 自定义业务指标监控
 
 ---
 
-**文档版本**: 1.0  
+**文档版本**: 1.5  
 **创建日期**: 2026年2月9日  
-**最后更新**: 2026年2月9日  
+**最后更新**: 2026年2月10日  
 **作者**: System Assistant
