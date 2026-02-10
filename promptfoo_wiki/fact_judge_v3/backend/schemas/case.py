@@ -2,6 +2,32 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
+# 首先定义 Execution 相关模型
+class ExecutionBase(BaseModel):
+    case_id: str
+    status: str = "queued"  # queued, running, completed, failed, stopped, paused, scheduled
+    progress: int = 0
+
+class ExecutionCreate(ExecutionBase):
+    pass
+
+class ExecutionUpdate(BaseModel):
+    status: Optional[str] = None
+    progress: Optional[int] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+
+class Execution(ExecutionBase):
+    id: str
+    user_id: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# 然后定义 Case 相关模型
 class CaseBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -27,31 +53,7 @@ class Case(CaseBase):
         from_attributes = True
 
 class CaseWithExecutions(Case):
-    executions: List['Execution'] = []
-
-class ExecutionBase(BaseModel):
-    case_id: str
-    status: str = "queued"  # queued, running, completed, failed, stopped, paused, scheduled
-    progress: int = 0
-
-class ExecutionCreate(ExecutionBase):
-    pass
-
-class ExecutionUpdate(BaseModel):
-    status: Optional[str] = None
-    progress: Optional[int] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-
-class Execution(ExecutionBase):
-    id: str
-    user_id: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+    executions: List[Execution] = []
 
 class ReportBase(BaseModel):
     execution_id: str
