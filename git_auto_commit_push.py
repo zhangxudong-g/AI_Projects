@@ -15,10 +15,10 @@ from typing import Tuple
 def run_git_command(command: str) -> Tuple[bool, str]:
     """
     执行Git命令并返回结果
-    
+
     Args:
         command: 要执行的Git命令
-        
+
     Returns:
         tuple: (是否成功, 输出信息)
     """
@@ -28,13 +28,18 @@ def run_git_command(command: str) -> Tuple[bool, str]:
             shell=True,
             capture_output=True,
             text=True,
+            encoding='utf-8',
             cwd=os.getcwd()
         )
-        
+
         if result.returncode == 0:
-            return True, result.stdout.strip()
+            # 处理可能的None值
+            stdout = result.stdout if result.stdout is not None else ""
+            return True, stdout.strip()
         else:
-            return False, result.stderr.strip()
+            # 处理可能的None值
+            stderr = result.stderr if result.stderr is not None else ""
+            return False, stderr.strip()
     except Exception as e:
         return False, str(e)
 
