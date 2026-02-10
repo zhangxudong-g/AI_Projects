@@ -1,6 +1,6 @@
 import os
 from typing import List, Union
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Engineering Judge v3 API"
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     # 日志配置
     LOG_LEVEL: str = "INFO"
     
-    class Config:
-        env_file = ".env"
+    # 额外配置
+    model_config = {"extra": "ignore"}  # 忽略额外字段
 
 settings = Settings()
