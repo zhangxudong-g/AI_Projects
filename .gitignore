@@ -93,3 +93,25 @@ promptfoo_wiki/fact_judge*/output*
 promptfoo_wiki/fact_judge*/res*
 promptfoo_wiki/fact_judge*/opt*
 promptfoo_wiki/fact_judge*/report*
+
+# fact_judge_v3 specific ignores
+promptfoo_wiki/fact_judge_v3/backend/__pycache__/
+promptfoo_wiki/fact_judge_v3/backend/*.py[cod]
+promptfoo_wiki/fact_judge_v3/backend/*$py.class
+promptfoo_wiki/fact_judge_v3/backend/build/
+promptfoo_wiki/fact_judge_v3/backend/dist/
+promptfoo_wiki/fact_judge_v3/backend/venv/
+promptfoo_wiki/fact_judge_v3/backend/env/
+
+# fact_judge_v3 frontend specific ignores
+promptfoo_wiki/fact_judge_v3/frontend/node_modules/
+promptfoo_wiki/fact_judge_v3/frontend/dist/
+promptfoo_wiki/fact_judge_v3/frontend/build/
+promptfoo_wiki/fact_judge_v3/frontend/.vite/
+promptfoo_wiki/fact_judge_v3/frontend/.nuxt/
+promptfoo_wiki/fact_judge_v3/frontend/.next/
+promptfoo_wiki/fact_judge_v3/frontend/.svelte-kit/
+promptfoo_wiki/fact_judge_v3/frontend/.angular/
+promptfoo_wiki/fact_judge_v3/frontend/.cache/
+promptfoo_wiki/fact_judge_v3/frontend/public/dist/
+promptfoo_wiki/fact_judge_v3/frontend/public/build/
