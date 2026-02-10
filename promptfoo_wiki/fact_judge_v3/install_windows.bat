@@ -129,7 +129,12 @@ cd frontend
 REM Install frontend dependencies
 echo Installing frontend dependencies...
 if exist "package.json" (
+    echo Attempting standard installation...
     npm install
+    if errorlevel 1 (
+        echo Standard installation failed, trying with legacy peer deps...
+        npm install --legacy-peer-deps
+    )
 ) else (
     echo WARNING: package.json not found in frontend directory.
     echo Skipping frontend installation.
