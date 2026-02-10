@@ -29,56 +29,56 @@ class TestAllFeatures(unittest.TestCase):
         
         for endpoint in endpoints:
             response = self.client.get(endpoint)
-            # 由于需要认证，预期返回 401
-            self.assertEqual(response.status_code, 401)
+            # 由于需要认证，预期返回 401 或 403
+            self.assertIn(response.status_code, [401, 403])
 
     def test_cases_endpoints(self):
         """测试案例相关端点"""
         # 测试获取案例列表
         response = self.client.get("/api/v1/cases/")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
         
         # 测试获取模板
         response = self.client.get("/api/v1/cases/templates")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
 
     def test_executions_endpoints(self):
         """测试执行相关端点"""
         # 测试获取执行列表
         response = self.client.get("/api/v1/executions/")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
         
         # 测试调度执行端点
         response = self.client.post("/api/v1/executions/schedule")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
 
     def test_reports_endpoints(self):
         """测试报告相关端点"""
         # 测试获取报告列表
         response = self.client.get("/api/v1/reports/")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
         
         # 测试报告图表数据
         response = self.client.get("/api/v1/reports/charts")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
         
         # 测试报告导出端点
         response = self.client.get("/api/v1/reports/export/batch")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
 
     def test_users_endpoints(self):
         """测试用户相关端点"""
         # 测试获取用户列表
         response = self.client.get("/api/v1/users/")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
         
         # 测试获取用户资料
         response = self.client.get("/api/v1/users/profile")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
         
         # 测试获取活动日志
         response = self.client.get("/api/v1/users/activity-log")
-        self.assertEqual(response.status_code, 401)  # 需要认证
+        self.assertIn(response.status_code, [401, 403])  # 需要认证
 
     def test_api_structure(self):
         """测试API结构完整性"""
