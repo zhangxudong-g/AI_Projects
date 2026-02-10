@@ -69,6 +69,17 @@
   - 分析依赖关系图以识别冲突
   - 生成依赖健康报告
 
+## 9. Autonomous Thinking Agent
+- **用途**: 自主分析任务并决定使用哪些agents
+- **触发方式**: 当需要智能决策使用哪些工具时使用
+- **功能**:
+  - 分析用户请求以理解任务需求
+  - 确定哪些agents组合最适合完成任务
+  - 自动按正确顺序触发必要的agents
+  - 在多个agents之间进行协调
+  - 监控执行情况并提供综合反馈
+  - 根据上下文决定何时使用哪个agents
+
 ## 如何使用
 
 要使用这些agents，请在与AI交互时明确提及您想要使用的agent类型，例如：
@@ -80,5 +91,6 @@
 - "初始化项目" → 触发Project Init Agent
 - "检查性能" → 触发Performance Monitoring Agent
 - "检查依赖" → 触发Dependency Management Agent
+- "智能分析任务" → 触发Autonomous Thinking Agent
 
 AI将自动选择适当的agent来处理您的请求。
