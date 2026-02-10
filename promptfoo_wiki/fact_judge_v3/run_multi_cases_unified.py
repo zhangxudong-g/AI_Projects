@@ -7,12 +7,13 @@ Engineering Judge v3 - 统一测试案例运行器
 3. retry 模式: 仅重跑失败的案例
 """
 import datetime
+import time
 import yaml
 import json
 import argparse
 from pathlib import Path
 from run_single_case_pipeline import run_single_case
-from utils import format_results_with_llm
+from utils import format_results_with_llm, format_results_to_html
 
 
 class ResumeRunner:
@@ -21,6 +22,8 @@ class ResumeRunner:
         self.status_file = self.base_output / "execution_status.json"
         self.completed_cases = {}
         self.failed_cases = {}
+        self.start_time = None
+        self.end_time = None
         self.load_status()
     
     def load_status(self):
@@ -145,16 +148,17 @@ class ResumeRunner:
         """
         支持断续执行的批量运行函数
         """
+        self.start_time = time.time()
         cfg = yaml.safe_load(open(cases_yaml, encoding="utf-8"))
-        
+
         # 获取剩余待执行的 cases
         remaining_cases, completed_ids, failed_ids = self.get_remaining_cases(cfg["cases"])
-        
+
         print(f"总共 {len(cfg['cases'])} 个测试案例")
         print(f"已完成: {len(completed_ids)} 个")
         print(f"失败: {len(failed_ids)} 个")
         print(f"剩余待执行: {len(remaining_cases)} 个")
-        
+
         if not remaining_cases:
             print("所有案例都已处理完毕！")
             # 按照原始配置顺序返回所有结果
@@ -174,8 +178,14 @@ class ResumeRunner:
                         "final_score": 0,  # 失败案例分数为0
                         "result": "ERROR",
                     })
+            
+            # 计算总执行时间
+            self.end_time = time.time()
+            total_duration = self.end_time - self.start_time
+            print(f"\n总执行时间: {total_duration:.2f} 秒")
+            
             return all_results
-        
+
         # 按原始配置顺序构建结果
         results_map = {}
 
@@ -206,7 +216,7 @@ class ResumeRunner:
             case_id = case["id"]
             if case_id in results_map:
                 results.append(results_map[case_id])
-        
+
         # 最后保存状态
         self.save_status()
 
@@ -217,6 +227,8 @@ class ResumeRunner:
 
         # 使用LLM整理结果并输出为Markdown表格
         format_results_with_llm(results, cfg, base_output)
+        # 也输出为HTML表格
+        format_results_to_html(results, cfg, base_output)
 
         # 保存最终结果到文件
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -225,8 +237,13 @@ class ResumeRunner:
         with open(final_results_path, "w", encoding="utf-8") as f:
             yaml.dump({"results": results}, f, allow_unicode=True)
 
+        # 计算总执行时间
+        self.end_time = time.time()
+        total_duration = self.end_time - self.start_time
         print(f"\n状态文件保存至: {self.status_file}")
         print(f"最终结果保存至: {final_results_path}")
+        print(f"总执行时间: {total_duration:.2f} 秒")
+        print(f"平均每案例耗时: {total_duration/len(remaining_cases):.2f} 秒" if remaining_cases else "无新案例执行")
 
         return results
 
@@ -234,6 +251,7 @@ class ResumeRunner:
         """
         仅运行失败的测试案例
         """
+        self.start_time = time.time()
         cfg = yaml.safe_load(open(cases_yaml, encoding="utf-8"))
 
         # 获取失败的 cases
@@ -261,6 +279,12 @@ class ResumeRunner:
                         "final_score": 0,  # 失败案例分数为0
                         "result": "ERROR",
                     })
+            
+            # 计算总执行时间
+            self.end_time = time.time()
+            total_duration = self.end_time - self.start_time
+            print(f"\n总执行时间: {total_duration:.2f} 秒")
+            
             return all_results
 
         # 按原始配置顺序构建结果
@@ -316,8 +340,13 @@ class ResumeRunner:
         with open(final_results_path, "w", encoding="utf-8") as f:
             yaml.dump({"results": results}, f, allow_unicode=True)
 
+        # 计算总执行时间
+        self.end_time = time.time()
+        total_duration = self.end_time - self.start_time
         print(f"\n状态文件保存至: {self.status_file}")
         print(f"重跑结果保存至: {final_results_path}")
+        print(f"总执行时间: {total_duration:.2f} 秒")
+        print(f"平均每案例耗时: {total_duration/len(failed_cases):.2f} 秒" if failed_cases else "无失败案例重跑")
 
         return results
 
@@ -326,6 +355,7 @@ def run_all_cases_simple(cases_yaml: str, base_output: str = "output"):
     """
     运行所有测试案例，使用Engineering Judge v3系统进行评估（简单模式，无断点续传）
     """
+    start_time = time.time()
     cfg = yaml.safe_load(open(cases_yaml, encoding="utf-8"))
     results = []
 
@@ -360,6 +390,12 @@ def run_all_cases_simple(cases_yaml: str, base_output: str = "output"):
     final_results_path = Path(base_output) / filename
     with open(final_results_path, "w", encoding="utf-8") as f:
         yaml.dump({"results": results}, f, allow_unicode=True)
+
+    # 计算总执行时间
+    end_time = time.time()
+    total_duration = end_time - start_time
+    print(f"\n总执行时间: {total_duration:.2f} 秒")
+    print(f"平均每案例耗时: {total_duration/len(results):.2f} 秒" if results else "无案例执行")
 
     return results
 

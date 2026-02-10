@@ -1023,6 +1023,13 @@ python run_multi_cases_unified.py all -c my_cases.yaml -o my_output
 |---------|--------|------|------|------|
 | case_001 | agent.py | PASS | 85 | <details><summary>Score: 85, Result: PASS</summary><div>Summary: ...</div></details> |
 
+#### 5.3.3 执行时间统计
+系统会自动计算并显示执行时间信息：
+
+- **总执行时间**：显示整个执行过程的总耗时
+- **平均每案例耗时**：显示每个案例的平均执行时间
+- **时间单位**：以秒为单位，精确到小数点后两位
+
 ### 5.4 回归测试运行
 
 #### 5.4.1 合并回归测试

@@ -137,6 +137,9 @@ python run_multi_cases_unified.py all -c my_cases.yaml -o my_output
 - `resume`：支持断点续传，跳过已完成的案例（默认模式）
 - `retry`：仅重跑失败的案例（相当于旧版本的 `--retry-failed` 模式）
 
+**新增功能：**
+- **执行时间统计**：系统会自动计算并显示总执行时间和平均每案例耗时
+
 ### 对抗性回归测试
 
 运行对抗性回归测试以确保系统稳定性：
@@ -185,6 +188,7 @@ cases:
 - **多维度信息**：包含Case ID、文件名、结果、分数和详细信息
 - **可折叠详情**：使用HTML的`<details>`和`<summary>`标签实现可折叠显示
 - **平铺信息展示**：在详情中平铺显示`final_score.json`中的关键信息
+- **执行时间统计**：显示总执行时间和平均每案例耗时
 
 ## 回归测试
 
@@ -213,11 +217,35 @@ cases:
 
 ## 更新日志
 
-### 2026年2月9日更新
+### 2026年2月10日更新
 
 今天对 Engineering Fact Judge v3 系统进行了重要更新，主要包括：
 
-#### 1. Engineering Judge v3.1 升级
+#### 1. 工程建议优先显示优化
+根据用户反馈，对结果展示进行了重要优化：
+
+- **工程建议作为主要展示点**：在结果表格的摘要部分，直接显示推荐操作内容，而非"Recommended Action: XXX"格式
+- **消除冗余信息**：详情部分不再重复显示推荐操作，避免与标题重复
+- **提升用户体验**：用户可以第一时间看到最重要的工程建议，无需展开详情
+
+#### 2. HTML 格式报告功能
+新增了 HTML 格式的结果报告功能：
+
+- **直接浏览器查看**：生成的 HTML 文件可直接在浏览器中打开，无需额外转换
+- **响应式设计**：采用现代化的 CSS 样式，适配不同屏幕尺寸
+- **交互式详情**：使用 `<details>` 和 `<summary>` 标签实现可折叠的详情查看
+- **状态可视化**：PASS/FAIL 状态使用不同颜色标识，便于快速识别
+- **生成函数**：新增 `format_results_to_html()` 函数，与现有的 Markdown 格式功能并行
+
+#### 3. PL/SQL 测试用例扩展
+为支持更广泛的数据库代码评估，新增了 PL/SQL 测试用例：
+
+- **SQL 文件 UTF-8 转换**：创建了 `convert_sql_to_utf8.py` 脚本，将原始 SQL 文件转换为 UTF-8 编码
+- **cases_plsql.yaml**：创建了包含 34 个 PL/SQL 测试用例的配置文件，涵盖 Functions、Procedures、Packages、Tables、Views、Package Bodies 等多种对象类型
+- **cases_plsql_kimi.yaml**：创建了使用 Kimi 生成文档的对比测试配置文件，用于评估不同 AI 模型的文档生成质量
+- **多类型覆盖**：测试用例覆盖了各种 PL/SQL 对象类型，确保评估系统的全面性
+
+#### 4. Engineering Judge v3.1 升级
 根据 DESIGN_v3.1.md 文档，实现了以下关键改进：
 
 - **新增 fabrication_type 字段**：在 Stage2 输出中添加了 `fabrication_type` 字段，用于明确标识伪造类型（NONE, ARCHITECTURAL, LOCAL, TERMINOLOGY）
@@ -225,16 +253,16 @@ cases:
 - **Abstraction Mismatch 分数封顶**：当 `explanation_reasonableness == "HIGH"` 且 `fabrication_risk == "LOW"` 且 `abstraction_quality` 为 `"OK"` 或 `"POOR"` 时，将最终分数限制在 50 或以下
 - **更新 Stage2 Prompt**：添加了 CRITICAL FABRICATION RULES，强化对架构级伪造的识别
 
-#### 2. 结果报告增强
+#### 5. 结果报告增强
 - **工程操作建议显示**：在最终报告中添加了 `engineering_action` 信息，包括操作级别、描述和推荐操作
 - **更详细的评估维度**：在最终报告中显示所有评估维度的详细信息
 
-#### 3. 回归测试改进
+#### 6. 回归测试改进
 - **合并回归测试**：创建了 `run_both_regressions_standalone.py` 脚本，可以同时运行 positive 和 adversarial 回归测试
 - **修复变量传递问题**：解决了 `language` 参数被当作文件路径处理的问题
 - **改进编码处理**：在 subprocess 调用中添加了 `encoding='utf-8'` 以解决编码问题
 
-#### 4. 系统改进
+#### 7. 系统改进
 - **增强鲁棒性**：改进了文件路径处理逻辑，支持多种可能的文件名变体
 - **优化错误处理**：增强了错误处理和调试信息
 

@@ -6,9 +6,9 @@
 
 ---
 
-# Engineering Judge v3 → v3.1
+# Engineering Judge v3 → v3.1 → v3.2
 
-## Stage2 + Final Score 修改设计文档
+## Stage2 + Final Score + 结果展示 修改设计文档
 
 ---
 
@@ -233,12 +233,48 @@ score ≤ 50
 
 ---
 
-## 9. 版本结论
+## 9. 用户体验优化扩展（v3.2）
+
+### 9.1 工程建议优先显示
+
+**设计目标**：将最重要的工程建议直接展示给用户，提升用户体验
+
+**实现要求**：
+- 在结果表格的摘要部分，直接显示推荐操作内容，而非"Recommended Action: XXX"格式
+- 详情部分不再重复显示推荐操作，避免与标题重复
+- 确保用户可以第一时间看到最重要的工程建议
+
+**技术实现**：
+```python
+# 在 _format_details 函数中
+compact_info = f"{recommended_action[:50]}{'...' if len(str(recommended_action)) > 50 else ''}"
+```
+
+### 9.2 HTML 格式报告功能
+
+**设计目标**：提供可直接在浏览器中查看的格式化报告
+
+**实现要求**：
+- 生成的 HTML 文件可直接在浏览器中打开
+- 采用现代化的 CSS 样式，适配不同屏幕尺寸
+- 使用 `<details>` 和 `<summary>` 标签实现可折叠的详情查看
+- PASS/FAIL 状态使用不同颜色标识
+
+**技术实现**：
+```python
+# 新增 format_results_to_html 函数
+def format_results_to_html(case_results, cases_config, base_output: str = "output"):
+    # 生成完整的HTML页面，包含CSS样式和表格
+```
+
+---
+
+## 10. 版本结论
 
 完成以上修改后：
 
 * Engineering Judge 从「评分器」
-* 升级为「**工程事实裁判 + 法律执行器**」
+* 升级为「**工程事实裁判 + 法律执行器 + 用户体验优化器**」
 
-这是 **v3 → v3.1** 的本质变化。
+这是 **v3 → v3.1 → v3.2** 的演进过程。
 

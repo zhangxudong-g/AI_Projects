@@ -1,0 +1,148 @@
+cases:
+  # PL/SQL Functions 测试用例 (5个)
+  - id: case_plsql_func_001
+    vars:
+      source_code: data/plsql/code/FUNCTION_GABFKGISURLGT.utf8.sql
+      wiki_md: data/plsql/result/FUNCTION_GABFKGISURLGT-kimi.md
+  - id: case_plsql_func_002
+    vars:
+      source_code: data/plsql/code/FUNCTION_GABFKKJNNNRCK.utf8.sql
+      wiki_md: data/plsql/result/FUNCTION_GABFKKJNNNRCK-kimi.md
+  - id: case_plsql_func_003
+    vars:
+      source_code: data/plsql/code/FUNCTION_GABFKMJCK.utf8.sql
+      wiki_md: data/plsql/result/FUNCTION_GABFKMJCK-kimi.md
+  - id: case_plsql_func_004
+    vars:
+      source_code: data/plsql/code/FUNCTION_GABFKMJHNKN.utf8.sql
+      wiki_md: data/plsql/result/FUNCTION_GABFKMJHNKN-kimi.md
+  - id: case_plsql_func_005
+    vars:
+      source_code: data/plsql/code/FUNCTION_GABFKSHKCSCV.utf8.sql
+      wiki_md: data/plsql/result/FUNCTION_GABFKSHKCSCV-kimi.md
+
+  # PL/SQL Procedures 测试用例 (10个)
+  - id: case_plsql_proc_001
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKAITEN1.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKAITEN1-kimi.md
+  - id: case_plsql_proc_002
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKAITEN2.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKAITEN2-kimi.md
+  - id: case_plsql_proc_003
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKDOUTEI5.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKDOUTEI5-kimi.md
+  - id: case_plsql_proc_004
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKDOUTEI6.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKDOUTEI6-kimi.md
+  - id: case_plsql_proc_005
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKDOUTEI7.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKDOUTEI7-kimi.md
+  - id: case_plsql_proc_006
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKGTMTRK.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKGTMTRK-kimi.md
+  - id: case_plsql_proc_007
+    vars:
+      source_code: data/plsql/code/PROCEDURE_GABSKTNNYSH1.utf8.sql
+      wiki_md: data/plsql/result/PROCEDURE_GABSKTNNYSH1-kimi.md
+
+  # PL/SQL Packages 测试用例 (7个)
+  - id: case_plsql_pkg_001
+    vars:
+      source_code: data/plsql/code/PACKAGE_GABPA00200.utf8.sql
+      wiki_md: data/plsql/result/PACKAGE_GABPA00200-kimi.md
+  - id: case_plsql_pkg_002
+    vars:
+      source_code: data/plsql/code/PACKAGE_GABPA00300.utf8.sql
+      wiki_md: data/plsql/result/PACKAGE_GABPA00300-kimi.md
+  - id: case_plsql_pkg_003
+    vars:
+      source_code: data/plsql/code/PACKAGE_GABPA00400.utf8.sql
+      wiki_md: data/plsql/result/PACKAGE_GABPA00400-kimi.md
+  - id: case_plsql_pkg_004
+    vars:
+      source_code: data/plsql/code/PACKAGE_GABPA01400.utf8.sql
+      wiki_md: data/plsql/result/PACKAGE_GABPA01400-kimi.md
+  - id: case_plsql_pkg_005
+    vars:
+      source_code: data/plsql/code/PACKAGE_GABPR01100.utf8.sql
+      wiki_md: data/plsql/result/PACKAGE_GABPR01100-kimi.md
+  - id: case_plsql_pkg_006
+    vars:
+      source_code: data/plsql/code/PACKAGE_GABPR01200.utf8.sql
+      wiki_md: data/plsql/result/PACKAGE_GABPR01200-kimi.md
+
+  # PL/SQL Tables 测试用例 (6个)
+  - id: case_plsql_tbl_001
+    vars:
+      source_code: data/plsql/code/TABLE_GABTATENAKIHON.utf8.sql
+      wiki_md: data/plsql/result/TABLE_GABTATENAKIHON-kimi.md
+  - id: case_plsql_tbl_002
+    vars:
+      source_code: data/plsql/code/TABLE_GABTREQ_ATENA.utf8.sql
+      wiki_md: data/plsql/result/TABLE_GABTREQ_ATENA-kimi.md
+  - id: case_plsql_tbl_003
+    vars:
+      source_code: data/plsql/code/TABLE_GABWIDENTFIL.utf8.sql
+      wiki_md: data/plsql/result/TABLE_GABWIDENTFIL-kimi.md
+  - id: case_plsql_tbl_004
+    vars:
+      source_code: data/plsql/code/TABLE_GABWL003R001.utf8.sql
+      wiki_md: data/plsql/result/TABLE_GABWL003R001-kimi.md
+  - id: case_plsql_tbl_005
+    vars:
+      source_code: data/plsql/code/TABLE_GABWRUISEKIKIHON.utf8.sql
+      wiki_md: data/plsql/result/TABLE_GABWRUISEKIKIHON-kimi.md
+  - id: case_plsql_tbl_006
+    vars:
+      source_code: data/plsql/code/TABLE_GADTMEMO.utf8.sql
+      wiki_md: data/plsql/result/TABLE_GADTMEMO-kimi.md
+
+  # PL/SQL Views 测试用例 (6个)
+  - id: case_plsql_view_001
+    vars:
+      source_code: data/plsql/code/VIEW_GABVEUC_JUKI_SOFU.utf8.sql
+      wiki_md: data/plsql/result/VIEW_GABVEUC_JUKI_SOFU-kimi.md
+  - id: case_plsql_view_002
+    vars:
+      source_code: data/plsql/code/VIEW_GABVEUC_TOSHI_3MEI.utf8.sql
+      wiki_md: data/plsql/result/VIEW_GABVEUC_TOSHI_3MEI-kimi.md
+  - id: case_plsql_view_003
+    vars:
+      source_code: data/plsql/code/VIEW_GABVGYOMUSHIKAKUGET.utf8.sql
+      wiki_md: data/plsql/result/VIEW_GABVGYOMUSHIKAKUGET-kimi.md
+  - id: case_plsql_view_004
+    vars:
+      source_code: data/plsql/code/VIEW_JIBVATENAALL.utf8.sql
+      wiki_md: data/plsql/result/VIEW_JIBVATENAALL-kimi.md
+  - id: case_plsql_view_005
+    vars:
+      source_code: data/plsql/code/VIEW_JIBVKNENKIN.utf8.sql
+      wiki_md: data/plsql/result/VIEW_JIBVKNENKIN-kimi.md
+
+  # PL/SQL Package Bodies 测试用例 (剩余的补充)
+  - id: case_plsql_body_001
+    vars:
+      source_code: data/plsql/code/BODY_GABPA00500B.utf8.sql
+      wiki_md: data/plsql/result/BODY_GABPA00500B-kimi.md
+  - id: case_plsql_body_002
+    vars:
+      source_code: data/plsql/code/BODY_GABPA01400B.utf8.sql
+      wiki_md: data/plsql/result/BODY_GABPA01400B-kimi.md
+  - id: case_plsql_body_003
+    vars:
+      source_code: data/plsql/code/BODY_GABPB60500B.utf8.sql
+      wiki_md: data/plsql/result/BODY_GABPB60500B-kimi.md
+  - id: case_plsql_body_004
+    vars:
+      source_code: data/plsql/code/BODY_GABPC20200B.utf8.sql
+      wiki_md: data/plsql/result/BODY_GABPC20200B-kimi.md
+  - id: case_plsql_body_005
+    vars:
+      source_code: data/plsql/code/BODY_GABPC20300B.utf8.sql
+      wiki_md: data/plsql/result/BODY_GABPC20300B-kimi.md
