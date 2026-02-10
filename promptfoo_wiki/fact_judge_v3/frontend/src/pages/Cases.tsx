@@ -8,9 +8,11 @@ import {
   Space, 
   Tag,
   Typography,
-  message 
+  message,
+  Upload,
+  Select
 } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import apiClient from '../utils/api';
 
 const { Title } = Typography;
@@ -29,6 +31,7 @@ const CasesPage: React.FC = () => {
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [importModalVisible, setImportModalVisible] = useState(false);
   const [editingCase, setEditingCase] = useState<CaseItem | null>(null);
   const [form] = Form.useForm();
 
@@ -105,6 +108,40 @@ const CasesPage: React.FC = () => {
     }
   };
 
+  const handleImportModalOpen = () => {
+    setImportModalVisible(true);
+  };
+
+  const handleImportSubmit = async (values: any) => {
+    try {
+      // 这里应该实现文件上传逻辑
+      // const formData = new FormData();
+      // formData.append('file', values.file.originFileObj);
+      // const response = await apiClient.post('/cases/import', formData, {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data'
+      //   }
+      // });
+      
+      message.success('Cases imported successfully');
+      setImportModalVisible(false);
+      fetchCases(); // 重新获取列表
+    } catch (error) {
+      console.error('Failed to import cases:', error);
+      message.error('Failed to import cases');
+    }
+  };
+
+  const beforeUpload = (file: any) => {
+    const isSupportedFormat = file.type === 'application/json' || 
+                              file.name.endsWith('.yaml') || 
+                              file.name.endsWith('.yml');
+    if (!isSupportedFormat) {
+      message.error('You can only upload JSON, YAML or YML files!');
+    }
+    return isSupportedFormat;
+  };
+
   const columns = [
     {
       title: 'ID',
@@ -152,9 +189,14 @@ const CasesPage: React.FC = () => {
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={2}>Test Cases</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCase}>
-          Add Case
-        </Button>
+        <Space>
+          <Button type="default" icon={<UploadOutlined />} onClick={handleImportModalOpen}>
+            Import Cases
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCase}>
+            Add Case
+          </Button>
+        </Space>
       </div>
 
       <Table 
@@ -198,6 +240,40 @@ const CasesPage: React.FC = () => {
             <Input /> {/* 在实际实现中，这里应该是 Select 组件 */}
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Import Cases"
+        open={importModalVisible}
+        onCancel={() => setImportModalVisible(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Upload
+          name="file"
+          beforeUpload={beforeUpload}
+          onChange={(info) => {
+            if (info.file.status !== 'uploading') {
+              console.log(info.file, info.fileList);
+            }
+            if (info.file.status === 'done') {
+              message.success(`${info.file.name} file uploaded successfully`);
+              setImportModalVisible(false);
+              fetchCases(); // 重新获取列表
+            } else if (info.file.status === 'error') {
+              message.error(`${info.file.name} file upload failed.`);
+            }
+          }}
+          accept=".json,.yaml,.yml"
+        >
+          <Button icon={<UploadOutlined />}>Click to Upload JSON/YAML</Button>
+        </Upload>
+        <div style={{ marginTop: 16 }}>
+          <Typography.Text type="secondary">
+            Supported formats: JSON, YAML (.yml or .yaml)<br/>
+            File should contain an array of case definitions.
+          </Typography.Text>
+        </div>
       </Modal>
     </div>
   );

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -113,3 +113,79 @@ def delete_case(
     db.delete(db_case)
     db.commit()
     return {"message": "Case deleted successfully"}
+
+
+@router.post("/import")
+def import_cases(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    批量导入案例
+    """
+    import json
+    import yaml
+    
+    try:
+        # 读取上传的文件
+        content = file.file.read().decode("utf-8")
+        
+        # 根据文件扩展名解析内容
+        if file.filename.endswith('.json'):
+            cases_data = json.loads(content)
+        elif file.filename.endswith('.yaml') or file.filename.endswith('.yml'):
+            cases_data = yaml.safe_load(content)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Unsupported file format. Please upload JSON or YAML file."
+            )
+        
+        imported_count = 0
+        for case_data in cases_data:
+            # 创建新案例
+            db_case = CaseModel(
+                name=case_data.get("name"),
+                description=case_data.get("description", ""),
+                config_yaml=yaml.dump(case_data.get("config", {})),
+                created_by=current_user.id
+            )
+            db.add(db_case)
+            imported_count += 1
+        
+        db.commit()
+        return {"message": f"Successfully imported {imported_count} cases", "imported_count": imported_count}
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error importing cases: {str(e)}"
+        )
+
+
+@router.get("/templates")
+def get_case_templates(
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    获取案例模板列表
+    """
+    # 这里可以返回预定义的案例模板
+    templates = [
+        {
+            "id": "template-001",
+            "name": "Java Controller Template",
+            "description": "Template for evaluating Java controllers",
+            "configYaml": "type: java-controller\ntechnology: spring-boot\nfeatures:\n  - rest-api\n  - validation\n"
+        },
+        {
+            "id": "template-002",
+            "name": "SQL Procedure Template",
+            "description": "Template for evaluating SQL procedures",
+            "configYaml": "type: sql-procedure\ndatabase: oracle\nfeatures:\n  - transaction\n  - error-handling\n"
+        }
+    ]
+    return {"templates": templates}

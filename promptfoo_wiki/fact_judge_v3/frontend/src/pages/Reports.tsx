@@ -16,7 +16,8 @@ import {
   Statistic
 } from 'antd';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, DownOutlined } from '@ant-design/icons';
+import { Dropdown } from 'antd';
 import apiClient from '../utils/api';
 
 const { Title } = Typography;
@@ -43,6 +44,8 @@ const ReportsPage: React.FC = () => {
   const [scoreDistribution, setScoreDistribution] = useState<any>({});
   const [successRate, setSuccessRate] = useState<number>(0);
   const [totalReports, setTotalReports] = useState<number>(0);
+  const [filters, setFilters] = useState<{ status?: string; dateRange?: [string, string]; minScore?: number; maxScore?: number }>({});
+  const [sortInfo, setSortInfo] = useState<{ field: string; order: 'ascend' | 'descend' } | null>(null);
   const [form] = Form.useForm();
 
   // 模拟获取报告列表
@@ -152,22 +155,39 @@ const ReportsPage: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
+      filteredValue: filters.id || null,
+      onFilter: (value: string, record: ReportItem) => record.id.includes(value),
     },
     {
       title: 'Case Name',
       dataIndex: 'case_name',
       key: 'case_name',
+      filteredValue: filters.case_name || null,
+      onFilter: (value: string, record: ReportItem) => record.case_name?.includes(value) || false,
     },
     {
       title: 'Final Score',
       dataIndex: 'final_score',
       key: 'final_score',
       sorter: (a: ReportItem, b: ReportItem) => a.final_score - b.final_score,
+      sortOrder: sortInfo?.field === 'final_score' ? sortInfo.order : null,
+      filteredValue: filters.score_range || null,
+      render: (score: number) => (
+        <span style={{ fontWeight: 'bold', color: score >= 70 ? '#52c41a' : score >= 50 ? '#faad14' : '#ff4d4f' }}>
+          {score}
+        </span>
+      ),
     },
     {
       title: 'Result',
       dataIndex: 'result',
       key: 'result',
+      filters: [
+        { text: 'PASS', value: 'PASS' },
+        { text: 'FAIL', value: 'FAIL' },
+      ],
+      filteredValue: filters.result || null,
+      onFilter: (value: string, record: ReportItem) => record.result === value,
       render: (result: string) => (
         <Tag color={result === 'PASS' ? 'green' : 'red'}>
           {result}
@@ -178,6 +198,8 @@ const ReportsPage: React.FC = () => {
       title: 'Created At',
       dataIndex: 'created_at',
       key: 'created_at',
+      sorter: (a: ReportItem, b: ReportItem) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      sortOrder: sortInfo?.field === 'created_at' ? sortInfo.order : null,
       render: (time: string) => new Date(time).toLocaleString(),
     },
     {
@@ -185,20 +207,98 @@ const ReportsPage: React.FC = () => {
       key: 'actions',
       render: (_: any, record: ReportItem) => (
         <Space>
-          <Button onClick={() => handleEditReport(record)}>View</Button>
-          <Button danger onClick={() => handleDeleteReport(record.id)}>Delete</Button>
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'view',
+                  label: 'View',
+                  onClick: () => handleEditReport(record)
+                },
+                {
+                  key: 'export-json',
+                  label: 'Export as JSON',
+                  onClick: () => handleExportReport(record.id, 'json')
+                },
+                {
+                  key: 'export-csv',
+                  label: 'Export as CSV',
+                  onClick: () => handleExportReport(record.id, 'csv')
+                },
+                {
+                  type: 'divider',
+                },
+                {
+                  key: 'delete',
+                  label: 'Delete',
+                  danger: true,
+                  onClick: () => handleDeleteReport(record.id)
+                }
+              ]
+            }}
+          >
+            <Button>
+              <Space>
+                Actions
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
         </Space>
       ),
     },
   ];
 
+  const handleExportReport = (reportId: string, format: 'json' | 'csv') => {
+    // 这里应该实现报告导出逻辑
+    // window.open(`/api/v1/reports/export/${reportId}?format=${format}`, '_blank');
+    message.success(`Exporting report ${reportId} as ${format.toUpperCase()}...`);
+  };
+
+  const handleBatchExport = (format: 'json' | 'csv') => {
+    // 这里应该实现批量导出逻辑
+    // window.open(`/api/v1/reports/export/batch?format=${format}`, '_blank');
+    message.success(`Exporting all reports as ${format.toUpperCase()}...`);
+  };
+
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    // 处理过滤和排序变化
+    setFilters(filters);
+    setSortInfo(sorter.order ? { field: sorter.field, order: sorter.order } : null);
+  };
+
   return (
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={2}>Reports</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddReport}>
-          Add Report
-        </Button>
+        <Space>
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'batch-export-json',
+                  label: 'Export All as JSON',
+                  onClick: () => handleBatchExport('json')
+                },
+                {
+                  key: 'batch-export-csv',
+                  label: 'Export All as CSV',
+                  onClick: () => handleBatchExport('csv')
+                }
+              ]
+            }}
+          >
+            <Button>
+              <Space>
+                Export Reports
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddReport}>
+            Add Report
+          </Button>
+        </Space>
       </div>
 
       {/* 统计卡片 */}
@@ -287,6 +387,7 @@ const ReportsPage: React.FC = () => {
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}
+        onChange={handleTableChange}
       />
 
       <Modal

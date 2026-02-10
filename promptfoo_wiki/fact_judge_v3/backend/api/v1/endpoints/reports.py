@@ -113,6 +113,7 @@ def update_report(
 @router.get("/export/{report_id}")
 def export_report(
     report_id: str, 
+    format: str = "json",  # json, csv, pdf, excel
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
@@ -123,17 +124,105 @@ def export_report(
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
     
-    # 这里应该实现报告导出逻辑
-    # 为了演示，返回报告数据
-    return {
-        "id": report.id,
-        "execution_id": report.execution_id,
-        "case_id": report.case_id,
-        "final_score": report.final_score,
-        "result": report.result,
-        "details": report.details,
-        "created_at": report.created_at
-    }
+    from fastapi.responses import StreamingResponse
+    import io
+    import json
+    import csv
+    
+    if format == "json":
+        content = json.dumps({
+            "id": report.id,
+            "execution_id": report.execution_id,
+            "case_id": report.case_id,
+            "final_score": report.final_score,
+            "result": report.result,
+            "details": report.details,
+            "created_at": str(report.created_at)
+        }, indent=2, ensure_ascii=False)
+        
+        return StreamingResponse(io.StringIO(content), media_type="application/json", 
+                                headers={"Content-Disposition": f"attachment; filename=report_{report_id}.json"})
+    
+    elif format == "csv":
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["ID", "Execution ID", "Case ID", "Final Score", "Result", "Details", "Created At"])
+        writer.writerow([report.id, report.execution_id, report.case_id, report.final_score, 
+                         report.result, report.details, str(report.created_at)])
+        
+        output.seek(0)
+        return StreamingResponse(io.BytesIO(output.getvalue().encode()), media_type="text/csv",
+                                headers={"Content-Disposition": f"attachment; filename=report_{report_id}.csv"})
+    
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported format. Use json or csv.")
+
+
+@router.get("/export/batch")
+def export_reports_batch(
+    format: str = "json",
+    status: str = None,
+    date_from: str = None,
+    date_to: str = None,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    批量导出报告
+    """
+    query = db.query(ReportModel)
+    
+    if status:
+        query = query.filter(ReportModel.result == status)
+    
+    if date_from:
+        from datetime import datetime
+        query = query.filter(ReportModel.created_at >= datetime.fromisoformat(date_from))
+    
+    if date_to:
+        from datetime import datetime
+        query = query.filter(ReportModel.created_at <= datetime.fromisoformat(date_to))
+    
+    reports = query.all()
+    
+    if format == "json":
+        import json
+        import io
+        from fastapi.responses import StreamingResponse
+        
+        reports_data = [{
+            "id": r.id,
+            "execution_id": r.execution_id,
+            "case_id": r.case_id,
+            "final_score": r.final_score,
+            "result": r.result,
+            "details": r.details,
+            "created_at": str(r.created_at)
+        } for r in reports]
+        
+        content = json.dumps(reports_data, indent=2, ensure_ascii=False)
+        return StreamingResponse(io.StringIO(content), media_type="application/json",
+                                headers={"Content-Disposition": f"attachment; filename=reports_batch.{format}"})
+    
+    elif format == "csv":
+        import csv
+        import io
+        from fastapi.responses import StreamingResponse
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["ID", "Execution ID", "Case ID", "Final Score", "Result", "Details", "Created At"])
+        
+        for report in reports:
+            writer.writerow([report.id, report.execution_id, report.case_id, report.final_score,
+                             report.result, report.details, str(report.created_at)])
+        
+        output.seek(0)
+        return StreamingResponse(io.BytesIO(output.getvalue().encode()), media_type="text/csv",
+                                headers={"Content-Disposition": f"attachment; filename=reports_batch.{format}"})
+    
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported format. Use json or csv.")
 
 
 @router.get("/charts")

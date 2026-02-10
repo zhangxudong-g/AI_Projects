@@ -31,7 +31,7 @@ class CaseWithExecutions(Case):
 
 class ExecutionBase(BaseModel):
     case_id: str
-    status: str = "queued"
+    status: str = "queued"  # queued, running, completed, failed, stopped, paused, scheduled
     progress: int = 0
 
 class ExecutionCreate(ExecutionBase):

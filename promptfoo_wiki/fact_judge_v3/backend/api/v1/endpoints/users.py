@@ -134,3 +134,53 @@ def delete_user(
     db.delete(db_user)
     db.commit()
     return {"message": "User deleted successfully"}
+
+
+@router.get("/profile", response_model=User)
+def read_profile(
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    获取当前用户个人资料
+    """
+    return current_user
+
+
+@router.put("/profile", response_model=User)
+def update_profile(
+    user_update: UserUpdate, 
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    更新当前用户个人资料
+    """
+    update_data = user_update.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.get("/activity-log")
+def get_activity_log(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    获取用户活动日志
+    """
+    # 这里应该实现活动日志查询逻辑
+    # 为了演示，返回模拟数据
+    activity_logs = [
+        {"id": "log-001", "action": "login", "timestamp": "2026-02-10T10:30:00", "details": "Successful login"},
+        {"id": "log-002", "action": "create_case", "timestamp": "2026-02-10T09:45:00", "details": "Created new test case"},
+        {"id": "log-003", "action": "run_execution", "timestamp": "2026-02-10T08:30:00", "details": "Started execution for case-001"},
+        {"id": "log-004", "action": "logout", "timestamp": "2026-02-09T18:15:00", "details": "User logged out"},
+    ]
+    
+    return {"logs": activity_logs[skip:skip+limit], "total": len(activity_logs)}

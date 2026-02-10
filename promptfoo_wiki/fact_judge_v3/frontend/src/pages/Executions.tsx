@@ -10,10 +10,12 @@ import {
   Tag,
   Typography,
   message,
-  Progress
+  Progress,
+  DatePicker
 } from 'antd';
-import { PlusOutlined, PlayCircleOutlined, StopOutlined, PauseCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, PlayCircleOutlined, StopOutlined, PauseCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import apiClient from '../utils/api';
+import moment from 'moment';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -34,8 +36,10 @@ const ExecutionsPage: React.FC = () => {
   const [executions, setExecutions] = useState<ExecutionItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [scheduleModalVisible, setScheduleModalVisible] = useState(false);
   const [editingExecution, setEditingExecution] = useState<ExecutionItem | null>(null);
   const [form] = Form.useForm();
+  const [scheduleForm] = Form.useForm();
 
   // 模拟获取执行列表
   useEffect(() => {
@@ -116,6 +120,30 @@ const ExecutionsPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to save execution:', error);
       message.error('Failed to save execution');
+    }
+  };
+
+  const handleScheduleExecution = () => {
+    scheduleForm.resetFields();
+    setScheduleModalVisible(true);
+  };
+
+  const handleScheduleSubmit = async () => {
+    try {
+      const values = await scheduleForm.validateFields();
+      
+      // 调用调度执行 API
+      // const response = await apiClient.post('/executions/schedule', {
+      //   ...values,
+      //   scheduled_time: values.scheduled_time.format('YYYY-MM-DDTHH:mm:ss')
+      // });
+      
+      message.success('Execution scheduled successfully');
+      setScheduleModalVisible(false);
+      fetchExecutions(); // 重新获取列表
+    } catch (error) {
+      console.error('Failed to schedule execution:', error);
+      message.error('Failed to schedule execution');
     }
   };
 
@@ -215,9 +243,14 @@ const ExecutionsPage: React.FC = () => {
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={2}>Executions</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleStartExecution}>
-          Start New Execution
-        </Button>
+        <Space>
+          <Button type="primary" icon={<ClockCircleOutlined />} onClick={handleScheduleExecution}>
+            Schedule Execution
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleStartExecution}>
+            Start New Execution
+          </Button>
+        </Space>
       </div>
 
       <Table 
@@ -261,6 +294,38 @@ const ExecutionsPage: React.FC = () => {
               <Option value="running">Running</Option>
               <Option value="paused">Paused</Option>
             </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Schedule Execution"
+        open={scheduleModalVisible}
+        onOk={handleScheduleSubmit}
+        onCancel={() => setScheduleModalVisible(false)}
+        destroyOnClose
+      >
+        <Form
+          form={scheduleForm}
+          layout="vertical"
+        >
+          <Form.Item
+            name="case_id"
+            label="Case ID"
+            rules={[{ required: true, message: 'Please select a case!' }]}
+          >
+            <Select placeholder="Select a case">
+              <Option value="case-001">Java Controller Eval</Option>
+              <Option value="case-002">SQL Procedure Eval</Option>
+              <Option value="case-003">Python Module Eval</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="scheduled_time"
+            label="Scheduled Time"
+            rules={[{ required: true, message: 'Please select a time!' }]}
+          >
+            <DatePicker showTime />
           </Form.Item>
         </Form>
       </Modal>

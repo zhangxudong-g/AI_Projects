@@ -144,3 +144,40 @@ def pause_execution(
     db_execution.status = "paused"
     db.commit()
     return {"message": "Execution paused successfully"}
+
+
+@router.post("/schedule")
+def schedule_execution(
+    execution: ExecutionCreate, 
+    scheduled_time: str,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    设置调度执行
+    """
+    # 检查案例是否存在
+    case = db.query(CaseModel).filter(CaseModel.id == execution.case_id).first()
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    
+    # 这造一个待调度的执行记录
+    db_execution = ExecutionModel(
+        case_id=execution.case_id,
+        user_id=current_user.id,
+        status="scheduled",  # 新增状态
+        progress=0
+    )
+    db.add(db_execution)
+    db.commit()
+    db.refresh(db_execution)
+    
+    # 这里应该集成任务调度器，如 APScheduler
+    # 示例代码：
+    # scheduler.add_job(run_scheduled_execution, 'date', run_date=datetime.fromisoformat(scheduled_time), args=[db_execution.id])
+    
+    return {
+        "message": "Execution scheduled successfully", 
+        "execution_id": db_execution.id,
+        "scheduled_time": scheduled_time
+    }

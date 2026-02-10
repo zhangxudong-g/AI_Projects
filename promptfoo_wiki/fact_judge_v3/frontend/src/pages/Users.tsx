@@ -9,10 +9,14 @@ import {
   Space, 
   Tag,
   Typography,
-  message 
+  message,
+  Tabs,
+  Card
 } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, UserOutlined, HistoryOutlined } from '@ant-design/icons';
 import apiClient from '../utils/api';
+
+const { TabPane } = Tabs;
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -32,13 +36,56 @@ const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [activityModalVisible, setActivityModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserItem | null>(null);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [form] = Form.useForm();
+  const [profileForm] = Form.useForm();
 
   // 模拟获取用户列表
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const fetchCurrentUserProfile = async () => {
+    try {
+      // 模拟获取当前用户资料
+      // const response = await apiClient.get('/users/profile');
+      const mockProfile = {
+        id: 'current-user-id',
+        username: 'current_user',
+        email: 'current@example.com',
+        role: 'admin',
+        is_active: true,
+        created_at: '2026-01-15',
+        updated_at: '2026-02-10'
+      };
+      setCurrentUserProfile(mockProfile);
+      profileForm.setFieldsValue(mockProfile);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      message.error('Failed to fetch profile');
+    }
+  };
+
+  const fetchActivityLogs = async () => {
+    try {
+      // 模拟获取活动日志
+      // const response = await apiClient.get('/users/activity-log');
+      const mockLogs = [
+        { id: 'log-001', action: 'login', timestamp: '2026-02-10T10:30:00', details: 'Successful login' },
+        { id: 'log-002', action: 'create_case', timestamp: '2026-02-10T09:45:00', details: 'Created new test case' },
+        { id: 'log-003', action: 'run_execution', timestamp: '2026-02-10T08:30:00', details: 'Started execution for case-001' },
+        { id: 'log-004', action: 'logout', timestamp: '2026-02-09T18:15:00', details: 'User logged out' },
+      ];
+      setActivityLogs(mockLogs);
+    } catch (error) {
+      console.error('Failed to fetch activity logs:', error);
+      message.error('Failed to fetch activity logs');
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -101,6 +148,31 @@ const UsersPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to save user:', error);
       message.error('Failed to save user');
+    }
+  };
+
+  const handleViewProfile = () => {
+    fetchCurrentUserProfile();
+    setProfileModalVisible(true);
+  };
+
+  const handleViewActivity = () => {
+    fetchActivityLogs();
+    setActivityModalVisible(true);
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      const values = await profileForm.validateFields();
+      
+      // 更新用户资料
+      // await apiClient.put('/users/profile', values);
+      
+      message.success('Profile updated successfully');
+      setProfileModalVisible(false);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      message.error('Failed to update profile');
     }
   };
 
@@ -170,9 +242,17 @@ const UsersPage: React.FC = () => {
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={2}>Users</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAddUser}>
-          Add User
-        </Button>
+        <Space>
+          <Button icon={<UserOutlined />} onClick={handleViewProfile}>
+            My Profile
+          </Button>
+          <Button icon={<HistoryOutlined />} onClick={handleViewActivity}>
+            Activity Log
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddUser}>
+            Add User
+          </Button>
+        </Space>
       </div>
 
       <Table 
@@ -243,6 +323,109 @@ const UsersPage: React.FC = () => {
             </Form.Item>
           )}
         </Form>
+      </Modal>
+
+      <Modal
+        title="My Profile"
+        open={profileModalVisible}
+        onOk={handleUpdateProfile}
+        onCancel={() => setProfileModalVisible(false)}
+        destroyOnClose
+        width={600}
+      >
+        <Tabs defaultActiveKey="profile">
+          <TabPane tab="Profile Info" key="profile">
+            <Form
+              form={profileForm}
+              layout="vertical"
+            >
+              <Form.Item
+                name="username"
+                label="Username"
+                rules={[{ required: true, message: 'Please input the username!' }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: 'Please input the email!' },
+                  { type: 'email', message: 'Please enter a valid email!' }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="role"
+                label="Role"
+              >
+                <Input disabled />
+              </Form.Item>
+            </Form>
+          </TabPane>
+          <TabPane tab="Preferences" key="preferences">
+            <Card title="Personal Preferences">
+              <Form layout="vertical">
+                <Form.Item label="Theme">
+                  <Select defaultValue="light">
+                    <Option value="light">Light</Option>
+                    <Option value="dark">Dark</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Language">
+                  <Select defaultValue="en">
+                    <Option value="en">English</Option>
+                    <Option value="zh">中文</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Notifications">
+                  <Space direction="vertical">
+                    <Form.Item valuePropName="checked" noStyle>
+                      <Input type="checkbox" /> Email Notifications
+                    </Form.Item>
+                    <Form.Item valuePropName="checked" noStyle>
+                      <Input type="checkbox" /> In-App Notifications
+                    </Form.Item>
+                  </Space>
+                </Form.Item>
+              </Form>
+            </Card>
+          </TabPane>
+        </Tabs>
+      </Modal>
+
+      <Modal
+        title="Activity Log"
+        open={activityModalVisible}
+        onCancel={() => setActivityModalVisible(false)}
+        footer={null}
+        destroyOnClose
+        width={800}
+      >
+        <Table
+          dataSource={activityLogs}
+          columns={[
+            {
+              title: 'Action',
+              dataIndex: 'action',
+              key: 'action',
+            },
+            {
+              title: 'Timestamp',
+              dataIndex: 'timestamp',
+              key: 'timestamp',
+              render: (time: string) => new Date(time).toLocaleString(),
+            },
+            {
+              title: 'Details',
+              dataIndex: 'details',
+              key: 'details',
+            }
+          ]}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+        />
       </Modal>
     </div>
   );

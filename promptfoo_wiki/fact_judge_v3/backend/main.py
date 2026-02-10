@@ -37,6 +37,12 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+# WebSocket 路由
+@app.websocket("/ws/execution/{execution_id}")
+async def ws_execution_endpoint(websocket: WebSocket, execution_id: str):
+    from api.v1.websocket import execution_websocket
+    await execution_websocket(websocket, execution_id)
+
 # 包含 API 路由
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
