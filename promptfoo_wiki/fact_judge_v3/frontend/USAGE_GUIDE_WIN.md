@@ -63,12 +63,12 @@ GENERATE_SOURCEMAP=false
 
 ### 1. 启动开发服务器
 ```cmd
-npm start
+npm run dev
 ```
 
 或使用 yarn：
 ```cmd
-yarn start
+yarn dev
 ```
 
 ### 2. 访问应用

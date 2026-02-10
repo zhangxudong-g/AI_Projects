@@ -35,7 +35,7 @@ timeout /t 5 /nobreak >nul
 
 REM Start frontend server in a new window
 echo Starting frontend server on port 3000...
-start "Frontend Server" cmd /k "cd /d %~dp0frontend && npm start"
+start "Frontend Server" cmd /k "cd /d %~dp0frontend && npm run dev"
 
 echo.
 echo ================================================
