@@ -1,0 +1,139 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.coverage
+.cache
+.pytest_cache/
+.hypothesis/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+.directory
+*.nfs
+.nfs0000000000000000.*
+
+# Logs
+*.log
+logs/
+*.out
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+
+# Database
+*.db
+*.db-journal
+
+# Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/dist
+/build
+/.cache
+.next
+.nuxt
+/public/dist
+/public/build
+coverage/
+.nyc_output
+
+# Backend
+/backend/__pycache__/
+/backend/*.pyc
+/backend/*.pyo
+/backend/*.pyd
+/backend/*.log
+/backend/data*
+# Data
+/data/output/
+/data/temp/
+# *.csv
+# *.json
+# *.xml
+# YAML files - specific files can be added below if needed
+# *.yaml
+# *.yml
+
+# CLI
+/cli/__pycache__/
+/cli/*.pyc
+/cli/*.pyo
+/cli/*.pyd
+/cli/*.log
+/cli/res*
+/cli/test*
+/cli/opt*
+/cli/output*
+/cli/result*
+
+# Local configuration
+/config/local/
+/config/development/
+
+# Secrets
+/secrets/
+/credentials.json
+/private.key
+/public.key
+
+# Testing
+/coverage/
+/.nyc_output/
+/test-results/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Promptfoo specific
+/.promptfoo/
+promptfoo_output/

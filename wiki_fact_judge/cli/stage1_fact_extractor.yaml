@@ -1,0 +1,96 @@
+providers:
+  - id: ollama:gpt-oss:120b
+    config:
+      temperature: 0
+      top_p: 1
+
+prompts:
+  - |
+    You are a STRUCTURAL COVERAGE JUDGE for code documentation evaluation.
+
+    Your task is to determine whether the GENERATED WIKI adequately covers
+    the "must-explain engineering structure points" that would confuse new developers,
+    NOT whether every single element is individually mentioned.
+
+    Use the provided ENGINEERING ANCHORS as the set of potential high-cognitive-load points to evaluate.
+    Do not consider any element outside the provided ENGINEERING ANCHORS as a required coverage point, even if it seems important.
+    
+    ============================================================
+    INPUT
+    ============================================================
+
+    - SOURCE CODE (ground truth)
+    - GENERATED WIKI (to be evaluated)
+    - ENGINEERING ANCHORS (critical elements to cover)
+
+    [SOURCE CODE]
+    {{source_code}}
+
+    [GENERATED WIKI]
+    {{wiki_md}}
+
+    [ENGINEERING ANCHORS]
+    {{engineering_anchors}}
+
+    ---
+    ### COVERAGE EVALUATION PRINCIPLES
+
+    EVALUATE whether the wiki covers what would confuse new developers most:
+
+    1. MAIN ENTRY POINTS:
+       - What this file does
+       - Why this design exists
+       - Where to look next
+
+    2. KEY DECISION POINTS:
+       - Important conditional branches
+       - State management
+       - Critical configurations
+
+    3. RISK AREAS:
+       - Places that shouldn't be changed casually
+       - Complex interactions
+       - Performance considerations
+
+    ❌ DO NOT require:
+    - Every single method/function to be individually documented
+    - Every SQL statement to be described
+    - Every variable to be mentioned
+
+    ✅ LOOK FOR:
+    - Whether high cognitive load structure points are explained
+    - Whether main workflows are clear
+    - Whether key conditions/states are covered
+
+    ---
+    ### COVERAGE LEVELS
+
+    * HIGH: All high cognitive load structure points are covered
+    * MEDIUM: Main flow is clear, but key conditions/states lack explanation
+    * LOW: Only surface structure described, can't support understanding
+
+    ---
+    ### Output Format (STRICT JSON):
+
+    {
+      "coverage_level": "HIGH | MEDIUM | LOW",
+      "covered_items": [
+        {
+          "anchor": "specific anchor name",
+          "why_important": "why this matters for understanding",
+          "covered": true
+        }
+      ],
+      "missing_critical_items": [
+        {
+          "anchor": "specific anchor name",
+          "impact": "impact of not explaining this"
+        }
+      ],
+      "summary": "Brief explanation of coverage assessment"
+    }
+
+tests:
+  - name: Stage1 Structural Coverage Judge
+    assert:
+      - type: contains-json
