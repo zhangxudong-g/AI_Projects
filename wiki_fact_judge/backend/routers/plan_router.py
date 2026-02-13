@@ -62,49 +62,24 @@ def run_plan(plan_id: int, db: Session = Depends(get_db)):
     # 在这里调用 pipeline_service.run_plan
     result = run_pipeline_plan(db, plan_id)
 
-    # 更新已存在的计划报告，而不是创建新的
-    from backend.services.report_service import get_reports_by_plan
-    from sqlalchemy.orm import Session
-    
-    # 获取与该计划关联的最新报告（即Plan_Report_XXX）
-    plan_reports = get_reports_by_plan(db, plan_id)
-    
-    if plan_reports:
-        # 获取最新的报告进行更新
-        latest_report = max(plan_reports, key=lambda r: r.created_at if r.created_at else r.id)
-        
-        # 更新报告信息
-        latest_report.status = "FINISHED"
-        latest_report.final_score = result.get("average_score")
-        latest_report.result = json.dumps(result, ensure_ascii=False)
-        
-        # 提交更改
-        db.commit()
-        db.refresh(latest_report)
-        
-        return {
-            "plan_id": plan_id,
-            "result": result,
-            "report_id": latest_report.id
-        }
-    else:
-        # 如果没有找到现有报告，则创建一个
-        from backend.services.report_service import create_report
-        from backend.schemas import TestReportCreate
+    # 为每次执行创建新的汇总报告
+    from backend.services.report_service import create_report
+    from backend.schemas import TestReportCreate
 
-        report_data = TestReportCreate(
-            report_name=f"Plan_Report_{plan_id}",
-            plan_id=plan_id,
-            status="FINISHED",
-            final_score=result.get("average_score"),
-            result=json.dumps(result, ensure_ascii=False),  # 序列化为JSON字符串
-            output_path=None
-        )
+    # 创建新的汇总报告（每次执行都创建新的，不覆盖旧的）
+    report_data = TestReportCreate(
+        report_name=f"Plan {plan_id} Summary Report - {datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        plan_id=plan_id,
+        status="FINISHED",
+        final_score=result.get("average_score"),
+        result=json.dumps(result, ensure_ascii=False),  # 序列化为JSON字符串
+        output_path=None
+    )
 
-        report = create_report(db, report_data)
+    report = create_report(db, report_data)
 
-        return {
-            "plan_id": plan_id,
-            "result": result,
-            "report_id": report.id
-        }
+    return {
+        "plan_id": plan_id,
+        "result": result,
+        "report_id": report.id
+    }
