@@ -1,0 +1,27 @@
+.execution-history-chart {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.execution-history-chart h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.execution-history-chart svg {
+  overflow: visible;
+}
+
+.execution-history-chart circle {
+  cursor: pointer;
+  transition: r 0.2s;
+}
+
+.execution-history-chart circle:hover {
+  r: 6;
+  opacity: 0.8;
+}

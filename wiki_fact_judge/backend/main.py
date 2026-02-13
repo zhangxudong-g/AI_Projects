@@ -9,7 +9,7 @@ if __name__ == "__main__" or "backend.main" not in sys.modules:
 
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from backend.database import engine, create_tables, get_db
+from backend.database import create_tables, get_db
 from backend.routers import case_router, plan_router, report_router
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -27,9 +27,9 @@ app = FastAPI(
 # 添加 CORS 中间件（允许前端访问）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 在生产环境中应限制为特定域名
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # 限制为前端开发服务器地址
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -46,10 +46,12 @@ def read_root():
         "version": "1.0.0",
         "endpoints": [
             "/cases - Test Case Management",
-            "/plans - Test Plan Management", 
+            "/plans - Test Plan Management",
             "/reports - Test Report Management"
         ]
     }
+
+
 
 
 @app.get("/health")

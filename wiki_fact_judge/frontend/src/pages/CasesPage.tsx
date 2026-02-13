@@ -71,6 +71,44 @@ const CasesPage: React.FC = () => {
     }
   };
 
+  const handleBulkDeleteCases = async (caseIds: string[]) => {
+    try {
+      const response = await caseApi.bulkDeleteCases(caseIds);
+      const deletedCount = response.data.length;
+      alert(`${deletedCount} case(s) deleted successfully`);
+      // 刷新案例列表
+      fetchCases();
+      // 如果已选中的案例被删除，则清除选择
+      if (selectedCase && caseIds.includes(selectedCase.case_id)) {
+        setSelectedCase(null);
+        navigate('/cases');
+      }
+    } catch (error: any) {
+      console.error(`Failed to bulk delete cases:`, error);
+      let errorMessage = 'Failed to bulk delete cases';
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      alert(errorMessage);
+    }
+  };
+
+  const handleCaseUpdated = (updatedCase: TestCase) => {
+    // 更新本地状态中的案例信息
+    setCases(prevCases => 
+      prevCases.map(caseItem => 
+        caseItem.case_id === updatedCase.case_id ? updatedCase : caseItem
+      )
+    );
+    
+    // 如果当前选中的案例被更新，也要更新选中的案例
+    if (selectedCase && selectedCase.case_id === updatedCase.case_id) {
+      setSelectedCase(updatedCase);
+    }
+  };
+
   const handleCaseUploaded = () => {
     setShowUploadForm(false);
     fetchCases(); // 刷新案例列表
@@ -112,28 +150,30 @@ const CasesPage: React.FC = () => {
         )}
 
         <div className="case-list-container">
-          <CaseList 
-            cases={cases} 
+          <CaseList
+            cases={cases}
             onSelectCase={(testCase) => {
               setSelectedCase(testCase);
               navigate(`/cases/${testCase.case_id}`);
             }}
             onRunCase={handleRunCase}
             onDeleteCase={handleDeleteCase}
+            onBulkDelete={handleBulkDeleteCases}
           />
         </div>
       </div>
 
       <Routes>
-        <Route 
-          path="/:caseId" 
+        <Route
+          path="/:caseId"
           element={
-            <CaseDetail 
-              testCase={selectedCase} 
+            <CaseDetail
+              testCase={selectedCase}
               onRunCase={handleRunCase}
               onDeleteCase={handleDeleteCase}
+              onCaseUpdated={handleCaseUpdated}
             />
-          } 
+          }
         />
       </Routes>
     </div>

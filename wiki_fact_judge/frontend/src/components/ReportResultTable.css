@@ -1,0 +1,75 @@
+.result-item {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  background-color: #f8f9fa;
+}
+
+.result-item h5 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.details-section,
+.engineering-action-section,
+.sub-results-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+}
+
+.sub-result-item {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+}
+
+.sub-result-item h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+.nested-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.nested-table th,
+.nested-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.nested-table th {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+.raw-result-display {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  max-height: 400px;
+  overflow: auto;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-message {
+  padding: 1rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 0.375rem;
+  color: #721c24;
+}

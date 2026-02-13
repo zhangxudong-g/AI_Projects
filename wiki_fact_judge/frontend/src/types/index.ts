@@ -19,6 +19,21 @@ export interface TestPlan {
   created_at: string; // ISO date string
 }
 
+export interface PlanSummary {
+  plan_id: number;
+  total_reports: number;
+  completed_reports: number;
+  failed_reports: number;
+  average_score: number | null;
+  max_score: number | null;
+  min_score: number | null;
+  summary: string;
+}
+
+export interface ExtendedTestPlan extends TestPlan {
+  summary?: PlanSummary;
+}
+
 export interface TestReport {
   id: number;
   report_name: string;

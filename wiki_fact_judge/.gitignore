@@ -90,6 +90,7 @@ coverage/
 /backend/data*
 # Data
 /data/output/
+/data/cases/
 /data/temp/
 # *.csv
 # *.json

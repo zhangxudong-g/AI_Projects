@@ -124,7 +124,7 @@ def run_single_case(
     # Stage 1: Structural Coverage Judge
     # ======================
     run_cmd(
-        f"promptfoo eval --no-cache "
+        f"promptfoo eval "
         f"--config stage1_fact_extractor.yaml "
         f"{' '.join(var_args)} "
         f"--output {stage1_out}"
@@ -144,7 +144,7 @@ def run_single_case(
     var_args_1_5.append(f"--var artifact_type={artifact_type}")
 
     run_cmd(
-        f"promptfoo eval --no-cache "
+        f"promptfoo eval "
         f"--config stage1_5_explanation_alignment.yaml "
         f"{' '.join(var_args_1_5)} "
         f"--output {stage1_5_out}"
@@ -173,7 +173,7 @@ def run_single_case(
 
     cfg = "stage2_explanatory_judge.yaml"  # Engineering Judge v3
     run_cmd(
-        f"promptfoo eval --no-cache "
+        f"promptfoo eval "
         f"--config {cfg} "
         f"{' '.join(var_args_for_stage2)} "
         f"--output {stage2_out}"

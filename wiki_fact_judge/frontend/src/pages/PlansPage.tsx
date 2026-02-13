@@ -72,6 +72,44 @@ const PlansPage: React.FC = () => {
     }
   };
 
+  const handleBulkDeletePlans = async (planIds: number[]) => {
+    try {
+      const response = await planApi.bulkDeletePlans(planIds);
+      const deletedCount = response.data.length;
+      alert(`${deletedCount} plan(s) deleted successfully`);
+      // 刷新计划列表
+      fetchPlans();
+      // 如果已选中的计划被删除，则清除选择
+      if (selectedPlan && planIds.includes(selectedPlan.id)) {
+        setSelectedPlan(null);
+        navigate('/plans');
+      }
+    } catch (error: any) {
+      console.error(`Failed to bulk delete plans:`, error);
+      let errorMessage = 'Failed to bulk delete plans';
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      alert(errorMessage);
+    }
+  };
+
+  const handlePlanUpdated = (updatedPlan: TestPlan) => {
+    // 更新本地状态中的计划信息
+    setPlans(prevPlans => 
+      prevPlans.map(plan => 
+        plan.id === updatedPlan.id ? updatedPlan : plan
+      )
+    );
+    
+    // 如果当前选中的计划被更新，也要更新选中的计划
+    if (selectedPlan && selectedPlan.id === updatedPlan.id) {
+      setSelectedPlan(updatedPlan);
+    }
+  };
+
   const handlePlanCreated = () => {
     setShowCreateForm(false);
     fetchPlans(); // 刷新计划列表
@@ -113,28 +151,30 @@ const PlansPage: React.FC = () => {
         )}
 
         <div className="plan-list-container">
-          <PlanList 
-            plans={plans} 
+          <PlanList
+            plans={plans}
             onSelectPlan={(testPlan) => {
               setSelectedPlan(testPlan);
               navigate(`/plans/${testPlan.id}`);
             }}
             onRunPlan={handleRunPlan}
             onDeletePlan={handleDeletePlan}
+            onBulkDelete={handleBulkDeletePlans}
           />
         </div>
       </div>
 
       <Routes>
-        <Route 
-          path="/:planId" 
+        <Route
+          path="/:planId"
           element={
-            <PlanDetail 
-              testPlan={selectedPlan} 
+            <PlanDetail
+              testPlan={selectedPlan}
               onRunPlan={handleRunPlan}
               onDeletePlan={handleDeletePlan}
+              onPlanUpdated={handlePlanUpdated}
             />
-          } 
+          }
         />
       </Routes>
     </div>

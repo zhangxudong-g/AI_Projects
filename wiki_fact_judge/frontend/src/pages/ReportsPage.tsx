@@ -3,12 +3,13 @@ import { reportApi } from '../api';
 import { TestReport } from '../types';
 import ReportList from '../components/ReportList';
 import ReportDetail from '../components/ReportDetail';
-import { useParams, useNavigate, Routes, Route } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const ReportsPage: React.FC = () => {
   const [reports, setReports] = useState<TestReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<TestReport | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false); // 控制报告详情弹窗
   const { reportId } = useParams<{ reportId?: string }>();
   const navigate = useNavigate();
 
@@ -21,15 +22,17 @@ const ReportsPage: React.FC = () => {
       const numericReportId = parseInt(reportId, 10);
       const selected = reports.find(r => r.id === numericReportId);
       setSelectedReport(selected || null);
+      setShowReportModal(true); // 显示弹窗
     } else {
       setSelectedReport(null);
+      setShowReportModal(false); // 隐藏弹窗
     }
-  }, [reportId, reports]);
+  }, [reportId, reports]); // 这个依赖于reports数组，当reports更新时会重新执行
 
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const response = await reportApi.getAllReports();
+      const response = await reportApi.getAllReports("created_at_desc"); // 按最新创建时间排序
       setReports(response.data);
     } catch (error) {
       console.error('Failed to fetch reports:', error);
@@ -58,6 +61,30 @@ const ReportsPage: React.FC = () => {
     }
   };
 
+  const handleBulkDeleteReports = async (reportIds: number[]) => {
+    try {
+      const response = await reportApi.bulkDeleteReports(reportIds);
+      const deletedCount = response.data.length;
+      alert(`${deletedCount} report(s) deleted successfully`);
+      // 刷新报告列表
+      fetchReports();
+      // 如果已选中的报告被删除，则清除选择
+      if (selectedReport && reportIds.includes(selectedReport.id)) {
+        setSelectedReport(null);
+        navigate('/reports');
+      }
+    } catch (error: any) {
+      console.error(`Failed to bulk delete reports:`, error);
+      let errorMessage = 'Failed to bulk delete reports';
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      alert(errorMessage);
+    }
+  };
+
   if (loading) {
     return <div className="container"><p>Loading reports...</p></div>;
   }
@@ -78,28 +105,29 @@ const ReportsPage: React.FC = () => {
       <div className="card">
         <h3>Reports List</h3>
         <div className="report-list-container">
-          <ReportList 
-            reports={reports} 
+          <ReportList
+            reports={reports}
             onSelectReport={(testReport) => {
               setSelectedReport(testReport);
-              navigate(`/reports/${testReport.id}`);
+              setShowReportModal(true); // 显示弹窗而不是导航
             }}
             onDeleteReport={handleDeleteReport}
+            onBulkDelete={handleBulkDeleteReports}
           />
         </div>
       </div>
 
-      <Routes>
-        <Route 
-          path="/:reportId" 
-          element={
-            <ReportDetail 
-              testReport={selectedReport} 
-              onDeleteReport={handleDeleteReport}
-            />
-          } 
-        />
-      </Routes>
+      {/* 报告详情弹窗 */}
+      <ReportDetail
+        testReport={selectedReport}
+        onDeleteReport={handleDeleteReport}
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false);
+          setSelectedReport(null);
+          navigate('/reports'); // 返回到报告列表页
+        }}
+      />
     </div>
   );
 };

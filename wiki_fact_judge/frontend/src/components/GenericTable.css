@@ -1,0 +1,65 @@
+.generic-table-container {
+  margin: 1rem 0;
+}
+
+.generic-table-container h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.generic-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+}
+
+.generic-table-container th,
+.generic-table-container td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.generic-table-container th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.col-field {
+  width: 30%;
+}
+
+.col-value {
+  width: 70%;
+}
+
+/* 嵌套表格样式 */
+.generic-table-container table {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+.generic-table-container table.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.generic-table-container table th,
+.generic-table-container table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.generic-table-container table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.generic-table-container ul {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}

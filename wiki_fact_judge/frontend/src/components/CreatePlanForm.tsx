@@ -59,8 +59,8 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onPlanCreated }) => {
         case_ids: selectedCaseIds // 注意：后端字段名是 case_ids 而不是 caseIds
       };
 
-      const response = await planApi.createPlan(planData);
-      
+      await planApi.createPlan(planData);
+
       alert('Plan created successfully!');
       setName('');
       setDescription('');

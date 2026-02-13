@@ -116,10 +116,10 @@ cases:
     vars:
       source_code: data/plsql/code/VIEW_GABVGYOMUSHIKAKUGET.utf8.sql
       wiki_md: data/plsql/result/VIEW_GABVGYOMUSHIKAKUGET-wiki.md
-  - id: case_plsql_view_004
-    vars:
-      source_code: data/plsql/code/VIEW_JIBVATENAALL.utf8.sql
-      wiki_md: data/plsql/result/VIEW_JIBVATENAALL-wiki.md
+  # - id: case_plsql_view_004
+  #   vars:
+  #     source_code: data/plsql/code/VIEW_JIBVATENAALL.utf8.sql
+  #     wiki_md: data/plsql/result/VIEW_JIBVATENAALL-wiki.md
   - id: case_plsql_view_005
     vars:
       source_code: data/plsql/code/VIEW_JIBVKNENKIN.utf8.sql

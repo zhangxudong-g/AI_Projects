@@ -42,24 +42,38 @@ export default api;
 // 测试案例相关的 API
 export const caseApi = {
   // 获取所有测试案例
-  getAllCases: () => api.get('/cases'),
-  
+  getAllCases: (orderBy: string = "created_at_desc") => api.get(`/cases?order_by=${orderBy}`),
+
   // 获取单个测试案例
   getCaseById: (id: string) => api.get(`/cases/${id}`),
-  
+
   // 创建测试案例
   createCase: (data: FormData) => api.post('/cases/', data, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   }),
-  
+
   // 更新测试案例
-  updateCase: (id: string, data: any) => api.put(`/cases/${id}`, data),
-  
+  updateCase: (id: string, data: any) => api.put(`/cases/${id}`, data, {
+    headers: {
+      'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json',
+    },
+  }),
+
+  // 更新测试案例文件
+  updateCaseFiles: (id: string, data: FormData) => api.post(`/cases/${id}/update_files`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
   // 删除测试案例
   deleteCase: (id: string) => api.delete(`/cases/${id}`),
-  
+
+  // 批量删除测试案例
+  bulkDeleteCases: (ids: string[]) => api.delete('/cases/', { data: ids }),
+
   // 运行测试案例
   runCase: (id: string) => api.post(`/cases/${id}/run`),
 };
@@ -67,20 +81,23 @@ export const caseApi = {
 // 测试计划相关的 API
 export const planApi = {
   // 获取所有测试计划
-  getAllPlans: () => api.get('/plans'),
-  
+  getAllPlans: (orderBy: string = "created_at_desc") => api.get(`/plans?order_by=${orderBy}`),
+
   // 获取单个测试计划
   getPlanById: (id: number) => api.get(`/plans/${id}`),
-  
+
   // 创建测试计划
   createPlan: (data: any) => api.post('/plans/', data),
-  
+
   // 更新测试计划
   updatePlan: (id: number, data: any) => api.put(`/plans/${id}`, data),
-  
+
   // 删除测试计划
   deletePlan: (id: number) => api.delete(`/plans/${id}`),
-  
+
+  // 批量删除测试计划
+  bulkDeletePlans: (ids: number[]) => api.delete('/plans/', { data: ids }),
+
   // 运行测试计划
   runPlan: (id: number) => api.post(`/plans/${id}/run`),
 };
@@ -88,17 +105,23 @@ export const planApi = {
 // 测试报告相关的 API
 export const reportApi = {
   // 获取所有测试报告
-  getAllReports: () => api.get('/reports'),
-  
+  getAllReports: (orderBy: string = "created_at_desc") => api.get(`/reports?order_by=${orderBy}`),
+
   // 获取单个测试报告
   getReportById: (id: number) => api.get(`/reports/${id}`),
-  
+
   // 创建测试报告
   createReport: (data: any) => api.post('/reports/', data),
-  
+
   // 更新测试报告
   updateReport: (id: number, data: any) => api.put(`/reports/${id}`, data),
-  
+
   // 删除测试报告
   deleteReport: (id: number) => api.delete(`/reports/${id}`),
+
+  // 批量删除测试报告
+  bulkDeleteReports: (ids: number[]) => api.delete('/reports/', { data: ids }),
+
+  // 获取Plan的汇总信息
+  getPlanSummary: (planId: number) => api.get(`/reports/plan/${planId}/summary`),
 };

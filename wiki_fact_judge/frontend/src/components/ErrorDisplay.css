@@ -1,0 +1,39 @@
+.error-display {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 0.375rem;
+  color: #721c24;
+  text-align: left;
+}
+
+.error-content {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.error-message {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.error-dismiss-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-dismiss-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
