@@ -87,7 +87,9 @@ coverage/
 /backend/*.pyo
 /backend/*.pyd
 /backend/*.log
-/backend/data*
+/backend/data/output/*
+/backend/data/cases/*
+/backend/data/temp/*
 # Data
 /data/output/
 /data/cases/
