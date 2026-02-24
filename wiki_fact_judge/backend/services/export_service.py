@@ -1,0 +1,531 @@
+"""
+Report Export Service - 支持多种格式导出
+- JSON: 完整原始数据
+- Markdown: 可读性好的报告文档
+- CSV: 用于数据分析
+"""
+import json
+import csv
+import io
+from datetime import datetime
+from typing import Dict, Any, List, Optional
+from sqlalchemy.orm import Session
+from backend.database import TestReport, TestPlan, TestCase
+
+
+def export_report_to_json(db: Session, report_id: int) -> Dict[str, Any]:
+    """
+    导出单个报告为 JSON 格式
+    """
+    report = db.query(TestReport).filter(TestReport.id == report_id).first()
+    if not report:
+        return None
+
+    result_data = {}
+    if report.result:
+        try:
+            result_data = json.loads(report.result)
+        except json.JSONDecodeError:
+            result_data = {"raw_result": report.result}
+
+    export_data = {
+        "report": {
+            "id": report.id,
+            "report_name": report.report_name,
+            "status": report.status,
+            "final_score": report.final_score,
+            "created_at": report.created_at.isoformat() if report.created_at else None,
+            "updated_at": report.updated_at.isoformat() if report.updated_at else None,
+            "output_path": report.output_path,
+        },
+        "result": result_data,
+    }
+
+    # 添加关联的计划信息
+    if report.plan_id:
+        plan = db.query(TestPlan).filter(TestPlan.id == report.plan_id).first()
+        if plan:
+            export_data["plan"] = {
+                "id": plan.id,
+                "name": plan.name,
+                "description": plan.description,
+            }
+
+    # 添加关联的案例信息
+    if report.case_id:
+        case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+        if case:
+            export_data["case"] = {
+                "case_id": case.case_id,
+                "name": case.name,
+                "source_code_path": case.source_code_path,
+                "wiki_path": case.wiki_path,
+                "yaml_path": case.yaml_path,
+            }
+
+    return export_data
+
+
+def export_plan_reports_to_json(db: Session, plan_id: int) -> Dict[str, Any]:
+    """
+    导出整个 Plan 的所有报告为 JSON 格式
+    """
+    plan = db.query(TestPlan).filter(TestPlan.id == plan_id).first()
+    if not plan:
+        return None
+
+    reports = db.query(TestReport).filter(TestReport.plan_id == plan_id).all()
+
+    export_data = {
+        "plan": {
+            "id": plan.id,
+            "name": plan.name,
+            "description": plan.description,
+            "created_at": plan.created_at.isoformat() if plan.created_at else None,
+            "updated_at": plan.updated_at.isoformat() if plan.updated_at else None,
+        },
+        "summary": {
+            "total_reports": len(reports),
+            "completed": len([r for r in reports if r.status == "FINISHED"]),
+            "failed": len([r for r in reports if r.status == "FAILED"]),
+            "running": len([r for r in reports if r.status == "RUNNING"]),
+        },
+        "reports": [],
+    }
+
+    scores = []
+    for report in reports:
+        report_data = {
+            "id": report.id,
+            "report_name": report.report_name,
+            "status": report.status,
+            "final_score": report.final_score,
+            "created_at": report.created_at.isoformat() if report.created_at else None,
+        }
+        if report.case_id:
+            case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+            if case:
+                report_data["case_name"] = case.name
+        export_data["reports"].append(report_data)
+        if report.final_score is not None:
+            scores.append(report.final_score)
+
+    if scores:
+        export_data["summary"]["average_score"] = sum(scores) / len(scores)
+        export_data["summary"]["max_score"] = max(scores)
+        export_data["summary"]["min_score"] = min(scores)
+
+    return export_data
+
+
+def export_report_to_markdown(db: Session, report_id: int) -> str:
+    """
+    导出单个报告为 Markdown 格式
+    """
+    report = db.query(TestReport).filter(TestReport.id == report_id).first()
+    if not report:
+        return None
+
+    result_data = {}
+    if report.result:
+        try:
+            result_data = json.loads(report.result)
+        except json.JSONDecodeError:
+            result_data = {"raw_result": report.result}
+
+    # 获取关联信息
+    plan_name = None
+    case_name = None
+    case_info = None
+
+    if report.plan_id:
+        plan = db.query(TestPlan).filter(TestPlan.id == report.plan_id).first()
+        if plan:
+            plan_name = plan.name
+
+    if report.case_id:
+        case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+        if case:
+            case_name = case.name
+            case_info = {
+                "source_code_path": case.source_code_path,
+                "wiki_path": case.wiki_path,
+                "yaml_path": case.yaml_path,
+            }
+
+    # 构建 Markdown
+    md_lines = [
+        f"# {report.report_name}",
+        "",
+        "## 基本信息",
+        "",
+        f"- **报告 ID**: {report.id}",
+        f"- **状态**: {report.status}",
+        f"- **最终得分**: {report.final_score if report.final_score is not None else 'N/A'}",
+        f"- **创建时间**: {report.created_at.strftime('%Y-%m-%d %H:%M:%S') if report.created_at else 'N/A'}",
+        f"- **更新时间**: {report.updated_at.strftime('%Y-%m-%d %H:%M:%S') if report.updated_at else 'N/A'}",
+        "",
+    ]
+
+    if plan_name:
+        md_lines.extend([
+            f"- **测试计划**: {plan_name}",
+            "",
+        ])
+
+    if case_name:
+        md_lines.extend([
+            f"- **测试案例**: {case_name}",
+            "",
+        ])
+
+    # 添加案例详细信息
+    if case_info:
+        md_lines.extend([
+            "## 案例文件",
+            "",
+        ])
+        if case_info.get("source_code_path"):
+            md_lines.append(f"- 源代码：`{case_info['source_code_path']}`")
+        if case_info.get("wiki_path"):
+            md_lines.append(f"- Wiki 文档：`{case_info['wiki_path']}`")
+        if case_info.get("yaml_path"):
+            md_lines.append(f"- 配置文件：`{case_info['yaml_path']}`")
+        md_lines.append("")
+
+    # 添加评估结果详情
+    if result_data:
+        md_lines.extend([
+            "## 评估结果详情",
+            "",
+        ])
+
+        # 处理五阶段评估结果
+        if "result" in result_data and isinstance(result_data["result"], dict):
+            stage_results = result_data["result"]
+
+            # Stage 1: Structural Coverage Judge
+            if "stage1_structural_coverage" in stage_results:
+                s1 = stage_results["stage1_structural_coverage"]
+                md_lines.extend([
+                    "### Stage 1: 结构覆盖度评估",
+                    "",
+                    f"- **判断**: {s1.get('judgement', 'N/A')}",
+                    f"- **置信度**: {s1.get('confidence', 'N/A')}",
+                    "",
+                ])
+                if s1.get("reasoning"):
+                    md_lines.extend([
+                        "**评估理由**:",
+                        "",
+                        f"{s1['reasoning']}",
+                        "",
+                    ])
+
+            # Stage 1.5: Explanation Alignment Judge
+            if "stage1_5_explanation_alignment" in stage_results:
+                s15 = stage_results["stage1_5_explanation_alignment"]
+                md_lines.extend([
+                    "### Stage 1.5: 解释对齐评估",
+                    "",
+                    f"- **判断**: {s15.get('judgement', 'N/A')}",
+                    f"- **置信度**: {s15.get('confidence', 'N/A')}",
+                    "",
+                ])
+                if s15.get("reasoning"):
+                    md_lines.extend([
+                        "**评估理由**:",
+                        "",
+                        f"{s15['reasoning']}",
+                        "",
+                    ])
+
+            # Stage 2: Engineering Judge v3
+            if "stage2_engineering_judge" in stage_results:
+                s2 = stage_results["stage2_engineering_judge"]
+                md_lines.extend([
+                    "### Stage 2: 工程价值评估",
+                    "",
+                    f"- **判断**: {s2.get('judgement', 'N/A')}",
+                    f"- **置信度**: {s2.get('confidence', 'N/A')}",
+                    "",
+                ])
+                if s2.get("reasoning"):
+                    md_lines.extend([
+                        "**评估理由**:",
+                        "",
+                        f"{s2['reasoning']}",
+                        "",
+                    ])
+
+            # Stage 3: Risk-aware Scoring
+            if "stage3_risk_scoring" in stage_results:
+                s3 = stage_results["stage3_risk_scoring"]
+                md_lines.extend([
+                    "### Stage 3: 风险评分",
+                    "",
+                    f"- **基础分数**: {s3.get('base_score', 'N/A')}",
+                    f"- **风险扣分**: {s3.get('risk_deduction', 'N/A')}",
+                    f"- **最终得分**: {s3.get('final_score', report.final_score)}",
+                    "",
+                ])
+                if s3.get("risk_analysis"):
+                    md_lines.extend([
+                        "**风险分析**:",
+                        "",
+                        f"{s3['risk_analysis']}",
+                        "",
+                    ])
+
+        # 添加原始 JSON 数据（折叠）
+        md_lines.extend([
+            "## 原始数据",
+            "",
+            "```json",
+            json.dumps(result_data, ensure_ascii=False, indent=2),
+            "```",
+            "",
+        ])
+
+    # 添加导出时间
+    md_lines.extend([
+        "---",
+        "",
+        f"*报告导出时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*",
+    ])
+
+    return "\n".join(md_lines)
+
+
+def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
+    """
+    导出整个 Plan 的所有报告为 Markdown 格式
+    """
+    plan = db.query(TestPlan).filter(TestPlan.id == plan_id).first()
+    if not plan:
+        return None
+
+    reports = db.query(TestReport).filter(TestReport.plan_id == plan_id).all()
+
+    # 计算统计信息
+    scores = [r.final_score for r in reports if r.final_score is not None]
+    completed = len([r for r in reports if r.status == "FINISHED"])
+    failed = len([r for r in reports if r.status == "FAILED"])
+    running = len([r for r in reports if r.status == "RUNNING"])
+
+    # 构建 Markdown
+    md_lines = [
+        f"# Plan {plan.id}: {plan.name} - 测试报告汇总",
+        "",
+        "## 计划信息",
+        "",
+        f"- **计划 ID**: {plan.id}",
+        f"- **计划名称**: {plan.name}",
+        f"- **描述**: {plan.description or 'N/A'}",
+        f"- **创建时间**: {plan.created_at.strftime('%Y-%m-%d %H:%M:%S') if plan.created_at else 'N/A'}",
+        "",
+        "## 汇总统计",
+        "",
+        f"- **总报告数**: {len(reports)}",
+        f"- **已完成**: {completed}",
+        f"- **失败**: {failed}",
+        f"- **进行中**: {running}",
+        "",
+    ]
+
+    if scores:
+        avg_score = sum(scores) / len(scores)
+        max_score = max(scores)
+        min_score = min(scores)
+        md_lines.extend([
+            f"- **平均分**: {avg_score:.2f}",
+            f"- **最高分**: {max_score:.2f}",
+            f"- **最低分**: {min_score:.2f}",
+            "",
+        ])
+
+    # 添加报告列表
+    md_lines.extend([
+        "## 报告列表",
+        "",
+        "| ID | 报告名称 | 案例 | 状态 | 得分 | 创建时间 |",
+        "|----|---------|------|------|------|---------|",
+    ])
+
+    for report in reports:
+        case_name = "N/A"
+        if report.case_id:
+            case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+            if case:
+                case_name = case.name
+
+        score_str = f"{report.final_score:.2f}" if report.final_score is not None else "N/A"
+        created_str = report.created_at.strftime('%Y-%m-%d %H:%M') if report.created_at else "N/A"
+
+        md_lines.append(
+            f"| {report.id} | {report.report_name} | {case_name} | {report.status} | {score_str} | {created_str} |"
+        )
+
+    md_lines.append("")
+
+    # 添加单个报告的详细摘要
+    md_lines.extend([
+        "## 各案例详细结果",
+        "",
+    ])
+
+    for i, report in enumerate(reports, 1):
+        if report.case_id:
+            case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+            if case:
+                md_lines.extend([
+                    f"### {i}. {case.name}",
+                    "",
+                    f"- **报告名称**: {report.report_name}",
+                    f"- **状态**: {report.status}",
+                    f"- **得分**: {report.final_score if report.final_score is not None else 'N/A'}",
+                    "",
+                ])
+
+                # 解析并添加关键评估结果
+                if report.result:
+                    try:
+                        result_data = json.loads(report.result)
+                        if "result" in result_data and isinstance(result_data["result"], dict):
+                            stage_results = result_data["result"]
+
+                            # 简化显示各阶段结果
+                            stages_info = []
+                            if "stage1_structural_coverage" in stage_results:
+                                s1 = stage_results["stage1_structural_coverage"]
+                                stages_info.append(f"Stage1: {s1.get('judgement', 'N/A')}")
+                            if "stage1_5_explanation_alignment" in stage_results:
+                                s15 = stage_results["stage1_5_explanation_alignment"]
+                                stages_info.append(f"Stage1.5: {s15.get('judgement', 'N/A')}")
+                            if "stage2_engineering_judge" in stage_results:
+                                s2 = stage_results["stage2_engineering_judge"]
+                                stages_info.append(f"Stage2: {s2.get('judgement', 'N/A')}")
+
+                            if stages_info:
+                                md_lines.extend([
+                                    "**关键评估**:",
+                                    "",
+                                    "- " + " | ".join(stages_info),
+                                    "",
+                                ])
+                    except json.JSONDecodeError:
+                        pass
+
+    md_lines.extend([
+        "---",
+        "",
+        f"*报告导出时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*",
+    ])
+
+    return "\n".join(md_lines)
+
+
+def export_reports_to_csv(db: Session, report_ids: Optional[List[int]] = None, plan_id: Optional[int] = None) -> str:
+    """
+    导出报告为 CSV 格式
+
+    Args:
+        db: 数据库会话
+        report_ids: 指定报告 ID 列表
+        plan_id: 指定 Plan ID（导出该 Plan 的所有报告）
+
+    Returns:
+        CSV 格式的字符串
+    """
+    query = db.query(TestReport)
+
+    if report_ids:
+        query = query.filter(TestReport.id.in_(report_ids))
+    elif plan_id:
+        query = query.filter(TestReport.plan_id == plan_id)
+
+    reports = query.all()
+
+    if not reports:
+        return None
+
+    # 创建 CSV
+    output = io.StringIO()
+    fieldnames = [
+        "report_id",
+        "report_name",
+        "plan_id",
+        "plan_name",
+        "case_id",
+        "case_name",
+        "status",
+        "final_score",
+        "created_at",
+        "stage1_judgement",
+        "stage1_5_judgement",
+        "stage2_judgement",
+        "stage3_base_score",
+        "stage3_risk_deduction",
+    ]
+
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+
+    for report in reports:
+        # 获取关联信息
+        plan_name = None
+        case_name = None
+
+        if report.plan_id:
+            plan = db.query(TestPlan).filter(TestPlan.id == report.plan_id).first()
+            if plan:
+                plan_name = plan.name
+
+        if report.case_id:
+            case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+            if case:
+                case_name = case.name
+
+        # 解析评估结果
+        stage1_judgement = None
+        stage1_5_judgement = None
+        stage2_judgement = None
+        stage3_base_score = None
+        stage3_risk_deduction = None
+
+        if report.result:
+            try:
+                result_data = json.loads(report.result)
+                if "result" in result_data and isinstance(result_data["result"], dict):
+                    stage_results = result_data["result"]
+                    if "stage1_structural_coverage" in stage_results:
+                        stage1_judgement = stage_results["stage1_structural_coverage"].get("judgement")
+                    if "stage1_5_explanation_alignment" in stage_results:
+                        stage1_5_judgement = stage_results["stage1_5_explanation_alignment"].get("judgement")
+                    if "stage2_engineering_judge" in stage_results:
+                        stage2_judgement = stage_results["stage2_engineering_judge"].get("judgement")
+                    if "stage3_risk_scoring" in stage_results:
+                        stage3_base_score = stage_results["stage3_risk_scoring"].get("base_score")
+                        stage3_risk_deduction = stage_results["stage3_risk_scoring"].get("risk_deduction")
+            except json.JSONDecodeError:
+                pass
+
+        row = {
+            "report_id": report.id,
+            "report_name": report.report_name,
+            "plan_id": report.plan_id or "",
+            "plan_name": plan_name or "",
+            "case_id": report.case_id or "",
+            "case_name": case_name or "",
+            "status": report.status,
+            "final_score": report.final_score if report.final_score is not None else "",
+            "created_at": report.created_at.strftime('%Y-%m-%d %H:%M:%S') if report.created_at else "",
+            "stage1_judgement": stage1_judgement or "",
+            "stage1_5_judgement": stage1_5_judgement or "",
+            "stage2_judgement": stage2_judgement or "",
+            "stage3_base_score": stage3_base_score if stage3_base_score is not None else "",
+            "stage3_risk_deduction": stage3_risk_deduction if stage3_risk_deduction is not None else "",
+        }
+        writer.writerow(row)
+
+    return output.getvalue()
