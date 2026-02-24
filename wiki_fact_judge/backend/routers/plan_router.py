@@ -60,26 +60,20 @@ def run_plan(plan_id: int, db: Session = Depends(get_db)):
     from backend.services.pipeline_service import run_plan as run_pipeline_plan
 
     # 在这里调用 pipeline_service.run_plan
+    # pipeline_service 内部会创建/更新 Plan_Report_{plan_id} 用于进度跟踪和结果汇总
     result = run_pipeline_plan(db, plan_id)
 
-    # 为每次执行创建新的汇总报告
-    from backend.services.report_service import create_report
-    from backend.schemas import TestReportCreate
-
-    # 创建新的汇总报告（每次执行都创建新的，不覆盖旧的）
-    report_data = TestReportCreate(
-        report_name=f"Plan {plan_id} Summary Report - {datetime.now().strftime('%Y%m%d_%H%M%S')}",
-        plan_id=plan_id,
-        status="FINISHED",
-        final_score=result.get("average_score"),
-        result=json.dumps(result, ensure_ascii=False),  # 序列化为JSON字符串
-        output_path=None
+    # 获取 pipeline_service 创建的报告 ID
+    from backend.database import TestReport
+    plan_report = (
+        db.query(TestReport)
+        .filter(TestReport.plan_id == plan_id)
+        .order_by(TestReport.created_at.desc())
+        .first()
     )
-
-    report = create_report(db, report_data)
 
     return {
         "plan_id": plan_id,
         "result": result,
-        "report_id": report.id
+        "report_id": plan_report.id if plan_report else None
     }
