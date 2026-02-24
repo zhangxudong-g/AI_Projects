@@ -16,9 +16,11 @@ Base = declarative_base()
 import os
 from pathlib import Path
 
-# 获取 backend 目录路径
-backend_dir = Path(__file__).parent
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{backend_dir}/judge.db")
+# 获取 backend 目录的绝对路径
+backend_dir = Path(__file__).resolve().parent
+# 使用绝对路径确保数据库文件位置正确
+DEFAULT_DB_PATH = backend_dir / "judge.db"
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}")
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite:") else {})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
