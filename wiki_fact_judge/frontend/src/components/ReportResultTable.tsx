@@ -301,7 +301,7 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
             {parsedResult.results.map((resultObj: any, idx: number) => {
               const actualResult = resultObj.result || resultObj;
               const caseId = actualResult.case_id || resultObj.case_id;
-              const caseInfo = caseId ? caseInfoMap.get(caseId) : null;
+              const caseInfo = caseId ? (caseInfoMap.get(caseId) || null) : null;
               return renderCaseResult(actualResult, caseInfo, idx);
             })}
           </div>
