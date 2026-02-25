@@ -168,3 +168,46 @@
   text-overflow: ellipsis;
   max-width: calc(100% - 25px);
 }
+
+/* Tag 过滤器样式 */
+.tag-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tag-filter-container label {
+  margin-bottom: 0;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.tag-filter-container .form-select {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background-color: white;
+  min-width: 120px;
+}
+
+.tag-filter-container .form-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Case Tag 显示样式 */
+.case-tag {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-left: 0.25rem;
+}
+
+/* 没有案例时的提示 */
+.no-cases-message {
+  padding: 1rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
