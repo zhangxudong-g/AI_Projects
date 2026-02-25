@@ -140,6 +140,13 @@ const renderCaseResult = (result: any, caseInfo: CaseInfo | null, index: number)
           <p className="action-recommendation">
             <strong>Recommendation:</strong> {engineeringAction.recommended_action}
           </p>
+          {/* 显示 Summary 在 Recommendation 下方 */}
+          {result?.summary && (
+            <div className="action-summary">
+              <strong>Summary:</strong>
+              <p>{result.summary}</p>
+            </div>
+          )}
         </div>
       )}
 
