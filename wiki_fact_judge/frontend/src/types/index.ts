@@ -4,6 +4,7 @@ export interface TestCase {
   id: number;
   case_id: string;
   name: string;
+  tag?: string;  // 用于区分不同版本的 case
   source_code_path?: string;
   wiki_path?: string;
   yaml_path?: string;
