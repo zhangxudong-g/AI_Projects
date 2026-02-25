@@ -470,6 +470,9 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
         "",
     ])
 
+    # 收集并排序所有案例数据（用于表格和详细结果）
+    sorted_case_data = None
+    
     # 添加案例结果总结表格 - 按文件类型排序
     for i, report in enumerate(reports, 1):
         if report.result:
@@ -478,7 +481,7 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                 if result_data and isinstance(result_data, dict) and "results" in result_data:
                     # 收集所有案例数据用于排序
                     case_data_list = []
-                    
+
                     for case_result in result_data["results"]:
                         case_id = case_result.get("case_id", "Unknown")
                         # 从数据库查询 case_name
@@ -520,10 +523,10 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                                 "summary": summary,
                             }
                         ))
-                    
+
                     # 按文件类型排序
                     sorted_case_data = sort_cases_by_file_type(case_data_list)
-                    
+
                     md_lines.extend([
                         "### 案例结果总结",
                         "",
@@ -538,81 +541,85 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                     md_lines.append("")
                     md_lines.append("---")
                     md_lines.append("")
-                    
-                    # 保存排序后的顺序用于详细结果部分
-                    sorted_case_data_for_details = sorted_case_data
                     break  # 只处理第一个 report
             except json.JSONDecodeError:
                 pass
 
     # 各案例详细结果 - 使用排序后的顺序
-    for i, report in enumerate(reports, 1):
-        # 处理 plan report（包含 results 数组）
-        if report.result:
-            try:
-                result_data = json.loads(report.result)
-                # 检查是否有 results 数组（plan report）
-                if result_data and isinstance(result_data, dict) and "results" in result_data:
-                    # 使用排序后的案例数据生成详细结果
-                    for case_id, case_name, data in sorted_case_data_for_details:
-                        # 从原始 result_data 中获取完整的 details
-                        original_case_result = None
-                        for cr in result_data["results"]:
-                            if cr.get("case_id") == case_id:
-                                original_case_result = cr
-                                break
-                        
-                        if original_case_result:
-                            inner_result = original_case_result.get("result", {})
-                            if isinstance(inner_result, dict):
-                                details = inner_result.get("details", {})
-                            else:
-                                details = original_case_result.get("details", {})
+    if sorted_case_data:
+        # 获取第一个 plan report 用于获取 details
+        plan_report = None
+        for report in reports:
+            if report.result:
+                try:
+                    result_data = json.loads(report.result)
+                    if result_data and isinstance(result_data, dict) and "results" in result_data:
+                        plan_report = result_data
+                        break
+                except json.JSONDecodeError:
+                    pass
+        
+        # 使用排序后的案例数据生成详细结果
+        for case_id, case_name, data in sorted_case_data:
+            # 从原始 result_data 中获取完整的 details
+            details = {}
+            if plan_report:
+                for cr in plan_report["results"]:
+                    if cr.get("case_id") == case_id:
+                        inner_result = cr.get("result", {})
+                        if isinstance(inner_result, dict):
+                            details = inner_result.get("details", {})
                         else:
-                            details = {}
+                            details = cr.get("details", {})
+                        break
 
-                        md_lines.extend([
-                            f"### {case_name} ({case_id})",
-                            "",
-                            f"- **状态**: {data['result_status']}",
-                            f"- **得分**: {data['score_str']}",
-                            "",
-                        ])
+            md_lines.extend([
+                f"### {case_name} ({case_id})",
+                "",
+                f"- **状态**: {data['result_status']}",
+                f"- **得分**: {data['score_str']}",
+                "",
+            ])
 
-                        # 显示 Engineering Action
-                        if data['ea']:
-                            md_lines.extend([
-                                "**Engineering Action**:",
-                                "",
-                                f"- **Level**: {data['ea_level']}",
-                                f"- **Description**: {data['ea'].get('description', 'N/A')}",
-                                f"- **Recommendation**: {data['ea'].get('recommended_action', 'N/A')}",
-                                "",
-                            ])
+            # 显示 Engineering Action
+            if data['ea']:
+                md_lines.extend([
+                    "**Engineering Action**:",
+                    "",
+                    f"- **Level**: {data['ea_level']}",
+                    f"- **Description**: {data['ea'].get('description', 'N/A')}",
+                    f"- **Recommendation**: {data['ea'].get('recommended_action', 'N/A')}",
+                    "",
+                ])
 
-                        # 显示 Summary
-                        if data['summary']:
-                            md_lines.extend([
-                                "**Summary**:",
-                                "",
-                                f"{data['summary']}",
-                                "",
-                            ])
+            # 显示 Summary
+            if data['summary']:
+                md_lines.extend([
+                    "**Summary**:",
+                    "",
+                    f"{data['summary']}",
+                    "",
+                ])
 
-                        # 显示 Assessment Details
-                        if details:
-                            md_lines.extend([
-                                "**Assessment Details**:",
-                                "",
-                            ])
-                            for key, value in details.items():
-                                label = key.replace("_", " ").title()
-                                md_lines.append(f"- **{label}**: {value}")
-                            md_lines.append("")
+            # 显示 Assessment Details
+            if details:
+                md_lines.extend([
+                    "**Assessment Details**:",
+                    "",
+                ])
+                for key, value in details.items():
+                    label = key.replace("_", " ").title()
+                    md_lines.append(f"- **{label}**: {value}")
+                md_lines.append("")
 
-                        md_lines.append("---")
-                        md_lines.append("")
-                else:
+            md_lines.append("---")
+            md_lines.append("")
+    else:
+        # 如果没有排序数据（旧格式），使用原有逻辑
+        for i, report in enumerate(reports, 1):
+            if report.result:
+                try:
+                    result_data = json.loads(report.result)
                     # 单个 case 的 report（旧格式兼容）
                     if report.case_id:
                         case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
@@ -625,7 +632,7 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                                 f"- **得分**: {report.final_score if report.final_score is not None else 'N/A'}",
                                 "",
                             ])
-                            
+
                             # 解析并添加关键评估结果
                             if "result" in result_data and isinstance(result_data["result"], dict):
                                 stage_results = result_data["result"]
@@ -639,7 +646,7 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                                 if "stage2_engineering_judge" in stage_results:
                                     s2 = stage_results["stage2_engineering_judge"]
                                     stages_info.append(f"Stage2: {s2.get('judgement', 'N/A')}")
-                                
+
                                 if stages_info:
                                     md_lines.extend([
                                         "**关键评估**:",
@@ -647,9 +654,9 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                                         "- " + " | ".join(stages_info),
                                         "",
                                     ])
-            except json.JSONDecodeError:
-                md_lines.append(f"// 解析报告 {i} 失败")
-                md_lines.append("")
+                except json.JSONDecodeError:
+                    md_lines.append(f"// 解析报告 {i} 失败")
+                    md_lines.append("")
 
     md_lines.extend([
         "---",
