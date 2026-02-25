@@ -415,6 +415,37 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
         "",
     ])
 
+    # 添加案例结果总结表格
+    for i, report in enumerate(reports, 1):
+        if report.result:
+            try:
+                result_data = json.loads(report.result)
+                if result_data and isinstance(result_data, dict) and "results" in result_data:
+                    md_lines.extend([
+                        "### 案例结果总结",
+                        "",
+                        "| Case Name | Case ID | Result | Score | Engineering Action Level |",
+                        "|-----------|---------|--------|-------|-------------------------|",
+                    ])
+                    
+                    for case_result in result_data["results"]:
+                        case_id = case_result.get("case_id", "Unknown")
+                        case_name = case_result.get("case_name", "Unknown")
+                        score = case_result.get("final_score", "N/A")
+                        result_status = case_result.get("result", "N/A")
+                        ea_level = case_result.get("engineering_action", {}).get("level", "N/A") if case_result.get("engineering_action") else "N/A"
+                        
+                        score_str = f"{score:.2f}" if isinstance(score, (int, float)) and score != "N/A" else str(score)
+                        
+                        md_lines.append(f"| {case_name} | {case_id} | {result_status} | {score_str} | {ea_level} |")
+                    
+                    md_lines.append("")
+                    md_lines.append("---")
+                    md_lines.append("")
+                    break  # 只处理第一个 report
+            except json.JSONDecodeError:
+                pass
+
     for i, report in enumerate(reports, 1):
         # 处理 plan report（包含 results 数组）
         if report.result:
