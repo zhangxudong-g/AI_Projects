@@ -8,9 +8,64 @@ import json
 import csv
 import io
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from sqlalchemy.orm import Session
 from backend.database import TestReport, TestPlan, TestCase
+
+
+def extract_file_type(case_name: str) -> str:
+    """
+    从 case name 中提取文件类型（扩展名）
+    
+    Args:
+        case_name: 案例名称（如：Controller_xxx.java）
+    
+    Returns:
+        文件类型（小写扩展名，如 'java'），如果没有扩展名则返回 'unknown'
+    """
+    if not case_name:
+        return 'unknown'
+    
+    # 去掉 .md 后缀（如果是 wiki 文档）
+    name = case_name[:-3] if case_name.endswith('.md') else case_name
+    
+    # 提取最后一个 . 之后的部分作为扩展名
+    parts = name.split('.')
+    if len(parts) > 1:
+        ext = parts[-1].lower()
+        return ext
+    
+    return 'unknown'
+
+
+def sort_cases_by_file_type(case_results: List[Tuple[str, str, Dict]]) -> List[Tuple[str, str, Dict]]:
+    """
+    按文件类型对案例结果进行排序
+    
+    排序规则：
+    1. 按文件类型分组（java、sql、py 等）
+    2. 类型间按类型名字母顺序排序
+    3. 同类型内按 case name 字母顺序排序
+    4. 无扩展名的 case 排在最后
+    
+    Args:
+        case_results: 列表，每个元素为 (case_id, case_name, case_result_data) 元组
+    
+    Returns:
+        排序后的列表
+    """
+    def sort_key(item: Tuple[str, str, Dict]) -> Tuple[int, str, str]:
+        case_id, case_name, _ = item
+        file_type = extract_file_type(case_name)
+        
+        # unknown 类型排在最后
+        if file_type == 'unknown':
+            return (1, '', case_name.lower())
+        
+        # 其他类型按类型名排序，类型内按 name 排序
+        return (0, file_type.lower(), case_name.lower())
+    
+    return sorted(case_results, key=sort_key)
 
 
 def export_report_to_json(db: Session, report_id: int) -> Dict[str, Any]:
@@ -415,12 +470,60 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
         "",
     ])
 
-    # 添加案例结果总结表格
+    # 添加案例结果总结表格 - 按文件类型排序
     for i, report in enumerate(reports, 1):
         if report.result:
             try:
                 result_data = json.loads(report.result)
                 if result_data and isinstance(result_data, dict) and "results" in result_data:
+                    # 收集所有案例数据用于排序
+                    case_data_list = []
+                    
+                    for case_result in result_data["results"]:
+                        case_id = case_result.get("case_id", "Unknown")
+                        # 从数据库查询 case_name
+                        case_name = "Unknown"
+                        if case_id and case_id != "Unknown":
+                            case = db.query(TestCase).filter(TestCase.case_id == case_id).first()
+                            if case:
+                                case_name = case.name
+
+                        # 从嵌套的 result 结构中获取数据
+                        inner_result = case_result.get("result", {})
+                        if isinstance(inner_result, dict):
+                            score = inner_result.get("final_score", "N/A")
+                            # result 字段在内层是判断结果（PASS/FAIL），不是 status
+                            result_status = inner_result.get("result", "N/A")
+                            ea = inner_result.get("engineering_action", {})
+                            summary = inner_result.get("summary", "")
+                        else:
+                            score = case_result.get("final_score", "N/A")
+                            result_status = case_result.get("result", "N/A")
+                            ea = case_result.get("engineering_action", {})
+                            summary = case_result.get("summary", "")
+
+                        ea_level = ea.get("level", "N/A") if ea else "N/A"
+                        recommendation = ea.get("recommended_action", "N/A") if ea else "N/A"
+
+                        score_str = f"{score:.2f}" if isinstance(score, (int, float)) and score != "N/A" else str(score)
+
+                        # 收集数据用于排序
+                        case_data_list.append((
+                            case_id,
+                            case_name,
+                            {
+                                "result_status": result_status,
+                                "score_str": score_str,
+                                "ea_level": ea_level,
+                                "recommendation": recommendation,
+                                "ea": ea,
+                                "summary": summary,
+                            }
+                        ))
+                    
+                    # 按文件类型排序
+                    sorted_case_data = sort_cases_by_file_type(case_data_list)
+                    
                     md_lines.extend([
                         "### 案例结果总结",
                         "",
@@ -428,43 +531,21 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                         "|-----------|---------|--------|-------|-------------------------|----------------|",
                     ])
 
-                    for case_result in result_data["results"]:
-                        case_id = case_result.get("case_id", "Unknown")
-                        # 从数据库查询 case_name
-                        case_name = "Unknown"
-                        if case_id and case_id != "Unknown":
-                            case = db.query(TestCase).filter(TestCase.case_id == case_id).first()
-                            if case:
-                                case_name = case.name
-                        
-                        # 从嵌套的 result 结构中获取数据
-                        inner_result = case_result.get("result", {})
-                        if isinstance(inner_result, dict):
-                            score = inner_result.get("final_score", "N/A")
-                            # result 字段在内层是判断结果（PASS/FAIL），不是 status
-                            result_status = inner_result.get("result", "N/A")
-                            ea = inner_result.get("engineering_action", {})
-                            summary = inner_result.get("summary", "")
-                        else:
-                            score = case_result.get("final_score", "N/A")
-                            result_status = case_result.get("result", "N/A")
-                            ea = case_result.get("engineering_action", {})
-                            summary = case_result.get("summary", "")
-                        
-                        ea_level = ea.get("level", "N/A") if ea else "N/A"
-                        recommendation = ea.get("recommended_action", "N/A") if ea else "N/A"
-
-                        score_str = f"{score:.2f}" if isinstance(score, (int, float)) and score != "N/A" else str(score)
-
-                        md_lines.append(f"| {case_name} | {case_id} | {result_status} | {score_str} | {ea_level} | {recommendation} |")
+                    # 使用排序后的数据生成表格
+                    for case_id, case_name, data in sorted_case_data:
+                        md_lines.append(f"| {case_name} | {case_id} | {data['result_status']} | {data['score_str']} | {data['ea_level']} | {data['recommendation']} |")
 
                     md_lines.append("")
                     md_lines.append("---")
                     md_lines.append("")
+                    
+                    # 保存排序后的顺序用于详细结果部分
+                    sorted_case_data_for_details = sorted_case_data
                     break  # 只处理第一个 report
             except json.JSONDecodeError:
                 pass
 
+    # 各案例详细结果 - 使用排序后的顺序
     for i, report in enumerate(reports, 1):
         # 处理 plan report（包含 results 数组）
         if report.result:
@@ -472,56 +553,49 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                 result_data = json.loads(report.result)
                 # 检查是否有 results 数组（plan report）
                 if result_data and isinstance(result_data, dict) and "results" in result_data:
-                    for case_result in result_data["results"]:
-                        case_id = case_result.get("case_id", "Unknown")
-                        # 从数据库查询 case_name
-                        case_name = "Unknown"
-                        if case_id and case_id != "Unknown":
-                            case = db.query(TestCase).filter(TestCase.case_id == case_id).first()
-                            if case:
-                                case_name = case.name
+                    # 使用排序后的案例数据生成详细结果
+                    for case_id, case_name, data in sorted_case_data_for_details:
+                        # 从原始 result_data 中获取完整的 details
+                        original_case_result = None
+                        for cr in result_data["results"]:
+                            if cr.get("case_id") == case_id:
+                                original_case_result = cr
+                                break
                         
-                        # 从嵌套的 result 结构中获取数据
-                        inner_result = case_result.get("result", {})
-                        if isinstance(inner_result, dict):
-                            score = inner_result.get("final_score", "N/A")
-                            # result 字段在内层是判断结果（PASS/FAIL），不是 status
-                            result_status = inner_result.get("result", "N/A")
-                            ea = inner_result.get("engineering_action", {})
-                            summary = inner_result.get("summary", "")
-                            details = inner_result.get("details", {})
+                        if original_case_result:
+                            inner_result = original_case_result.get("result", {})
+                            if isinstance(inner_result, dict):
+                                details = inner_result.get("details", {})
+                            else:
+                                details = original_case_result.get("details", {})
                         else:
-                            score = case_result.get("final_score", "N/A")
-                            result_status = case_result.get("result", "N/A")
-                            ea = case_result.get("engineering_action", {})
-                            summary = case_result.get("summary", "")
-                            details = case_result.get("details", {})
+                            details = {}
 
                         md_lines.extend([
                             f"### {case_name} ({case_id})",
                             "",
-                            f"- **状态**: {result_status}",
-                            f"- **得分**: {score if score == 'N/A' else f'{score:.2f}'}",
+                            f"- **状态**: {data['result_status']}",
+                            f"- **得分**: {data['score_str']}",
                             "",
                         ])
 
                         # 显示 Engineering Action
-                        if ea:
+                        if data['ea']:
                             md_lines.extend([
                                 "**Engineering Action**:",
                                 "",
-                                f"- **Level**: {ea.get('level', 'N/A')}",
-                                f"- **Description**: {ea.get('description', 'N/A')}",
-                                f"- **Recommendation**: {ea.get('recommended_action', 'N/A')}",
+                                f"- **Level**: {data['ea_level']}",
+                                f"- **Description**: {data['ea'].get('description', 'N/A')}",
+                                f"- **Recommendation**: {data['ea'].get('recommended_action', 'N/A')}",
                                 "",
                             ])
 
                         # 显示 Summary
-                        if summary:
+                        if data['summary']:
                             md_lines.extend([
                                 "**Summary**:",
                                 "",
-                                f"{summary}",
+                                f"{data['summary']}",
                                 "",
                             ])
 
