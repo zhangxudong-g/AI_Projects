@@ -216,11 +216,18 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
         }
       });
 
-      if (caseIds.size === 0) return;
+      if (caseIds.size === 0) {
+        console.log('No case IDs found');
+        return;
+      }
 
+      console.log('Loading case info for:', Array.from(caseIds));
+
+      // 获取所有 case 的信息
       try {
         const response = await caseApi.getAllCases();
         const allCases = response.data;
+        console.log('All cases loaded:', allCases.length);
         const caseInfo = new Map<string, CaseInfo>();
         allCases.forEach((c: any) => {
           if (caseIds.has(c.case_id)) {
@@ -230,6 +237,8 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
             });
           }
         });
+        console.log('Case info map size:', caseInfo.size);
+        console.log('Case info entries:', Array.from(caseInfo.entries()));
         setCaseInfoMap(caseInfo);
       } catch (error) {
         console.error('Failed to load case info:', error);
