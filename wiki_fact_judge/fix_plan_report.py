@@ -49,7 +49,7 @@ def fix_plan_report(report_id: int):
             total_cases += 1
             case_id = case_dir.name
             
-            # 检查 final_score.json 是否存在
+            # 读取 final_score.json
             final_score_path = case_dir / "final_score.json"
             if final_score_path.exists():
                 try:
@@ -60,13 +60,35 @@ def fix_plan_report(report_id: int):
                     case = db.query(TestCase).filter(TestCase.case_id == case_id).first()
                     case_name = case.name if case else "Unknown"
                     
+                    # 构建 stage_results
+                    stage_results = {}
+                    stage_files = {
+                        'stage1': case_dir / 'stage1_result.json',
+                        'stage1_5': case_dir / 'stage1_5_result.json',
+                        'stage2': case_dir / 'stage2_result.json',
+                        'stage3': case_dir / 'stage3_result.json'
+                    }
+                    for stage_name, stage_path in stage_files.items():
+                        if stage_path.exists():
+                            try:
+                                with open(stage_path, 'r', encoding='utf-8') as f:
+                                    stage_data = json.load(f)
+                                stage_results[stage_name] = stage_data
+                            except:
+                                pass
+                    
+                    # 构建完整的结果记录，包含所有评估信息
                     results.append({
                         "case_id": case_id,
                         "case_name": case_name,
                         "success": True,
                         "result": case_result.get("result", "UNKNOWN"),
                         "final_score": case_result.get("final_score", 0),
-                        "summary": case_result.get("summary", "")[:100] + "..." if len(case_result.get("summary", "")) > 100 else case_result.get("summary", "")
+                        "summary": case_result.get("summary", "")[:100] + "..." if len(case_result.get("summary", "")) > 100 else case_result.get("summary", ""),
+                        # 包含完整的评估信息
+                        "details": case_result.get("details", {}),
+                        "engineering_action": case_result.get("engineering_action", {}),
+                        "stage_results": stage_results
                     })
                     
                     completed_cases += 1
@@ -77,6 +99,7 @@ def fix_plan_report(report_id: int):
                     failed_cases += 1
                     results.append({
                         "case_id": case_id,
+                        "case_name": case_name if 'case_name' in locals() else "Unknown",
                         "success": False,
                         "error": str(e)
                     })
