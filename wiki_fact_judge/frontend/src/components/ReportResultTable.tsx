@@ -200,13 +200,25 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
   // 加载 case 信息
   useEffect(() => {
     const loadCaseInfo = async () => {
-      if (!parsedResult || !Array.isArray(parsedResult)) return;
+      // 处理两种情况：parsedResult 是数组 或 parsedResult.results 是数组
+      let resultsArray = null;
+      if (Array.isArray(parsedResult)) {
+        resultsArray = parsedResult;
+      } else if (parsedResult && typeof parsedResult === 'object' && Array.isArray(parsedResult.results)) {
+        resultsArray = parsedResult.results;
+      }
+      
+      if (!resultsArray || resultsArray.length === 0) {
+        console.log('No results array found');
+        return;
+      }
 
       const caseIds = new Set<string>();
-      parsedResult.forEach((result: any) => {
+      resultsArray.forEach((result: any) => {
         if (result?.case_id) {
           caseIds.add(result.case_id);
         }
+        // 处理嵌套结构
         if (result?.results && Array.isArray(result.results)) {
           result.results.forEach((subResult: any) => {
             if (subResult?.case_id) {
