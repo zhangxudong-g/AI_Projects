@@ -122,6 +122,38 @@ export const reportApi = {
   // 批量删除测试报告
   bulkDeleteReports: (ids: number[]) => api.delete('/reports/', { data: ids }),
 
-  // 获取Plan的汇总信息
+  // 获取 Plan 的汇总信息
   getPlanSummary: (planId: number) => api.get(`/reports/plan/${planId}/summary`),
+
+  // ==================== 导出功能 API ====================
+  
+  // 导出单个报告为 JSON
+  exportReportJson: (id: number) => api.get(`/reports/${id}/export/json`, {
+    responseType: 'blob',
+  }),
+
+  // 导出单个报告为 Markdown
+  exportReportMarkdown: (id: number) => api.get(`/reports/${id}/export/markdown`, {
+    responseType: 'blob',
+  }),
+
+  // 导出单个报告为 CSV
+  exportReportCsv: (id: number) => api.get(`/reports/${id}/export/csv`, {
+    responseType: 'blob',
+  }),
+
+  // 导出整个 Plan 的报告为 JSON
+  exportPlanReportsJson: (planId: number) => api.get(`/reports/plan/${planId}/export/json`, {
+    responseType: 'blob',
+  }),
+
+  // 导出整个 Plan 的报告为 Markdown
+  exportPlanReportsMarkdown: (planId: number) => api.get(`/reports/plan/${planId}/export/markdown`, {
+    responseType: 'blob',
+  }),
+
+  // 导出整个 Plan 的报告为 CSV
+  exportPlanReportsCsv: (planId: number) => api.get(`/reports/plan/${planId}/export/csv`, {
+    responseType: 'blob',
+  }),
 };

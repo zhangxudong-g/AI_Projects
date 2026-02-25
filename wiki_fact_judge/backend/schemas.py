@@ -45,6 +45,7 @@ class TestPlanUpdate(TestPlanBase):
 
 class TestPlan(TestPlanBase):
     id: int
+    case_ids: Optional[List[str]] = []  # 添加 case_ids 字段
     created_at: datetime
 
     class Config:

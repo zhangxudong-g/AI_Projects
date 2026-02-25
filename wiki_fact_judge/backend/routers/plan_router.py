@@ -23,6 +23,8 @@ def read_plan(plan_id: int, db: Session = Depends(get_db)):
     db_plan = plan_service.get_plan(db, plan_id)
     if db_plan is None:
         raise HTTPException(status_code=404, detail="Plan not found")
+    # 调试：打印 case_ids
+    print(f"DEBUG read_plan: plan_id={plan_id}, case_ids={getattr(db_plan, 'case_ids', 'NOT_SET')}")
     return db_plan
 
 

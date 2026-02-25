@@ -3,7 +3,8 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 from sqlalchemy.orm import Session
-from backend.database import TestCase
+from backend.database import TestCase, TestReport
+from backend.services import report_service
 import os
 
 
@@ -55,7 +56,7 @@ def _run_case_internal(db: Session, case_id: str, create_report: bool = True) ->
         else:
             # 创建新的测试报告
             report = TestReport(
-                report_name=f"Report_{case_id}",
+                report_name=report_service.generate_unique_report_name(case_id=case_id, db=db),
                 case_id=case_id,
                 status="RUNNING",
                 result=json.dumps({"status": "RUNNING", "message": "Pipeline is running"}),
@@ -111,7 +112,7 @@ def _run_case_internal(db: Session, case_id: str, create_report: bool = True) ->
             from backend.database import TestReport
 
             report = TestReport(
-                report_name=f"Report_{case_id}",
+                report_name=report_service.generate_unique_report_name(case_id=case_id, db=db),
                 case_id=case_id,
                 status="FAILED",
                 result=json.dumps({"error": f"以下文件不存在: {', '.join(missing_files)}"}),
@@ -274,7 +275,7 @@ print(json.dumps(result))
                 from backend.database import TestReport
 
                 report = TestReport(
-                    report_name=f"Report_{case_id}",
+                    report_name=report_service.generate_unique_report_name(case_id=case_id, db=db),
                     case_id=case_id,
                     status="FINISHED",
                     final_score=(
@@ -301,7 +302,7 @@ print(json.dumps(result))
                 from backend.database import TestReport
 
                 report = TestReport(
-                    report_name=f"Report_{case_id}_error",
+                    report_name=report_service.generate_unique_report_name(case_id=case_id, db=db),
                     case_id=case_id,
                     status="FAILED",
                     result=json.dumps(
@@ -325,7 +326,7 @@ print(json.dumps(result))
                 from backend.database import TestReport
 
                 report = TestReport(
-                    report_name=f"Report_{case_id}_error",
+                    report_name=report_service.generate_unique_report_name(case_id=case_id, db=db),
                     case_id=case_id,
                     status="FAILED",
                     result=json.dumps({"error": f"处理 final_score.json 文件时发生未知错误: {str(e)}"}),
@@ -370,46 +371,28 @@ def run_plan(db: Session, plan_id: int):
     # 获取计划中的所有案例
     cases = get_plan_cases(db, plan_id)
 
-    # 创建或更新计划报告，状态设为RUNNING
-    plan_report = (
-        db.query(TestReport)
-        .filter(TestReport.plan_id == plan_id)
-        .order_by(TestReport.created_at.desc())
-        .first()
-    )
-    if plan_report:
-        # 更新现有报告的状态
-        plan_report.status = "RUNNING"
-        plan_report.result = json.dumps(
+
+    # 每次运行都创建新的计划报告（不覆盖已有报告）
+    # 生成唯一的报告名称
+    report_name = report_service.generate_unique_report_name(plan_id=plan_id, db=db)
+    
+    plan_report = TestReport(
+        report_name=report_name,
+        plan_id=plan_id,
+        case_id=None,
+        status="RUNNING",
+        result=json.dumps(
             {
                 "status": "RUNNING",
                 "message": f"Running plan with {len(cases)} cases",
                 "total_cases": len(cases),
                 "completed_cases": 0,
             }
-        )
-        plan_report.updated_at = datetime.utcnow()
-    else:
-        # 创建新的计划报告
-        plan_report = TestReport(
-            report_name=f"Plan_Report_{plan_id}",
-            plan_id=plan_id,
-            case_id=None,
-            status="RUNNING",
-            result=json.dumps(
-                {
-                    "status": "RUNNING",
-                    "message": f"Running plan with {len(cases)} cases",
-                    "total_cases": len(cases),
-                    "completed_cases": 0,
-                }
-            ),
-            output_path="",
-        )
-        db.add(plan_report)
-
+        ),
+        output_path="",
+    )
+    db.add(plan_report)
     db.commit()
-
     results = []
     total_score = 0
     completed_count = 0

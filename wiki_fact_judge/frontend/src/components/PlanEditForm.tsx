@@ -15,15 +15,31 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
     description: plan.description || ''
   });
   const [allCases, setAllCases] = useState<TestCase[]>([]);
-  const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>(plan.case_ids || []);
+  const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 调试：打印 plan 对象
+  useEffect(() => {
+    console.log('PlanEditForm - plan object:', plan);
+    console.log('PlanEditForm - plan.case_ids:', plan.case_ids);
+    console.log('PlanEditForm - plan.case_ids type:', Array.isArray(plan.case_ids) ? 'array' : typeof plan.case_ids);
+  }, [plan]);
 
   useEffect(() => {
     const fetchCases = async () => {
       try {
         const response = await caseApi.getAllCases();
-        setAllCases(response.data);
+        const cases = response.data;
+        setAllCases(cases);
+
+        // allCases 加载完成后，根据 plan.case_ids 设置选中的 case
+        // 确保转换为字符串类型以匹配 testCase.case_id
+        if (plan.case_ids && plan.case_ids.length > 0) {
+          const caseIds = plan.case_ids.map(id => String(id));
+          console.log('Plan edit: Setting selected case IDs:', caseIds);
+          setSelectedCaseIds(caseIds);
+        }
       } catch (err) {
         console.error('Failed to fetch cases:', err);
         setError('Failed to load cases. Please try again later.');
@@ -33,7 +49,7 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
     };
 
     fetchCases();
-  }, []);
+  }, [plan.case_ids]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -147,8 +163,8 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
                 <label>
                   <input
                     type="checkbox"
-                    checked={selectedCaseIds.includes(testCase.case_id)}
-                    onChange={(e) => handleCaseSelection(testCase.case_id, e.target.checked)}
+                    checked={selectedCaseIds.includes(String(testCase.case_id))}
+                    onChange={(e) => handleCaseSelection(String(testCase.case_id), e.target.checked)}
                     disabled={loading}
                   />
                   <span className="case-name" title={testCase.name}>

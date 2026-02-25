@@ -31,13 +31,26 @@ def create_plan(db: Session, plan: TestPlanCreate):
 
 
 def get_plan(db: Session, plan_id: int):
-    """根据ID获取测试计划"""
-    return db.query(TestPlan).filter(TestPlan.id == plan_id).first()
+    """根据 ID 获取测试计划（包含 case_ids）"""
+    db_plan = db.query(TestPlan).filter(TestPlan.id == plan_id).first()
+    if db_plan:
+        # 加载关联的 case_ids
+        plan_cases = db.query(PlanCase).filter(PlanCase.plan_id == plan_id).all()
+        case_ids = [pc.case_id for pc in plan_cases]
+        # 使用 setattr 确保属性被正确设置
+        setattr(db_plan, 'case_ids', case_ids)
+    return db_plan
+
 
 
 def get_plans(db: Session, skip: int = 0, limit: int = 100, order_by: str = "created_at_desc"):
     """获取测试计划列表"""
-    return get_items(db, TestPlan, skip=skip, limit=limit, order_by=order_by)
+    plans = get_items(db, TestPlan, skip=skip, limit=limit, order_by=order_by)
+    # 为每个计划加载 case_ids
+    for plan in plans:
+        plan_cases = db.query(PlanCase).filter(PlanCase.plan_id == plan.id).all()
+        setattr(plan, 'case_ids', [pc.case_id for pc in plan_cases])
+    return plans
 
 
 def update_plan(db: Session, plan_id: int, plan_update: TestPlanUpdate):
@@ -64,6 +77,10 @@ def update_plan(db: Session, plan_id: int, plan_update: TestPlanUpdate):
                 )
                 db.add(plan_case)
             db.commit()
+
+        # 加载 case_ids 以便返回
+        plan_cases = db.query(PlanCase).filter(PlanCase.plan_id == plan_id).all()
+        setattr(db_plan, 'case_ids', [pc.case_id for pc in plan_cases])
 
     return db_plan
 

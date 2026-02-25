@@ -4,12 +4,85 @@ from backend.schemas import TestReportCreate, TestReportUpdate
 from typing import List, Optional
 import uuid
 from datetime import datetime
+import random
+
+
+def generate_unique_report_name(case_id: Optional[str] = None, plan_id: Optional[int] = None, db: Optional[Session] = None) -> str:
+    """
+    生成唯一的报告名称
+    
+    Args:
+        case_id: 案例 ID（如果为案例生成报告）
+        plan_id: 计划 ID（如果为计划生成报告）
+        db: 数据库会话（用于验证唯一性）
+        
+    Returns:
+        唯一的报告名称，格式：report_{id}_{timestamp}_{random}
+    """
+    # 确定标识符
+    if case_id:
+        identifier = case_id
+    elif plan_id:
+        identifier = str(plan_id)
+    else:
+        identifier = "unknown"
+    
+    # 生成时间戳（精确到秒）
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    
+    # 生成 6 位随机数（十六进制）
+    random_suffix = format(random.randint(0, 0xFFFFFF), '06x')
+    
+    report_name = f"report_{identifier}_{timestamp}_{random_suffix}"
+    
+    # 如果提供了数据库会话，验证唯一性
+    if db:
+        max_retries = 10
+        retries = 0
+        while db.query(TestReport).filter(TestReport.report_name == report_name).first():
+            if retries >= max_retries:
+                raise Exception(f"Failed to generate unique report name after {max_retries} retries")
+            # 重新生成随机数
+            random_suffix = format(random.randint(0, 0xFFFFFF), '06x')
+            report_name = f"report_{identifier}_{timestamp}_{random_suffix}"
+            retries += 1
+    
+    return report_name
+
+
+def ensure_unique_report_name(report: TestReport, db: Session):
+    """
+    确保报告有唯一的名称，如果没有则自动生成
+    
+    Args:
+        report: TestReport 对象（会被修改）
+        db: 数据库会话
+    """
+    if not report.report_name:
+        report.report_name = generate_unique_report_name(
+            case_id=report.case_id,
+            plan_id=report.plan_id,
+            db=db
+        )
 
 
 def create_report(db: Session, report: TestReportCreate):
-    """创建新的测试报告"""
+    """
+    创建新的测试报告
+    
+    如果未提供 report_name，自动生成唯一的报告名称
+    """
+    # 如果没有提供报告名称，自动生成唯一名称
+    report_name = report.report_name
+    if not report_name:
+        report_name = generate_unique_report_name(
+            case_id=report.case_id,
+            plan_id=report.plan_id,
+            db=db
+        )
+    
     db_report = TestReport(
-        report_name=report.report_name,
+        report_name=report_name,
         plan_id=report.plan_id,
         case_id=report.case_id,
         status=report.status,

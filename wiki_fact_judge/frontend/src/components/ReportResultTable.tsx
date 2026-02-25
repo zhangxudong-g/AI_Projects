@@ -157,12 +157,37 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
   const renderResultTable = (result: any, index?: number) => {
     const title = index !== undefined ? `Result ${index + 1}` : 'Test Result';
 
-    // 准备基本结果数据
-    const resultData = {
-      'Final Score': result?.final_score !== undefined ? result.final_score.toFixed(2) : 'N/A',
-      'Result': result?.result || 'N/A',
-      'Summary': result?.summary ? escapeHtml(result.summary) : 'N/A',
-    };
+    // 准备基本结果数据 - 动态遍历所有字段，不显示 N/A
+    const resultData: Record<string, any> = {};
+    
+    // 遍历 result 对象的所有顶层字段
+    if (result && typeof result === 'object') {
+      Object.keys(result).forEach(key => {
+        const value = result[key];
+        // 跳过 null、undefined 和空字符串，但保留 0 和 false
+        if (value !== null && value !== undefined && value !== '') {
+          // 跳过嵌套对象和数组（这些会单独显示）
+          if (typeof value !== 'object' || Array.isArray(value)) {
+            // 数字保留 2 位小数
+            if (typeof value === 'number') {
+              resultData[key] = value.toFixed(2);
+            } else {
+              resultData[key] = value;
+            }
+          }
+        }
+      });
+    }
+
+    // 如果没有任何数据，返回空消息
+    if (Object.keys(resultData).length === 0) {
+      return (
+        <div key={index} className="result-item">
+          {index !== undefined && <h5>{title}</h5>}
+          <p style={{ color: '#999' }}>暂无详细数据</p>
+        </div>
+      );
+    }
 
     return (
       <div key={index} className="result-item">
@@ -319,17 +344,36 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
     );
   }
 
-  // 准备基本报告数据
-  const basicReportData = {
-    'ID': testReport.id || 'N/A',
-    'Report Name': testReport.report_name ? escapeHtml(testReport.report_name) : 'N/A',
-    'Status': testReport.status ? escapeHtml(testReport.status) : 'N/A',
-    'Final Score': testReport.final_score != null ? testReport.final_score.toFixed(2) : 'N/A',
-    'Plan ID': testReport.plan_id || 'N/A',
-    'Case ID': testReport.case_id || 'N/A',
-    'Output Path': testReport.output_path ? escapeHtml(testReport.output_path) : 'N/A',
-    'Created At': testReport.created_at ? new Date(testReport.created_at).toLocaleString() : 'N/A'
-  };
+  // 准备基本报告数据 - 只显示有值的字段
+  const basicReportData: Record<string, string | number> = {};
+  
+  basicReportData['ID'] = testReport.id;
+  
+  if (testReport.report_name) {
+    basicReportData['Report Name'] = escapeHtml(testReport.report_name);
+  }
+  
+  if (testReport.status) {
+    basicReportData['Status'] = escapeHtml(testReport.status);
+  }
+  
+  if (testReport.final_score != null) {
+    basicReportData['Final Score'] = testReport.final_score.toFixed(2);
+  }
+  
+  if (testReport.plan_id != null) {
+    basicReportData['Plan ID'] = testReport.plan_id;
+  }
+  
+  if (testReport.case_id != null) {
+    basicReportData['Case ID'] = testReport.case_id;
+  }
+  
+  if (testReport.output_path) {
+    basicReportData['Output Path'] = escapeHtml(testReport.output_path);
+  }
+  
+  basicReportData['Created At'] = new Date(testReport.created_at).toLocaleString();
 
   return (
     <div className="report-result-table">

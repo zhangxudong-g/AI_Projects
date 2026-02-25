@@ -18,7 +18,7 @@
 **请求参数**:
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| report_name | string | 是 | 报告名称 |
+| report_name | string | 否 | 报告名称（可选，未提供时系统自动生成唯一名称） |
 | plan_id | integer | 否 | 关联的计划 ID |
 | case_id | string | 否 | 关联的案例 ID |
 | status | string | 否 | 状态（PENDING/RUNNING/FINISHED/FAILED/PARTIAL_SUCCESS） |
@@ -27,6 +27,15 @@
 | output_path | string | 否 | 输出文件路径 |
 
 **响应数据**: `TestReport` 对象
+
+**核心规则**:
+- 创建报告时，系统应自动生成唯一的报告名称，不覆盖已有报告
+- 未提供 `report_name` 时，系统自动生成包含时间戳和随机数的唯一报告名称
+- 手动指定 `report_name` 时，系统会追加时间戳确保唯一性
+- 报告名称格式：
+  - 案例报告：`report_{case_id}_{timestamp}_{random}`
+  - 计划报告：`report_{plan_id}_{timestamp}_{random}`
+- 名称冲突处理：生成的报告名称与现有报告冲突时，系统自动重新生成随机数部分，直到名称唯一
 
 ### 2.2 获取报告列表
 
