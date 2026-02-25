@@ -13,7 +13,13 @@ interface CaseInfo {
   name: string;
 }
 
-// ... (safeParseJSON 和 escapeHtml 函数保持不变，省略以节省空间)
+interface EngineeringAction {
+  level: string;
+  description: string;
+  recommended_action: string;
+}
+
+// 安全的 JSON 解析函数
 export const safeParseJSON = (jsonString: string) => {
   try {
     if (!jsonString || typeof jsonString !== 'string') {
@@ -45,12 +51,8 @@ export const safeParseJSON = (jsonString: string) => {
       sanitized = sanitized.replace(/\bTrue\b/g, 'true');
       sanitized = sanitized.replace(/\bFalse\b/g, 'false');
       sanitized = sanitized.replace(/\bNone\b/g, 'null');
-      sanitized = sanitized.replace(/(?<!\\)'([^']*)'(?=\s*:)/g, '"$1"');
-      sanitized = sanitized.replace(/(?<=:\s*)'([^']*)'(?=\s*,|\s*})/g, '"$1"');
-      sanitized = sanitized.replace(/'([^']+)':/g, '"$1":');
-      sanitized = sanitized.replace(/:'([^']+)'/g, ':"$1"');
     } catch (e) {
-      console.warn('Warning: Failed to fix quote issues, using original string:', e);
+      console.warn('Warning: Failed to fix special values:', e);
     }
     if (!sanitized || sanitized.length === 0) {
       return null;
@@ -66,18 +68,9 @@ export const safeParseJSON = (jsonString: string) => {
         return null;
       }
     }
-    if (typeof parsed !== 'object' && !Array.isArray(parsed) &&
-        typeof parsed !== 'string' && typeof parsed !== 'number' &&
-        typeof parsed !== 'boolean') {
-      return null;
-    }
     return parsed;
   } catch (e) {
-    if (e instanceof SyntaxError) {
-      console.error('JSON parsing error (syntax):', e.message);
-    } else {
-      console.error('JSON parsing error:', e);
-    }
+    console.error('JSON parsing error:', e);
     return null;
   }
 };
@@ -92,6 +85,94 @@ const escapeHtml = (unsafe: any): string => {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+};
+
+// 获取工程建议级别的样式
+const getActionLevelStyle = (level: string): string => {
+  const levelStyles: Record<string, string> = {
+    'PRIMARY_REFERENCE': '#28a745',  // 绿色 - 可作为主要参考
+    'SUPPORTING_MATERIAL': '#007bff',  // 蓝色 - 辅助材料
+    'NEEDS_REVIEW': '#ffc107',  // 黄色 - 需要审查
+    'NOT_RELIABLE': '#dc3545',  // 红色 - 不可靠
+  };
+  return levelStyles[level] || '#6c757d';
+};
+
+// 渲染单个 case 的结果（简化版，突出 Engineering Action）
+const renderCaseResult = (result: any, caseInfo: CaseInfo | null, index: number) => {
+  const engineeringAction: EngineeringAction | null = result?.engineering_action || null;
+  const actionLevelColor = engineeringAction ? getActionLevelStyle(engineeringAction.level) : '#6c757d';
+
+  return (
+    <div key={index} className="case-result-card">
+      <div className="case-result-header">
+        <h5 className="case-title">
+          {caseInfo ? (
+            <span>
+              {caseInfo.name} 
+              <span className="case-id">({caseInfo.case_id})</span>
+            </span>
+          ) : (
+            `Case ${index + 1}`
+          )}
+        </h5>
+        <div className="case-score">
+          <span className="score-label">Score:</span>
+          <span className={`score-value ${result?.final_score >= 80 ? 'score-high' : result?.final_score >= 40 ? 'score-medium' : 'score-low'}`}>
+            {result?.final_score?.toFixed(0) || 'N/A'}
+          </span>
+          <span className={`result-badge ${result?.result === 'PASS' ? 'badge-pass' : 'badge-fail'}`}>
+            {result?.result || 'N/A'}
+          </span>
+        </div>
+      </div>
+
+      {/* 突出显示 Engineering Action */}
+      {engineeringAction && (
+        <div className="engineering-action-highlight" style={{ borderLeftColor: actionLevelColor }}>
+          <div className="action-header">
+            <strong>Engineering Action:</strong>
+            <span className="action-level" style={{ color: actionLevelColor }}>
+              {engineeringAction.level}
+            </span>
+          </div>
+          <p className="action-description">{engineeringAction.description}</p>
+          <p className="action-recommendation">
+            <strong>Recommendation:</strong> {engineeringAction.recommended_action}
+          </p>
+        </div>
+      )}
+
+      {/* 简化的评估维度 */}
+      {result?.details && (
+        <details className="details-collapse">
+          <summary>Assessment Details</summary>
+          <div className="details-grid">
+            {Object.entries(result.details).map(([key, value]) => (
+              <div key={key} className="detail-item">
+                <span className="detail-label">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
+                <span className="detail-value">{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
+      {/* 简化的 Stage Results */}
+      {result?.stage_results && (
+        <details className="stage-results-collapse">
+          <summary>Stage Results</summary>
+          <div className="stage-results">
+            {Object.entries(result.stage_results).map(([stage, stageResult]) => (
+              <div key={stage} className="stage-item">
+                <strong>{stage}:</strong> {String(stageResult)}
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  );
 };
 
 const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => {
@@ -165,107 +246,6 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
     loadCaseInfo();
   }, [parsedResult]);
 
-  const renderResultTable = (result: any, index?: number) => {
-    const title = index !== undefined ? `Result ${index + 1}` : 'Test Result';
-    const resultData: Record<string, any> = {};
-
-    if (result && typeof result === 'object') {
-      Object.keys(result).forEach(key => {
-        const value = result[key];
-        if (value !== null && value !== undefined && value !== '') {
-          if (typeof value !== 'object' || Array.isArray(value)) {
-            if (typeof value === 'number') {
-              resultData[key] = value.toFixed(2);
-            } else {
-              resultData[key] = value;
-            }
-          }
-        }
-      });
-    }
-
-    if (Object.keys(resultData).length === 0) {
-      return (
-        <div key={index} className="result-item">
-          {index !== undefined && <h5>{title}</h5>}
-          <p style={{ color: '#999' }}>暂无详细数据</p>
-        </div>
-      );
-    }
-
-    return (
-      <div key={index} className="result-item">
-        {index !== undefined && <h5>{title}</h5>}
-        <GenericTable data={resultData} />
-
-        {result?.details && typeof result.details === 'object' && (
-          <div className="details-section">
-            <h5>Details</h5>
-            <GenericTable data={result.details} />
-          </div>
-        )}
-
-        {result?.engineering_action && typeof result.engineering_action === 'object' && (
-          <div className="engineering-action-section">
-            <h5>Engineering Action</h5>
-            <GenericTable data={result.engineering_action} />
-          </div>
-        )}
-
-        {result?.stage_results && (
-          <details>
-            <summary>Stage Results</summary>
-            <table className="nested-table">
-              <thead>
-                <tr>
-                  <th>Stage</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(result.stage_results).map(([stage, stageResult]) => (
-                  <tr key={stage}>
-                    <td><strong>{escapeHtml(stage)}:</strong></td>
-                    <td>
-                      {typeof stageResult === 'object' && stageResult !== null
-                        ? <GenericTable data={stageResult} />
-                        : escapeHtml(String(stageResult))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </details>
-        )}
-
-        {result?.results && Array.isArray(result.results) && (
-          <div className="sub-results-section">
-            <h5>Sub-Results</h5>
-            {result.results.map((subResult: any, idx: number) => {
-              const caseId = subResult?.case_id;
-              const caseInfo = caseId ? caseInfoMap.get(caseId) : null;
-              return (
-                <div key={idx} className="sub-result-item">
-                  <h6>
-                    Sub-Result {idx + 1}
-                    {caseInfo && (
-                      <span className="case-name-display">
-                        : {caseInfo.name} ({caseInfo.case_id})
-                      </span>
-                    )}
-                  </h6>
-                  {subResult.result && typeof subResult.result === 'object' && (
-                    <GenericTable data={subResult.result} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   if (isLoading) {
     return (
       <div className="report-result-table">
@@ -293,95 +273,58 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
     }
   }
 
-  if (parsedResult && Array.isArray(parsedResult)) {
+  // 处理 Plan 执行结果
+  if (parsedResult && typeof parsedResult === 'object' && parsedResult.plan_id !== undefined && Array.isArray(parsedResult.results)) {
     return (
-      <div className="report-results-table">
-        <h4>{testReport.plan_id ? 'Plan Test Results' : 'Test Results'}</h4>
-        {parsedResult.map((result, index) => renderResultTable(result, index))}
-      </div>
-    );
-  }
-
-  if (parsedResult && typeof parsedResult === 'object') {
-    if (parsedResult.plan_id !== undefined && Array.isArray(parsedResult.results)) {
-      return (
-        <div className="report-result-table">
-          <div className="plan-summary">
-            <h4>Plan Execution Summary</h4>
-            <div className="summary-info">
-              <p><strong>Total Cases:</strong> {parsedResult.total_cases}</p>
-              <p><strong>Completed Cases:</strong> {parsedResult.completed_cases}</p>
-              <p><strong>Average Score:</strong> {parsedResult.average_score?.toFixed(2)}</p>
+      <div className="report-result-table">
+        <div className="plan-summary-card">
+          <h4>Plan Execution Summary</h4>
+          <div className="summary-stats">
+            <div className="stat-item">
+              <span className="stat-label">Total Cases</span>
+              <span className="stat-value">{parsedResult.total_cases}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Completed</span>
+              <span className="stat-value stat-success">{parsedResult.completed_cases}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Average Score</span>
+              <span className="stat-value stat-highlight">{parsedResult.average_score?.toFixed(2)}</span>
             </div>
           </div>
+        </div>
 
-          <div className="plan-results">
-            <h4>Individual Case Results</h4>
+        <div className="plan-cases-section">
+          <h4>Case Results</h4>
+          <div className="cases-list">
             {parsedResult.results.map((resultObj: any, idx: number) => {
               const actualResult = resultObj.result || resultObj;
               const caseId = actualResult.case_id || resultObj.case_id;
               const caseInfo = caseId ? caseInfoMap.get(caseId) : null;
-              return (
-                <div key={idx} className="case-result">
-                  <h5>
-                    Case {idx + 1}: 
-                    {caseInfo ? (
-                      <span className="case-name-display">
-                        {caseInfo.name} ({caseInfo.case_id})
-                      </span>
-                    ) : (
-                      caseId || 'Unknown'
-                    )}
-                  </h5>
-                  {actualResult.result ? renderResultTable(actualResult.result, idx) : renderResultTable(actualResult, idx)}
-                </div>
-              );
+              return renderCaseResult(actualResult, caseInfo, idx);
             })}
           </div>
         </div>
-      );
-    } else {
-      return (
-        <div className="report-result-table">
-          {renderResultTable(parsedResult)}
-        </div>
-      );
-    }
-  }
-
-  if (!testReport) {
-    return (
-      <div className="report-result-table">
-        <p>No report data available</p>
       </div>
     );
   }
 
-  const basicReportData: Record<string, string | number> = {};
-  basicReportData['ID'] = testReport.id;
-  if (testReport.report_name) {
-    basicReportData['Report Name'] = escapeHtml(testReport.report_name);
+  // 处理普通测试结果（单个 case）
+  if (parsedResult && typeof parsedResult === 'object') {
+    return (
+      <div className="report-result-table">
+        <div className="single-case-result">
+          {renderCaseResult(parsedResult, null, 0)}
+        </div>
+      </div>
+    );
   }
-  if (testReport.status) {
-    basicReportData['Status'] = escapeHtml(testReport.status);
-  }
-  if (testReport.final_score != null) {
-    basicReportData['Final Score'] = testReport.final_score.toFixed(2);
-  }
-  if (testReport.plan_id != null) {
-    basicReportData['Plan ID'] = testReport.plan_id;
-  }
-  if (testReport.case_id != null) {
-    basicReportData['Case ID'] = testReport.case_id;
-  }
-  if (testReport.output_path) {
-    basicReportData['Output Path'] = escapeHtml(testReport.output_path);
-  }
-  basicReportData['Created At'] = new Date(testReport.created_at).toLocaleString();
 
+  // 无数据
   return (
     <div className="report-result-table">
-      <GenericTable data={basicReportData} title="Test Results" />
+      <p>No report data available</p>
     </div>
   );
 };

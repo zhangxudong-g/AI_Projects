@@ -106,9 +106,30 @@ def export_plan_reports_to_json(db: Session, plan_id: int) -> Dict[str, Any]:
             case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
             if case:
                 report_data["case_name"] = case.name
-        export_data["reports"].append(report_data)
-        if report.final_score is not None:
+        
+        # 如果是 plan report（包含 results 数组），从 result 字段提取实际的 case 分数
+        if report.result:
+            try:
+                result_obj = json.loads(report.result)
+                if result_obj and isinstance(result_obj, dict) and "results" in result_obj:
+                    # 从 results 数组中提取每个 case 的分数
+                    for result_item in result_obj["results"]:
+                        if "final_score" in result_item and result_item["final_score"] is not None:
+                            scores.append(result_item["final_score"])
+                        elif "result" in result_item and isinstance(result_item["result"], dict):
+                            if "final_score" in result_item["result"] and result_item["result"]["final_score"] is not None:
+                                scores.append(result_item["result"]["final_score"])
+                elif "final_score" in result_obj and result_obj["final_score"] is not None:
+                    # 如果是单个 case 的结果
+                    scores.append(result_obj["final_score"])
+            except (json.JSONDecodeError, KeyError, TypeError):
+                # 如果解析失败，使用 report 的 final_score
+                if report.final_score is not None:
+                    scores.append(report.final_score)
+        elif report.final_score is not None:
             scores.append(report.final_score)
+            
+        export_data["reports"].append(report_data)
 
     if scores:
         export_data["summary"]["average_score"] = sum(scores) / len(scores)
@@ -307,8 +328,28 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
 
     reports = db.query(TestReport).filter(TestReport.plan_id == plan_id).all()
 
-    # 计算统计信息
-    scores = [r.final_score for r in reports if r.final_score is not None]
+    # 计算统计信息 - 从 result 字段提取实际的 case 分数
+    scores = []
+    for report in reports:
+        if report.result:
+            try:
+                result_obj = json.loads(report.result)
+                if result_obj and isinstance(result_obj, dict) and "results" in result_obj:
+                    # 从 results 数组中提取每个 case 的分数
+                    for result_item in result_obj["results"]:
+                        if "final_score" in result_item and result_item["final_score"] is not None:
+                            scores.append(result_item["final_score"])
+                        elif "result" in result_item and isinstance(result_item["result"], dict):
+                            if "final_score" in result_item["result"] and result_item["result"]["final_score"] is not None:
+                                scores.append(result_item["result"]["final_score"])
+                elif "final_score" in result_obj and result_obj["final_score"] is not None:
+                    scores.append(result_obj["final_score"])
+            except (json.JSONDecodeError, KeyError, TypeError):
+                if report.final_score is not None:
+                    scores.append(report.final_score)
+        elif report.final_score is not None:
+            scores.append(report.final_score)
+    
     completed = len([r for r in reports if r.status == "FINISHED"])
     failed = len([r for r in reports if r.status == "FAILED"])
     running = len([r for r in reports if r.status == "RUNNING"])
