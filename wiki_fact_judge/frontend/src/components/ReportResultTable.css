@@ -36,6 +36,22 @@
   color: #6c757d;
 }
 
+.case-name-display {
+  color: #007bff;
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
+.case-result h5 {
+  color: #495057;
+}
+
+.case-result .case-name-display {
+  color: #007bff;
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
 .nested-table {
   width: 100%;
   border-collapse: collapse;
