@@ -430,10 +430,27 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
 
                     for case_result in result_data["results"]:
                         case_id = case_result.get("case_id", "Unknown")
-                        case_name = case_result.get("case_name", "Unknown")
-                        score = case_result.get("final_score", "N/A")
-                        result_status = case_result.get("result", "N/A")
-                        ea = case_result.get("engineering_action", {})
+                        # 从数据库查询 case_name
+                        case_name = "Unknown"
+                        if case_id and case_id != "Unknown":
+                            case = db.query(TestCase).filter(TestCase.case_id == case_id).first()
+                            if case:
+                                case_name = case.name
+                        
+                        # 从嵌套的 result 结构中获取数据
+                        inner_result = case_result.get("result", {})
+                        if isinstance(inner_result, dict):
+                            score = inner_result.get("final_score", "N/A")
+                            # result 字段在内层是判断结果（PASS/FAIL），不是 status
+                            result_status = inner_result.get("result", "N/A")
+                            ea = inner_result.get("engineering_action", {})
+                            summary = inner_result.get("summary", "")
+                        else:
+                            score = case_result.get("final_score", "N/A")
+                            result_status = case_result.get("result", "N/A")
+                            ea = case_result.get("engineering_action", {})
+                            summary = case_result.get("summary", "")
+                        
                         ea_level = ea.get("level", "N/A") if ea else "N/A"
                         recommendation = ea.get("recommended_action", "N/A") if ea else "N/A"
 
@@ -457,10 +474,29 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                 if result_data and isinstance(result_data, dict) and "results" in result_data:
                     for case_result in result_data["results"]:
                         case_id = case_result.get("case_id", "Unknown")
-                        case_name = case_result.get("case_name", "Unknown")
-                        score = case_result.get("final_score", "N/A")
-                        result_status = case_result.get("result", "N/A")
+                        # 从数据库查询 case_name
+                        case_name = "Unknown"
+                        if case_id and case_id != "Unknown":
+                            case = db.query(TestCase).filter(TestCase.case_id == case_id).first()
+                            if case:
+                                case_name = case.name
                         
+                        # 从嵌套的 result 结构中获取数据
+                        inner_result = case_result.get("result", {})
+                        if isinstance(inner_result, dict):
+                            score = inner_result.get("final_score", "N/A")
+                            # result 字段在内层是判断结果（PASS/FAIL），不是 status
+                            result_status = inner_result.get("result", "N/A")
+                            ea = inner_result.get("engineering_action", {})
+                            summary = inner_result.get("summary", "")
+                            details = inner_result.get("details", {})
+                        else:
+                            score = case_result.get("final_score", "N/A")
+                            result_status = case_result.get("result", "N/A")
+                            ea = case_result.get("engineering_action", {})
+                            summary = case_result.get("summary", "")
+                            details = case_result.get("details", {})
+
                         md_lines.extend([
                             f"### {case_name} ({case_id})",
                             "",
@@ -468,10 +504,9 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                             f"- **得分**: {score if score == 'N/A' else f'{score:.2f}'}",
                             "",
                         ])
-                        
+
                         # 显示 Engineering Action
-                        if "engineering_action" in case_result and case_result["engineering_action"]:
-                            ea = case_result["engineering_action"]
+                        if ea:
                             md_lines.extend([
                                 "**Engineering Action**:",
                                 "",
@@ -480,27 +515,27 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                                 f"- **Recommendation**: {ea.get('recommended_action', 'N/A')}",
                                 "",
                             ])
-                        
+
                         # 显示 Summary
-                        if "summary" in case_result and case_result["summary"]:
+                        if summary:
                             md_lines.extend([
                                 "**Summary**:",
                                 "",
-                                f"{case_result['summary']}",
+                                f"{summary}",
                                 "",
                             ])
-                        
+
                         # 显示 Assessment Details
-                        if "details" in case_result and case_result["details"]:
+                        if details:
                             md_lines.extend([
                                 "**Assessment Details**:",
                                 "",
                             ])
-                            for key, value in case_result["details"].items():
+                            for key, value in details.items():
                                 label = key.replace("_", " ").title()
                                 md_lines.append(f"- **{label}**: {value}")
                             md_lines.append("")
-                        
+
                         md_lines.append("---")
                         md_lines.append("")
                 else:
