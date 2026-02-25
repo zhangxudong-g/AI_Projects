@@ -16,6 +16,7 @@ router = APIRouter(prefix="/cases", tags=["cases"])
 @router.post("/", response_model=schemas.TestCase)
 def create_case(
     name: str = Form(...),
+    tag: str = Form(None),  # 添加 tag 参数
     source_code: UploadFile = File(None),
     wiki: UploadFile = File(None),
     yaml_file: UploadFile = File(None),
@@ -55,6 +56,7 @@ def create_case(
     case_data = schemas.TestCaseCreate(
         case_id=case_id,
         name=name,
+        tag=tag,  # 添加 tag
         source_code_path=source_code_path,
         wiki_path=wiki_path,
         yaml_path=yaml_path
@@ -69,6 +71,25 @@ def upload_batch_cases(files: List[UploadFile] = File(...), db: Session = Depend
     # 这里实现批量上传逻辑
     # 暂时只返回成功消息
     return {"message": f"成功上传 {len(files)} 个文件", "filenames": [f.filename for f in files]}
+
+
+# Tag 相关路由 - 必须在 /{case_id} 之前定义
+@router.get("/tags", response_model=List[str])
+def get_all_tags(db: Session = Depends(get_db)):
+    """获取所有唯一的 tag 值"""
+    return case_service.get_all_tags(db)
+
+
+@router.get("/tag/{tag}", response_model=List[schemas.TestCase])
+def get_cases_by_tag(
+    tag: str,
+    skip: int = 0,
+    limit: int = 100,
+    order_by: str = "created_at_desc",
+    db: Session = Depends(get_db)
+):
+    """根据 tag 获取测试案例列表"""
+    return case_service.get_cases_by_tag(db, tag, skip=skip, limit=limit, order_by=order_by)
 
 
 @router.get("/{case_id}", response_model=schemas.TestCase)

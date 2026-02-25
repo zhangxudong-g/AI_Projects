@@ -96,6 +96,7 @@ def create_case(db: Session, case: TestCaseCreate):
     db_case = TestCaseModel(
         case_id=case.case_id or f"case_{uuid.uuid4().hex[:8]}",
         name=case.name,
+        tag=case.tag,  # 添加 tag 字段
         source_code_path=case.source_code_path,
         wiki_path=case.wiki_path,
         yaml_path=case.yaml_path,
@@ -182,8 +183,55 @@ def bulk_delete_cases(db: Session, case_ids: List[str]):
     for db_case in db_cases:
         db.delete(db_case)
     db.commit()
-    
+
     logger.info(f"批量删除 {len(db_cases)} 个案例记录")
 
     # 返回实际删除的案例
     return db_cases
+
+
+def get_all_tags(db: Session):
+    """
+    获取所有唯一的 tag 值
+    
+    Args:
+        db: 数据库会话
+        
+    Returns:
+        List[str]: 所有唯一的 tag 列表
+    """
+    results = db.query(TestCaseModel.tag).filter(TestCaseModel.tag.isnot(None)).distinct().all()
+    return [tag for (tag,) in results]
+
+
+def get_cases_by_tag(db: Session, tag: str, skip: int = 0, limit: int = 100, order_by: str = "created_at_desc"):
+    """
+    根据 tag 获取测试案例列表
+    
+    Args:
+        db: 数据库会话
+        tag: tag 值
+        skip: 跳过的记录数
+        limit: 限制返回的记录数
+        order_by: 排序方式
+        
+    Returns:
+        List[TestCaseModel]: 测试案例列表
+    """
+    query = db.query(TestCaseModel).filter(TestCaseModel.tag == tag)
+    
+    # 根据 order_by 参数决定排序方式
+    if order_by == "created_at_asc":
+        query = query.order_by(TestCaseModel.created_at.asc())
+    elif order_by == "created_at_desc":
+        query = query.order_by(TestCaseModel.created_at.desc())
+    elif order_by == "id_asc":
+        query = query.order_by(TestCaseModel.id.asc())
+    elif order_by == "id_desc":
+        query = query.order_by(TestCaseModel.id.desc())
+    elif order_by == "name_asc":
+        query = query.order_by(TestCaseModel.name.asc())
+    elif order_by == "name_desc":
+        query = query.order_by(TestCaseModel.name.desc())
+    
+    return query.offset(skip).limit(limit).all()

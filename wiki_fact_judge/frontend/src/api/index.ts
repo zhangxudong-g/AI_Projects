@@ -76,6 +76,13 @@ export const caseApi = {
 
   // 运行测试案例
   runCase: (id: string) => api.post(`/cases/${id}/run`),
+
+  // 获取所有唯一的 tag 值
+  getAllTags: () => api.get('/cases/tags'),
+
+  // 根据 tag 获取测试案例列表
+  getCasesByTag: (tag: string, orderBy: string = "created_at_desc") => 
+    api.get(`/cases/tag/${tag}?order_by=${orderBy}`),
 };
 
 // 测试计划相关的 API

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { TestPlan, TestCase } from '../types';
 import { planApi, caseApi } from '../api';
 import './PlanEditForm.css';
@@ -18,6 +18,26 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
   const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string>('all');
+
+  // 获取所有唯一的 tag 值
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    allCases.forEach(c => {
+      if (c.tag) {
+        tags.add(c.tag);
+      }
+    });
+    return Array.from(tags).sort();
+  }, [allCases]);
+
+  // 根据 tag 过滤 case
+  const filteredCases = useMemo(() => {
+    if (selectedTag === 'all') {
+      return allCases;
+    }
+    return allCases.filter(c => c.tag === selectedTag);
+  }, [allCases, selectedTag]);
 
   // 调试：打印 plan 对象
   useEffect(() => {
@@ -69,7 +89,7 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
 
   const handleSelectAllCases = (selectAll: boolean) => {
     if (selectAll) {
-      setSelectedCaseIds(allCases.map(c => c.case_id));
+      setSelectedCaseIds(filteredCases.map(c => c.case_id));
     } else {
       setSelectedCaseIds([]);
     }
@@ -140,6 +160,21 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
         <div className="form-group">
           <div className="case-selection-header">
             <label>Select Test Cases for this Plan:</label>
+            <div className="tag-filter-container">
+              <label htmlFor="case-tag-filter">Filter by Tag: </label>
+              <select
+                id="case-tag-filter"
+                value={selectedTag}
+                onChange={(e) => setSelectedTag(e.target.value)}
+                className="form-select"
+                disabled={loading}
+              >
+                <option value="all">全部</option>
+                {allTags.map(tag => (
+                  <option key={tag} value={tag}>{tag}</option>
+                ))}
+              </select>
+            </div>
             <button
               type="button"
               className="btn btn-sm btn-outline-primary"
@@ -158,7 +193,7 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
             </button>
           </div>
           <div className="case-selection-list">
-            {allCases.map(testCase => (
+            {filteredCases.map(testCase => (
               <div key={testCase.case_id} className="case-checkbox-item">
                 <label>
                   <input
@@ -169,11 +204,15 @@ const PlanEditForm: React.FC<PlanEditFormProps> = ({ plan, onSave, onCancel }) =
                   />
                   <span className="case-name" title={testCase.name}>
                     {testCase.name} ({testCase.case_id})
+                    {testCase.tag && <span className="case-tag"> - Tag: {testCase.tag}</span>}
                   </span>
                 </label>
               </div>
             ))}
           </div>
+          {filteredCases.length === 0 && (
+            <p className="no-cases-message">No cases found {selectedTag !== 'all' ? `with tag "${selectedTag}"` : ''}.</p>
+          )}
         </div>
 
         <div className="form-actions">

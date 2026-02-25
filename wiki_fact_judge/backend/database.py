@@ -47,6 +47,7 @@ class TestCase(Base):
     id = Column(Integer, primary_key=True, index=True)
     case_id = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, index=True, nullable=False)
+    tag = Column(String, index=True, nullable=True)  # 用于区分不同版本的 case
     source_code_path = Column(String)
     wiki_path = Column(String)
     yaml_path = Column(String)

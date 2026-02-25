@@ -7,6 +7,7 @@ from datetime import datetime
 class TestCaseBase(BaseModel):
     case_id: str
     name: str
+    tag: Optional[str] = None  # 用于区分不同版本的 case
     source_code_path: Optional[str] = None
     wiki_path: Optional[str] = None
     yaml_path: Optional[str] = None
