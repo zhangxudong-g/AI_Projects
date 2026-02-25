@@ -273,8 +273,8 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
     }
   }
 
-  // 处理 Plan 执行结果
-  if (parsedResult && typeof parsedResult === 'object' && parsedResult.plan_id !== undefined && Array.isArray(parsedResult.results)) {
+  // 处理 Plan 执行结果（包含 results 数组）
+  if (parsedResult && typeof parsedResult === 'object' && Array.isArray(parsedResult.results) && parsedResult.results.length > 0) {
     return (
       <div className="report-result-table">
         <div className="plan-summary-card">
@@ -282,15 +282,15 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
           <div className="summary-stats">
             <div className="stat-item">
               <span className="stat-label">Total Cases</span>
-              <span className="stat-value">{parsedResult.total_cases}</span>
+              <span className="stat-value">{parsedResult.total_cases || parsedResult.results.length}</span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Completed</span>
-              <span className="stat-value stat-success">{parsedResult.completed_cases}</span>
+              <span className="stat-value stat-success">{parsedResult.completed_cases || parsedResult.results.length}</span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Average Score</span>
-              <span className="stat-value stat-highlight">{parsedResult.average_score?.toFixed(2)}</span>
+              <span className="stat-value stat-highlight">{parsedResult.average_score?.toFixed(2) || 'N/A'}</span>
             </div>
           </div>
         </div>
@@ -299,7 +299,8 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
           <h4>Case Results</h4>
           <div className="cases-list">
             {parsedResult.results.map((resultObj: any, idx: number) => {
-              const actualResult = resultObj.result || resultObj;
+              // 处理嵌套的 result 结构
+              const actualResult = resultObj.result && typeof resultObj.result === 'object' ? resultObj.result : resultObj;
               const caseId = actualResult.case_id || resultObj.case_id;
               const caseInfo = caseId ? (caseInfoMap.get(caseId) || null) : null;
               return renderCaseResult(actualResult, caseInfo, idx);
