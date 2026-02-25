@@ -416,46 +416,98 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
     ])
 
     for i, report in enumerate(reports, 1):
-        if report.case_id:
-            case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
-            if case:
-                md_lines.extend([
-                    f"### {i}. {case.name}",
-                    "",
-                    f"- **报告名称**: {report.report_name}",
-                    f"- **状态**: {report.status}",
-                    f"- **得分**: {report.final_score if report.final_score is not None else 'N/A'}",
-                    "",
-                ])
-
-                # 解析并添加关键评估结果
-                if report.result:
-                    try:
-                        result_data = json.loads(report.result)
-                        if "result" in result_data and isinstance(result_data["result"], dict):
-                            stage_results = result_data["result"]
-
-                            # 简化显示各阶段结果
-                            stages_info = []
-                            if "stage1_structural_coverage" in stage_results:
-                                s1 = stage_results["stage1_structural_coverage"]
-                                stages_info.append(f"Stage1: {s1.get('judgement', 'N/A')}")
-                            if "stage1_5_explanation_alignment" in stage_results:
-                                s15 = stage_results["stage1_5_explanation_alignment"]
-                                stages_info.append(f"Stage1.5: {s15.get('judgement', 'N/A')}")
-                            if "stage2_engineering_judge" in stage_results:
-                                s2 = stage_results["stage2_engineering_judge"]
-                                stages_info.append(f"Stage2: {s2.get('judgement', 'N/A')}")
-
-                            if stages_info:
-                                md_lines.extend([
-                                    "**关键评估**:",
-                                    "",
-                                    "- " + " | ".join(stages_info),
-                                    "",
-                                ])
-                    except json.JSONDecodeError:
-                        pass
+        # 处理 plan report（包含 results 数组）
+        if report.result:
+            try:
+                result_data = json.loads(report.result)
+                # 检查是否有 results 数组（plan report）
+                if result_data and isinstance(result_data, dict) and "results" in result_data:
+                    for case_result in result_data["results"]:
+                        case_id = case_result.get("case_id", "Unknown")
+                        case_name = case_result.get("case_name", "Unknown")
+                        score = case_result.get("final_score", "N/A")
+                        result_status = case_result.get("result", "N/A")
+                        
+                        md_lines.extend([
+                            f"### {case_name} ({case_id})",
+                            "",
+                            f"- **状态**: {result_status}",
+                            f"- **得分**: {score if score == 'N/A' else f'{score:.2f}'}",
+                            "",
+                        ])
+                        
+                        # 显示 Engineering Action
+                        if "engineering_action" in case_result and case_result["engineering_action"]:
+                            ea = case_result["engineering_action"]
+                            md_lines.extend([
+                                "**Engineering Action**:",
+                                "",
+                                f"- **Level**: {ea.get('level', 'N/A')}",
+                                f"- **Description**: {ea.get('description', 'N/A')}",
+                                f"- **Recommendation**: {ea.get('recommended_action', 'N/A')}",
+                                "",
+                            ])
+                        
+                        # 显示 Summary
+                        if "summary" in case_result and case_result["summary"]:
+                            md_lines.extend([
+                                "**Summary**:",
+                                "",
+                                f"{case_result['summary']}",
+                                "",
+                            ])
+                        
+                        # 显示 Assessment Details
+                        if "details" in case_result and case_result["details"]:
+                            md_lines.extend([
+                                "**Assessment Details**:",
+                                "",
+                            ])
+                            for key, value in case_result["details"].items():
+                                label = key.replace("_", " ").title()
+                                md_lines.append(f"- **{label}**: {value}")
+                            md_lines.append("")
+                        
+                        md_lines.append("---")
+                        md_lines.append("")
+                else:
+                    # 单个 case 的 report（旧格式兼容）
+                    if report.case_id:
+                        case = db.query(TestCase).filter(TestCase.case_id == report.case_id).first()
+                        if case:
+                            md_lines.extend([
+                                f"### {i}. {case.name}",
+                                "",
+                                f"- **报告名称**: {report.report_name}",
+                                f"- **状态**: {report.status}",
+                                f"- **得分**: {report.final_score if report.final_score is not None else 'N/A'}",
+                                "",
+                            ])
+                            
+                            # 解析并添加关键评估结果
+                            if "result" in result_data and isinstance(result_data["result"], dict):
+                                stage_results = result_data["result"]
+                                stages_info = []
+                                if "stage1_structural_coverage" in stage_results:
+                                    s1 = stage_results["stage1_structural_coverage"]
+                                    stages_info.append(f"Stage1: {s1.get('judgement', 'N/A')}")
+                                if "stage1_5_explanation_alignment" in stage_results:
+                                    s15 = stage_results["stage1_5_explanation_alignment"]
+                                    stages_info.append(f"Stage1.5: {s15.get('judgement', 'N/A')}")
+                                if "stage2_engineering_judge" in stage_results:
+                                    s2 = stage_results["stage2_engineering_judge"]
+                                    stages_info.append(f"Stage2: {s2.get('judgement', 'N/A')}")
+                                
+                                if stages_info:
+                                    md_lines.extend([
+                                        "**关键评估**:",
+                                        "",
+                                        "- " + " | ".join(stages_info),
+                                        "",
+                                    ])
+            except json.JSONDecodeError:
+                md_lines.append(f"// 解析报告 {i} 失败")
+                md_lines.append("")
 
     md_lines.extend([
         "---",
