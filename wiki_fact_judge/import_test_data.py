@@ -208,33 +208,35 @@ def copy_file_to_cases_dir(source_path: Path, case_dir: Path, file_type: str, la
     return str(rel_path)
 
 
-def import_test_data(dry_run: bool = False):
+def import_test_data(dry_run: bool = False, default_tag: str = 'default'):
     """
     导入测试数据
-    
+
     Args:
         dry_run: 如果为 True，只显示不实际导入
+        default_tag: 默认 tag 值
     """
     # 目录路径
     test_dir = project_root / "test"
     code_dir = test_dir / "code"
     wiki_dir = test_dir / "wiki"
     data_dir = project_root / "data" / "cases"
-    
+
     # 确保目录存在
     data_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 检查目录是否存在
     if not code_dir.exists():
         print(f"错误：代码目录不存在：{code_dir}")
         return
-    
+
     if not wiki_dir.exists():
         print(f"错误：Wiki 目录不存在：{wiki_dir}")
         return
-    
+
     # 查找匹配的文件
     print(f"\n正在扫描 test 目录...")
+    print(f"默认 tag: {default_tag}")
     matches = find_matching_files(code_dir, wiki_dir)
     
     if not matches:
@@ -296,15 +298,17 @@ def import_test_data(dry_run: bool = False):
                 case_data = TestCaseCreate(
                     case_id=case_id,
                     name=name,
+                    tag=default_tag,  # 设置默认 tag
                     source_code_path=source_code_rel_path,
                     wiki_path=wiki_rel_path,
                     yaml_path=None
                 )
-                
+
                 db_case = case_service.create_case(db, case_data)
                 print(f"  [OK] 已创建 case_id: {case_id}")
                 print(f"    名称：{name}")
                 print(f"    语言：{language}")
+                print(f"    Tag: {default_tag}")
                 print(f"    代码路径：{source_code_rel_path}")
                 print(f"    Wiki 路径：{wiki_rel_path}\n")
                 
@@ -337,7 +341,7 @@ def import_test_data(dry_run: bool = False):
 def main():
     """主函数"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
         description='从 test 目录自动导入测试数据到 case 中'
     )
@@ -353,9 +357,15 @@ def main():
         default='all',
         help=f'只导入指定语言的文件 (默认：all, 支持：{", ".join(SUPPORTED_LANGUAGES)})'
     )
-    
+    parser.add_argument(
+        '--tag',
+        type=str,
+        default='default',
+        help='为导入的 case 设置 tag 值 (默认：default)'
+    )
+
     args = parser.parse_args()
-    
+
     print("="*60)
     print("测试数据导入工具")
     print("="*60)
@@ -363,14 +373,15 @@ def main():
     print(f"测试数据目录：{project_root / 'test'}")
     print(f"目标目录：{project_root / 'data' / 'cases'}")
     print(f"支持的语言：{', '.join(SUPPORTED_LANGUAGES)}")
+    print(f"默认 Tag: {args.tag}")
     print()
-    
+
     if args.dry_run:
         print("【试运行模式】- 不会实际导入数据\n")
     else:
         print("准备导入数据...\n")
-    
-    import_test_data(dry_run=args.dry_run)
+
+    import_test_data(dry_run=args.dry_run, default_tag=args.tag)
 
 
 if __name__ == "__main__":
