@@ -1,5 +1,6 @@
 import subprocess
 import json
+import sys
 from pathlib import Path
 from typing import Dict, Any
 from sqlalchemy.orm import Session
@@ -240,12 +241,14 @@ print(json.dumps(result))
 
         # 将输出打印到主进程，使用 ignore 忽略无法显示的字符
         if stdout_str:
-            # 编码为 utf-8 并忽略无法编码的字符，然后解码回字符串
+            # 先编码为 gbk 忽略无法编码的字符，再解码回来
             safe_stdout = stdout_str.encode('gbk', errors='ignore').decode('gbk', errors='ignore')
-            print(f"[CLI STDOUT] {safe_stdout}", flush=True)
+            sys.stdout.write(f"[CLI STDOUT] {safe_stdout}\n")
+            sys.stdout.flush()
         if stderr_str:
             safe_stderr = stderr_str.encode('gbk', errors='ignore').decode('gbk', errors='ignore')
-            print(f"[CLI STDERR] {safe_stderr}", flush=True)
+            sys.stderr.write(f"[CLI STDERR] {safe_stderr}\n")
+            sys.stderr.flush()
 
         # 删除临时脚本
         if os.path.exists(temp_script_path):
