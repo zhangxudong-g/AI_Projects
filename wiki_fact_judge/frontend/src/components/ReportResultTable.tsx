@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TestReport } from '../types';
 import { caseApi } from '../api';
 import GenericTable from './GenericTable';
+import { sortCasesByFileType, extractFileType } from '../utils/fileTypeSort';
 import './ReportResultTable.css';
 
 interface ReportResultTableProps {
@@ -289,6 +290,9 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
 
   // 处理 Plan 执行结果（包含 results 数组）
   if (parsedResult && typeof parsedResult === 'object' && Array.isArray(parsedResult.results) && parsedResult.results.length > 0) {
+    // 按文件类型排序
+    const sortedResults = sortCasesByFileType(parsedResult.results, caseInfoMap);
+    
     return (
       <div className="report-result-table">
         <div className="plan-summary-card">
@@ -310,14 +314,15 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
         </div>
 
         <div className="plan-cases-section">
-          <h4>Case Results</h4>
+          <h4>Case Results (Sorted by File Type)</h4>
           <div className="cases-list">
-            {parsedResult.results.map((resultObj: any, idx: number) => {
+            {sortedResults.map((resultObj: any, idx: number) => {
               // 处理嵌套的 result 结构
               const actualResult = resultObj.result && typeof resultObj.result === 'object' ? resultObj.result : resultObj;
               const caseId = actualResult.case_id || resultObj.case_id;
               const caseInfo = caseId ? (caseInfoMap.get(caseId) || null) : null;
-              console.log(`Rendering case ${idx}: caseId=${caseId}, caseInfo=`, caseInfo);
+              const fileType = caseInfo?.name ? extractFileType(caseInfo.name) : 'unknown';
+              console.log(`Rendering case ${idx}: caseId=${caseId}, fileType=${fileType}, caseInfo=`, caseInfo);
               return renderCaseResult(actualResult, caseInfo, idx);
             })}
           </div>
