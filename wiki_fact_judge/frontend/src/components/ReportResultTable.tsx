@@ -317,6 +317,7 @@ const ReportResultTable: React.FC<ReportResultTableProps> = ({ testReport }) => 
               const actualResult = resultObj.result && typeof resultObj.result === 'object' ? resultObj.result : resultObj;
               const caseId = actualResult.case_id || resultObj.case_id;
               const caseInfo = caseId ? (caseInfoMap.get(caseId) || null) : null;
+              console.log(`Rendering case ${idx}: caseId=${caseId}, caseInfo=`, caseInfo);
               return renderCaseResult(actualResult, caseInfo, idx);
             })}
           </div>
