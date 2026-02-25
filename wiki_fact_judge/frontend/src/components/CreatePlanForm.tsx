@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { caseApi, planApi } from '../api';
 import { TestCase } from '../types';
+import './CreatePlanForm.css';
 
 interface CreatePlanFormProps {
   onPlanCreated: () => void;
@@ -14,6 +15,26 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onPlanCreated }) => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string>('all');
+
+  // 获取所有唯一的 tag 值
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    allCases.forEach(c => {
+      if (c.tag) {
+        tags.add(c.tag);
+      }
+    });
+    return Array.from(tags).sort();
+  }, [allCases]);
+
+  // 根据 tag 过滤 case
+  const filteredCases = useMemo(() => {
+    if (selectedTag === 'all') {
+      return allCases;
+    }
+    return allCases.filter(c => c.tag === selectedTag);
+  }, [allCases, selectedTag]);
 
   useEffect(() => {
     fetchAllCases();
@@ -37,6 +58,14 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onPlanCreated }) => {
       setSelectedCaseIds([...selectedCaseIds, caseId]);
     } else {
       setSelectedCaseIds(selectedCaseIds.filter(id => id !== caseId));
+    }
+  };
+
+  const handleSelectAllCases = (selectAll: boolean) => {
+    if (selectAll) {
+      setSelectedCaseIds(filteredCases.map(c => c.case_id));
+    } else {
+      setSelectedCaseIds([]);
     }
   };
 
@@ -109,20 +138,64 @@ const CreatePlanForm: React.FC<CreatePlanFormProps> = ({ onPlanCreated }) => {
       
       <div className="form-group">
         <label className="form-label">Select Cases</label>
+        <div className="case-selection-header">
+          <div className="tag-filter-container">
+            <label htmlFor="create-plan-tag-filter">Filter by Tag: </label>
+            <select
+              id="create-plan-tag-filter"
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              className="form-select"
+              disabled={loading || creating}
+            >
+              <option value="all">全部</option>
+              {allTags.map(tag => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+          </div>
+          <div className="selection-actions">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary"
+              onClick={() => handleSelectAllCases(true)}
+              disabled={loading || creating}
+            >
+              Select All
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary"
+              onClick={() => handleSelectAllCases(false)}
+              disabled={loading || creating}
+            >
+              Clear All
+            </button>
+          </div>
+        </div>
         <div className="case-selection-list">
-          {allCases.map((testCase) => (
+          {filteredCases.map((testCase) => (
             <div key={testCase.id} className="case-item">
               <label>
                 <input
                   type="checkbox"
                   checked={selectedCaseIds.includes(testCase.case_id)}
                   onChange={(e) => handleCaseSelection(testCase.case_id, e.target.checked)}
+                  disabled={loading || creating}
                 />
-                <span style={{ marginLeft: '8px' }}>{testCase.name} ({testCase.case_id})</span>
+                <span className="case-name">
+                  {testCase.name} ({testCase.case_id})
+                  {testCase.tag && <span className="case-tag"> - Tag: {testCase.tag}</span>}
+                </span>
               </label>
             </div>
           ))}
         </div>
+        {filteredCases.length === 0 && (
+          <p className="no-cases-message">
+            No cases found {selectedTag !== 'all' ? `with tag "${selectedTag}"` : ''}.
+          </p>
+        )}
       </div>
       
       <button 
