@@ -157,20 +157,6 @@ const renderCaseResult = (result: any, caseInfo: CaseInfo | null, index: number)
           </div>
         </details>
       )}
-
-      {/* 简化的 Stage Results */}
-      {result?.stage_results && (
-        <details className="stage-results-collapse">
-          <summary>Stage Results</summary>
-          <div className="stage-results">
-            {Object.entries(result.stage_results).map(([stage, stageResult]) => (
-              <div key={stage} className="stage-item">
-                <strong>{stage}:</strong> {String(stageResult)}
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
     </div>
   );
 };
