@@ -221,28 +221,31 @@ print(json.dumps(result))
                 import locale
 
                 encoding = locale.getpreferredencoding()
-                stdout_str = result.stdout.decode(encoding, errors="replace")
+                stdout_str = result.stdout.decode(encoding, errors="ignore")
             except:
                 # 如果都失败了，转换为字符串表示
                 stdout_str = str(result.stdout)
         try:
-            stderr_str = result.stderr.decode("utf-8", errors="replace")
+            stderr_str = result.stderr.decode("utf-8", errors="ignore")
         except (UnicodeDecodeError, AttributeError):
             try:
                 # 如果 utf-8 失敗，嘗試使用系統默認編碼
                 import locale
 
                 encoding = locale.getpreferredencoding()
-                stderr_str = result.stderr.decode(encoding, errors="replace")
+                stderr_str = result.stderr.decode(encoding, errors="ignore")
             except:
                 # 如果都失敗了，轉換為字符串表示
                 stderr_str = str(result.stderr)
 
-        # 将输出打印到主进程，以便在控制台上看到日志
+        # 将输出打印到主进程，使用 ignore 忽略无法显示的字符
         if stdout_str:
-            print(f"[CLI STDOUT] {stdout_str}")
+            # 编码为 utf-8 并忽略无法编码的字符，然后解码回字符串
+            safe_stdout = stdout_str.encode('gbk', errors='ignore').decode('gbk', errors='ignore')
+            print(f"[CLI STDOUT] {safe_stdout}", flush=True)
         if stderr_str:
-            print(f"[CLI STDERR] {stderr_str}")
+            safe_stderr = stderr_str.encode('gbk', errors='ignore').decode('gbk', errors='ignore')
+            print(f"[CLI STDERR] {safe_stderr}", flush=True)
 
         # 删除临时脚本
         if os.path.exists(temp_script_path):
