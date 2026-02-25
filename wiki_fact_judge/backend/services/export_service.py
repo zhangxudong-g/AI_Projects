@@ -424,21 +424,23 @@ def export_plan_reports_to_markdown(db: Session, plan_id: int) -> str:
                     md_lines.extend([
                         "### 案例结果总结",
                         "",
-                        "| Case Name | Case ID | Result | Score | Engineering Action Level |",
-                        "|-----------|---------|--------|-------|-------------------------|",
+                        "| Case Name | Case ID | Result | Score | Engineering Action Level | Recommendation |",
+                        "|-----------|---------|--------|-------|-------------------------|----------------|",
                     ])
-                    
+
                     for case_result in result_data["results"]:
                         case_id = case_result.get("case_id", "Unknown")
                         case_name = case_result.get("case_name", "Unknown")
                         score = case_result.get("final_score", "N/A")
                         result_status = case_result.get("result", "N/A")
-                        ea_level = case_result.get("engineering_action", {}).get("level", "N/A") if case_result.get("engineering_action") else "N/A"
-                        
+                        ea = case_result.get("engineering_action", {})
+                        ea_level = ea.get("level", "N/A") if ea else "N/A"
+                        recommendation = ea.get("recommended_action", "N/A") if ea else "N/A"
+
                         score_str = f"{score:.2f}" if isinstance(score, (int, float)) and score != "N/A" else str(score)
-                        
-                        md_lines.append(f"| {case_name} | {case_id} | {result_status} | {score_str} | {ea_level} |")
-                    
+
+                        md_lines.append(f"| {case_name} | {case_id} | {result_status} | {score_str} | {ea_level} | {recommendation} |")
+
                     md_lines.append("")
                     md_lines.append("---")
                     md_lines.append("")
