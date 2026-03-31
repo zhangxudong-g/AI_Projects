@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving under.
+
+    The href is defaulted to "/" so that the app will work even if you opened
+    the index.html from the file system.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="AI Chat Application with Flutter and Riverpod">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="AI Chat">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>AI Chat</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* 使用系统字体替代 Google Fonts */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    }
+
+    /* 中文字体支持 */
+    body, button, input, select, textarea {
+      font-family: 'Microsoft YaHei', 'SimHei', 'SimSun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* 加载动画 */
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .loader h1 {
+      font-size: 24px;
+      color: #1976D2;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader" id="loading">
+    <svg width="50" height="50" viewBox="0 0 50 50">
+      <circle cx="25" cy="25" r="20" fill="none" stroke="#1976D2" stroke-width="4" 
+              stroke-dasharray="80" stroke-dashoffset="0">
+        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+    <h1>加载中...</h1>
+  </div>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
