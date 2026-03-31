@@ -9,7 +9,7 @@
 
 ## Build, Test, and Development Commands
 - `pip install -r requirements.txt`: install backend dependencies.
-- `cd backend; uvicorn main:app --reload --port 8000`: run the API for local dev.
+- `cd backend; uvicorn main:app --reload --port 8765`: run the API for local dev.
 - `cd frontend; npm install`: install frontend dependencies.
 - `cd frontend; npm start`: run the React dev server.
 - `cd frontend; npm run build`: produce a production build.
@@ -34,5 +34,5 @@
 - Do not change the CLI pipeline behavior unless the PR explicitly targets CLI logic; the web layer should remain a wrapper over `cli/`.
 
 ## Configuration Notes
-- Frontend reads `REACT_APP_API_URL` (defaults to `http://localhost:8000`).
+- Frontend reads `REACT_APP_API_URL` (defaults to `http://localhost:8765`).
 - Keep local artifacts under `data/output/` to avoid mixing generated files with source.

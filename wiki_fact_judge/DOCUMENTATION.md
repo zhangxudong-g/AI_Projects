@@ -272,7 +272,7 @@ pip install -r requirements.txt
 
 # 启动服务
 cd backend
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 0.0.0.0 --port 8765
 ```
 
 ### 2. 前端部署
@@ -290,7 +290,7 @@ npm start
 
 ## 环境变量
 
-- `REACT_APP_API_URL`: 前端 API 地址（默认: http://localhost:8000）
+- `REACT_APP_API_URL`: 前端 API 地址（默认: http://localhost:8765）
 
 ## 开发指南
 

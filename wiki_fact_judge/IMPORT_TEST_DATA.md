@@ -148,13 +148,13 @@ python import_test_data.py --language plsql
 
 ```bash
 # 获取所有 Case 列表
-curl http://localhost:8000/cases/
+curl http://localhost:8765/cases/
 
 # 获取单个 Case 详情
-curl http://localhost:8000/cases/case_2458b0d7
+curl http://localhost:8765/cases/case_2458b0d7
 
 # 查看导入的 Case 总数
-curl http://localhost:8000/cases/ | python -m json.tool | findstr /C:"case_id" | find /C "case_"
+curl http://localhost:8765/cases/ | python -m json.tool | findstr /C:"case_id" | find /C "case_"
 ```
 
 ## 支持的语言

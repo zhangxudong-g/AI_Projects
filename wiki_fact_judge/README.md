@@ -2,6 +2,25 @@
 
 Wiki Fact Judge 是一个基于 promptfoo 框架构建的维基百科事实准确性评估系统，专门用于评估**代码解释性文档**（如Wiki）的工程价值和风险。该系统通过多阶段评估流程，自动化地判断生成的代码解释文档是否提供了有价值的工程见解，同时保持合理的准确性。
 
+## 快速启动
+
+### Windows 用户
+```bat
+start.bat
+```
+
+### Linux/macOS 用户
+```bash
+python start.py
+```
+
+访问服务：
+- 后端 API: http://localhost:8765
+- API 文档：http://localhost:8765/docs
+- 前端界面：http://localhost:3456
+
+详细说明请参考 [启动指南](STARTUP_GUIDE.md)
+
 ## 概述
 
 与传统的 Fact Judge 系统不同，Wiki Fact Judge 专注于评估解释性文档的工程价值，而非严格的事实一致性。其设计目标是判断"这份文档是否提供了有价值的工程见解，同时保持合理的准确性？"，而不是"是否100%覆盖了代码中的每一个元素？"。
@@ -160,7 +179,7 @@ python run_stage2_regression.py
 
 ```bash
 cd backend
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 8765
 ```
 
 ### 启动前端服务

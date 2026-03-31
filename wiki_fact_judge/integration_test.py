@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 # API base URL
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8765"
 
 def test_frontend_backend_integration():
     """测试前端后端集成"""

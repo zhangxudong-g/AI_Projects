@@ -287,21 +287,23 @@ def fixer_node(
         
         logger.info(f"修复完成，应用了 {len(fix_result.get('fixes_applied', []))} 个修复")
 
-        # 清除已处理的错误（让下一轮测试验证）
-        # 如果迭代次数过多，不再继续
+        # 检查迭代次数，超过限制则停止
+        state.iteration_count += 1
         if state.iteration_count >= 5:
-            state.add_error("达到最大修复次数限制")
+            state.add_error("达到最大修复次数限制 (5 次)")
             return {
-                "errors": state.errors,
+                "errors": state.errors,  # 保留错误，不再修复
                 "generated_files": state.generated_files,
+                "iteration_count": state.iteration_count,
                 "messages": state.messages + [
-                    AIMessage(content=f"修复了 {len(fix_result.get('fixes_applied', []))} 个问题，但仍有限制")
+                    AIMessage(content=f"已尝试修复 5 次，仍有错误未解决")
                 ],
             }
 
         return {
             "errors": [],  # 清空错误，让下一轮测试验证
             "generated_files": state.generated_files,
+            "iteration_count": state.iteration_count,
             "messages": state.messages + [
                 AIMessage(content=f"修复了 {len(fix_result.get('fixes_applied', []))} 个问题")
             ],

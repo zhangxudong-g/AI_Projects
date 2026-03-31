@@ -257,11 +257,22 @@ def create_deep_agent(
     # 设置入口
     workflow.set_entry_point("planner")
 
-    # 添加边 - 简化流程，避免循环
+    # 添加边 - 简化流程，添加停止条件
     workflow.add_edge("planner", "coder")
     workflow.add_edge("coder", "tester")
-    workflow.add_edge("tester", "fixer")
-    workflow.add_edge("fixer", "coder")  # Fixer 修复后回到 Coder 重新生成
+    
+    # Tester 根据结果决定下一步
+    workflow.add_conditional_edges(
+        "tester",
+        lambda state: "fixer" if state.errors else "end",
+        {
+            "fixer": "fixer",
+            "end": END,
+        }
+    )
+    
+    # Fixer 修复后回到 Coder
+    workflow.add_edge("fixer", "coder")
 
     # 编译图
     app = workflow.compile(
@@ -361,7 +372,7 @@ class DeepAgentExecutor:
         )
         
         # 执行图
-        config = {"recursion_limit": max(100, self.max_iterations * 6)}
+        config = {"recursion_limit": max(200, self.max_iterations * 10)}
 
         try:
             async for event in self.graph.astream(

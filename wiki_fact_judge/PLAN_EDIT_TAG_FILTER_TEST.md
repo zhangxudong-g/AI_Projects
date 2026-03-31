@@ -28,7 +28,7 @@
 ## 测试步骤
 
 ### 准备工作
-1. 确保后端服务运行：`http://localhost:8000`
+1. 确保后端服务运行：`http://localhost:8765`
 2. 确保前端服务运行：`http://localhost:3000`
 3. 确保数据库中有带 tag 的 case 数据
 
@@ -60,13 +60,13 @@
 
 ### 获取所有 tag
 ```bash
-curl http://localhost:8000/cases/tags
+curl http://localhost:8765/cases/tags
 # 预期：["default"]
 ```
 
 ### 根据 tag 获取 case
 ```bash
-curl http://localhost:8000/cases/tag/default
+curl http://localhost:8765/cases/tag/default
 # 预期：返回所有 tag 为 "default" 的 case 列表
 ```
 
@@ -75,7 +75,7 @@ curl http://localhost:8000/cases/tag/default
 ### Q: Tag 下拉框为空？
 A: 确保数据库中有带 tag 值的 case。可以使用以下命令检查：
 ```bash
-curl http://localhost:8000/cases/ | python -c "import sys,json; data=json.load(sys.stdin); tags=set(c['tag'] for c in data if c.get('tag')); print('Tags:', tags)"
+curl http://localhost:8765/cases/ | python -c "import sys,json; data=json.load(sys.stdin); tags=set(c['tag'] for c in data if c.get('tag')); print('Tags:', tags)"
 ```
 
 ### Q: Select All 选中了所有 case 而不是过滤后的？

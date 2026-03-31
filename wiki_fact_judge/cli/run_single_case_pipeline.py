@@ -27,7 +27,8 @@ def run_cmd(cmd: str):
             shell=True, 
             check=True,
             timeout=1800,  # 30分钟超时，给 Ollama 更多时间
-            env=os.environ.copy()  # 确保使用当前进程的环境变量
+            env=os.environ.copy(),  # 确保使用当前进程的环境变量
+            encoding='utf-8'  # 显式指定 UTF-8 编码，避免 Windows GBK 编码问题
         )
         return result
     except subprocess.TimeoutExpired:
