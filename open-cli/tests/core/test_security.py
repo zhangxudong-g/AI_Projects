@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import shutil
 from pathlib import Path
-from core.security import SecurityBoundary
+from opencli.security import SecurityBoundary
 
 @pytest.fixture
 def temp_workspace():
