@@ -8,6 +8,7 @@ from pathlib import Path
 from core.llm import LLMClient, LLMError, TOOL_SCHEMAS
 from core.session import SessionManager
 from core.security import SecurityBoundary
+from core.renderer import MarkdownRenderer
 from tools.file_tool import FileTool
 from tools.git_tool import GitTool
 from tools.cmd_tool import CmdTool
@@ -109,6 +110,7 @@ class REPL:
         self.session = self.session_manager.create_session()
         self.prompt_builder = PromptBuilder(self.session["id"])
         self.history = []
+        self.renderer = MarkdownRenderer()
 
         if READLINE_AVAILABLE:
             readline.parse_and_bind("tab: complete")
@@ -256,6 +258,9 @@ class REPL:
                 print()
                 if not response_text.strip():
                     print(f"{COLORS['yellow']}(Empty response from AI){COLORS['reset']}")
+                elif response_text.strip():
+                    rendered = self.renderer.render(response_text)
+                    print(rendered)
             except Exception as e:
                 print()
                 return f"{COLORS['red']}Stream error: {type(e).__name__}: {e}{COLORS['reset']}"
@@ -276,6 +281,9 @@ class REPL:
                 print()
                 if not response_text.strip():
                     print(f"{COLORS['yellow']}(Empty response from AI){COLORS['reset']}")
+                elif response_text.strip():
+                    rendered = self.renderer.render(response_text)
+                    print(rendered)
             except Exception as e:
                 print()
                 return f"{COLORS['red']}Stream error: {type(e).__name__}: {e}{COLORS['reset']}"
