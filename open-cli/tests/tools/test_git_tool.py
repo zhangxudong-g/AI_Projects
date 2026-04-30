@@ -28,11 +28,16 @@ def test_git_status(temp_git_repo):
 def test_git_diff_no_changes(temp_git_repo):
     gt = GitTool(repo_root=temp_git_repo)
     diff = gt.diff()
-    assert diff == ""
+    assert diff == "No changes."
 
 def test_git_diff_with_changes(temp_git_repo):
+    """Test diff after adding file to git tracking."""
     gt = GitTool(repo_root=temp_git_repo)
     (temp_git_repo / "test.txt").write_text("changes")
+    import subprocess
+    subprocess.run(["git", "add", "test.txt"], cwd=temp_git_repo, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "add file"], cwd=temp_git_repo, capture_output=True)
+    (temp_git_repo / "test.txt").write_text("modified content")
     diff = gt.diff()
     assert "test.txt" in diff
 
