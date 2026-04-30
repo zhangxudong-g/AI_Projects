@@ -134,6 +134,13 @@ Type 'exit' or 'quit' to end session."""
             self.session_manager.save_session(self.session)
             return response_text
 
+        thinking_blocks = [block for block in content_blocks if block.type == "thinking"]
+        if thinking_blocks:
+            response_text = f"[Thinking: {thinking_blocks[0].thinking[:500]}...]"
+            self.session["messages"].append({"role": "assistant", "content": response_text})
+            self.session_manager.save_session(self.session)
+            return response_text
+
         return "No response content"
 
     def run(self):
