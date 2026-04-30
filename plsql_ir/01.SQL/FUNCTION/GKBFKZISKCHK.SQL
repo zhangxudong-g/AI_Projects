@@ -1,0 +1,194 @@
+CREATE OR REPLACE FUNCTION GKBFKZISKCHK( i_KOJIN_NO IN NUMBER,    --宛名番号
+--1.0.000.000-02.02-02.02
+                                    i_GAKUKBN IN NUMBER,          --学校区分
+                                    i_GAKUNEN IN NUMBER           --学年
+                                   ) RETURN  NUMBER
+    --------------------------------------------------------
+    --  機能概要      : 在籍状況チェック
+    --  パラメータ    : i_KOJIN_NO  宛名番号
+    --              i_GAKUKBN  学校区分
+    --              i_GAKUNEN  学年
+    --  モジュール区分: 内部関数
+    --  戻り値        : 在籍状況 nZAISEKI(0:未在籍,1:在籍中)
+    --  バージョン    : Ver 0.3.000.000
+    --  作成者／作成日: ZCZL.LISHUAI   2024/07/27
+    --------------------------------------------------------
+    IS
+    nZAISEKI                       NUMBER;                        --在籍状況
+    sSQL                           NVARCHAR2(32767);              --SQL文
+    TYPE MC_CURSOR IS REF CURSOR;
+    cCURSOR                        MC_CURSOR;
+    TYPE MR_CHK_ZAISEKIJOKYO IS RECORD(
+        GEN_JIYU_CD                GKBTGAKUREIBO.GEN_JIYU_CD%TYPE,
+        GEN_NENGAPI                GKBTGAKUREIBO.GEN_NENGAPI%TYPE,
+        S_NYUGAKU_BI               GKBTSHUGAKURIREKI.S_NYUGAKU_BI%TYPE,
+        S_TENNYU_BI                GKBTSHUGAKURIREKI.S_TENNYU_BI%TYPE,
+        S_TENGAKU_BI               GKBTSHUGAKURIREKI.S_TENGAKU_BI%TYPE,
+        S_TAIGAKU_BI               GKBTSHUGAKURIREKI.S_TAIGAKU_BI%TYPE,
+        S_SOTSUGYO_BI              GKBTSHUGAKURIREKI.S_SOTSUGYO_BI%TYPE,
+        T_NYUGAKU_BI               GKBTSHUGAKURIREKI.T_NYUGAKU_BI%TYPE,
+        T_TENNYU_BI                GKBTSHUGAKURIREKI.T_TENNYU_BI%TYPE,
+        T_TENGAKU_BI               GKBTSHUGAKURIREKI.T_TENGAKU_BI%TYPE,
+        T_TAIGAKU_BI               GKBTSHUGAKURIREKI.T_TAIGAKU_BI%TYPE,
+        T_SOTSUGYO_BI              GKBTSHUGAKURIREKI.T_SOTSUGYO_BI%TYPE,
+        SHIEN_S_NYUGAKU_BI         GKBTSHUGAKURIREKI.SHIEN_S_NYUGAKU_BI%TYPE,
+        SHIEN_S_TENNYU_BI          GKBTSHUGAKURIREKI.SHIEN_S_TENNYU_BI%TYPE,
+        SHIEN_S_TENGAKU_BI         GKBTSHUGAKURIREKI.SHIEN_S_TENGAKU_BI%TYPE,
+        SHIEN_S_TAIGAKU_BI         GKBTSHUGAKURIREKI.SHIEN_S_TAIGAKU_BI%TYPE,
+        SHIEN_S_SOTSUGYO_BI        GKBTSHUGAKURIREKI.SHIEN_S_SOTSUGYO_BI%TYPE,
+        SHIEN_T_NYUGAKU_BI         GKBTSHUGAKURIREKI.SHIEN_T_NYUGAKU_BI%TYPE,
+        SHIEN_T_TENNYU_BI          GKBTSHUGAKURIREKI.SHIEN_T_TENNYU_BI%TYPE,
+        SHIEN_T_TENGAKU_BI         GKBTSHUGAKURIREKI.SHIEN_T_TENGAKU_BI%TYPE,
+        SHIEN_T_TAIGAKU_BI         GKBTSHUGAKURIREKI.SHIEN_T_TAIGAKU_BI%TYPE,
+        SHIEN_T_SOTSUGYO_BI        GKBTSHUGAKURIREKI.SHIEN_T_SOTSUGYO_BI%TYPE,
+        KUIKIGAI_S_NYUGAKU_BI      GKBTSHUGAKURIREKI.KUIKIGAI_S_NYUGAKU_BI%TYPE,
+        KUIKIGAI_S_TENNYU_BI       GKBTSHUGAKURIREKI.KUIKIGAI_S_TENNYU_BI%TYPE,
+        KUIKIGAI_S_TENGAKU_BI      GKBTSHUGAKURIREKI.KUIKIGAI_S_TENGAKU_BI%TYPE,
+        KUIKIGAI_S_TAIGAKU_BI      GKBTSHUGAKURIREKI.KUIKIGAI_S_TAIGAKU_BI%TYPE,
+        KUIKIGAI_S_SOTSUGYO_BI     GKBTSHUGAKURIREKI.KUIKIGAI_S_SOTSUGYO_BI%TYPE,
+        KUIKIGAI_T_NYUGAKU_BI      GKBTSHUGAKURIREKI.KUIKIGAI_T_NYUGAKU_BI%TYPE,
+        KUIKIGAI_T_TENNYU_BI       GKBTSHUGAKURIREKI.KUIKIGAI_T_TENNYU_BI%TYPE,
+        KUIKIGAI_T_TENGAKU_BI      GKBTSHUGAKURIREKI.KUIKIGAI_T_TENGAKU_BI%TYPE,
+        KUIKIGAI_T_TAIGAKU_BI      GKBTSHUGAKURIREKI.KUIKIGAI_T_TAIGAKU_BI%TYPE,
+        KUIKIGAI_T_SOTSUGYO_BI     GKBTSHUGAKURIREKI.KUIKIGAI_T_SOTSUGYO_BI%TYPE,
+        KUNISHIRITSU_S_NYUGAKU_BI  GKBTSHUGAKURIREKI.KUNISHIRITSU_S_NYUGAKU_BI%TYPE,
+        KUNISHIRITSU_S_TENNYU_BI   GKBTSHUGAKURIREKI.KUNISHIRITSU_S_TENNYU_BI%TYPE,
+        KUNISHIRITSU_S_TENGAKU_BI  GKBTSHUGAKURIREKI.KUNISHIRITSU_S_TENGAKU_BI%TYPE,
+        KUNISHIRITSU_S_TAIGAKU_BI  GKBTSHUGAKURIREKI.KUNISHIRITSU_S_TAIGAKU_BI%TYPE,
+        KUNISHIRITSU_S_SOTSUGYO_BI GKBTSHUGAKURIREKI.KUNISHIRITSU_S_SOTSUGYO_BI%TYPE,
+        KUNISHIRITSU_T_NYUGAKU_BI  GKBTSHUGAKURIREKI.KUNISHIRITSU_T_NYUGAKU_BI%TYPE,
+        KUNISHIRITSU_T_TENNYU_BI   GKBTSHUGAKURIREKI.KUNISHIRITSU_T_TENNYU_BI%TYPE,
+        KUNISHIRITSU_T_TENGAKU_BI  GKBTSHUGAKURIREKI.KUNISHIRITSU_T_TENGAKU_BI%TYPE,
+        KUNISHIRITSU_T_TAIGAKU_BI  GKBTSHUGAKURIREKI.KUNISHIRITSU_T_TAIGAKU_BI%TYPE,
+        KUNISHIRITSU_T_SOTSUGYO_BI GKBTSHUGAKURIREKI.KUNISHIRITSU_T_SOTSUGYO_BI%TYPE
+    );
+    rCHK_ZAISEKIJOKYO               MR_CHK_ZAISEKIJOKYO;        --学齢簿・学年履歴カーソル
+    BEGIN
+        sSQL := '';
+        sSQL := sSQL ||'SELECT GTG.GEN_JIYU_CD';
+        sSQL := sSQL ||'       , GTG.GEN_NENGAPI';
+        sSQL := sSQL ||'       , GTS.S_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.S_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.S_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.S_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.S_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.T_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.T_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.T_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.T_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.T_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_S_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_S_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_S_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_S_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_S_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_T_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_T_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_T_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_T_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.SHIEN_T_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_S_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_S_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_S_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_S_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_S_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_T_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_T_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_T_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_T_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUIKIGAI_T_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_S_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_S_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_S_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_S_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_S_SOTSUGYO_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_T_NYUGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_T_TENNYU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_T_TENGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_T_TAIGAKU_BI';
+        sSQL := sSQL ||'       , GTS.KUNISHIRITSU_T_SOTSUGYO_BI ';
+        sSQL := sSQL ||'FROM GKBTGAKUREIBO GTG';
+        sSQL := sSQL ||'     , GKBTSHUGAKURIREKI GTS ';
+        sSQL := sSQL ||'WHERE GTG.KOJIN_NO = ' || i_KOJIN_NO;
+        sSQL := sSQL ||'      AND GTG.SAISHIN_KBN = 0';
+        sSQL := sSQL ||'      AND GTG.SAKUJO_FLG = 0';
+        sSQL := sSQL ||'      AND GTS.KOJIN_NO = GTG.KOJIN_NO';
+        sSQL := sSQL ||'      AND GTS.SAISHIN_FLG = 0';
+        sSQL := sSQL ||'      AND GTS.SAKUJO_FLG = 0';
+        OPEN cCURSOR FOR sSQL;
+            LOOP
+                FETCH cCURSOR INTO rCHK_ZAISEKIJOKYO;
+                EXIT WHEN cCURSOR%NOTFOUND;
+                IF rCHK_ZAISEKIJOKYO.GEN_JIYU_CD <> 0 OR rCHK_ZAISEKIJOKYO.GEN_NENGAPI <> 0 THEN
+                  nZAISEKI := 0;
+                ELSE
+                  IF i_GAKUKBN = 1 THEN --小学校 の場合
+                    IF (rCHK_ZAISEKIJOKYO.S_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.S_TENNYU_BI <> 0) AND 
+                       (rCHK_ZAISEKIJOKYO.S_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.S_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.S_SOTSUGYO_BI = 0) THEN
+                      nZAISEKI := 1;
+                    END IF;
+                  ELSIF i_GAKUKBN = 2 THEN --中学校 の場合
+                    IF (rCHK_ZAISEKIJOKYO.T_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.T_TENNYU_BI <> 0) AND 
+                       (rCHK_ZAISEKIJOKYO.T_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.T_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.T_SOTSUGYO_BI = 0) THEN
+                      nZAISEKI := 1;
+                    END IF;
+                  ELSIF i_GAKUKBN = 3 THEN --特別支援学校 の場合
+                    IF i_GAKUNEN >= 1 AND i_GAKUNEN <= 6 THEN
+                      IF (rCHK_ZAISEKIJOKYO.SHIEN_S_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.SHIEN_S_TENNYU_BI <> 0) AND 
+                         (rCHK_ZAISEKIJOKYO.SHIEN_S_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.SHIEN_S_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.SHIEN_S_SOTSUGYO_BI = 0) THEN
+                        nZAISEKI := 1;
+                      END IF;
+                    ELSIF i_GAKUNEN >= 7 AND i_GAKUNEN <= 9 THEN
+                      IF (rCHK_ZAISEKIJOKYO.SHIEN_T_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.SHIEN_T_TENNYU_BI <> 0) AND 
+                         (rCHK_ZAISEKIJOKYO.SHIEN_T_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.SHIEN_T_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.SHIEN_T_SOTSUGYO_BI = 0) THEN
+                        nZAISEKI := 1;
+                      END IF;
+                    ELSE
+                      NULL;
+                    END IF;
+                  ELSIF i_GAKUKBN = 4 THEN --区域外 の場合
+                    IF i_GAKUNEN >= 1 AND i_GAKUNEN <= 6 THEN
+                      IF (rCHK_ZAISEKIJOKYO.KUIKIGAI_S_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.KUIKIGAI_S_TENNYU_BI <> 0) AND 
+                         (rCHK_ZAISEKIJOKYO.KUIKIGAI_S_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUIKIGAI_S_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUIKIGAI_S_SOTSUGYO_BI = 0) THEN
+                        nZAISEKI := 1;
+                      END IF;
+                    ELSIF i_GAKUNEN >= 7 AND i_GAKUNEN <= 9 THEN
+                      IF (rCHK_ZAISEKIJOKYO.KUIKIGAI_T_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.KUIKIGAI_T_TENNYU_BI <> 0) AND 
+                         (rCHK_ZAISEKIJOKYO.KUIKIGAI_T_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUIKIGAI_T_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUIKIGAI_T_SOTSUGYO_BI = 0) THEN
+                        nZAISEKI := 1;
+                      END IF;
+                    ELSE
+                      NULL;
+                    END IF;
+                  ELSIF i_GAKUKBN = 5 THEN --国私立 の場合
+                    IF i_GAKUNEN >= 1 AND i_GAKUNEN <= 6 THEN
+                      IF (rCHK_ZAISEKIJOKYO.KUNISHIRITSU_S_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.KUNISHIRITSU_S_TENNYU_BI <> 0) AND 
+                         (rCHK_ZAISEKIJOKYO.KUNISHIRITSU_S_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUNISHIRITSU_S_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUNISHIRITSU_S_SOTSUGYO_BI = 0) THEN
+                        nZAISEKI := 1;
+                      END IF;
+                    ELSIF i_GAKUNEN >= 7 AND i_GAKUNEN <= 9 THEN
+                      IF (rCHK_ZAISEKIJOKYO.KUNISHIRITSU_T_NYUGAKU_BI <> 0 OR rCHK_ZAISEKIJOKYO.KUNISHIRITSU_T_TENNYU_BI <> 0) AND 
+                         (rCHK_ZAISEKIJOKYO.KUNISHIRITSU_T_TENGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUNISHIRITSU_T_TAIGAKU_BI = 0 AND rCHK_ZAISEKIJOKYO.KUNISHIRITSU_T_SOTSUGYO_BI = 0) THEN
+                        nZAISEKI := 1;
+                      END IF;
+                    ELSE
+                      NULL;
+                    END IF;
+                  ELSE
+                    nZAISEKI := 0;
+                  END IF;
+                END IF;
+            END LOOP;
+        IF cCURSOR%ISOPEN THEN
+          CLOSE cCURSOR;
+        END IF;
+        --関数終了
+        RETURN nZAISEKI;
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF cCURSOR%ISOPEN THEN
+              CLOSE cCURSOR;
+            END IF;
+            RETURN SQLCODE;
+    END GKBFKZISKCHK;
+/

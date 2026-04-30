@@ -1,0 +1,367 @@
+{
+  "file_name": "GKBSBCHKLCSV.SQL",
+  "file_type": "PROCEDURE",
+  "identifier": {
+    "name": "GKBSBCHKLCSV",
+    "type": "PROCEDURE",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "NRENBAN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NSHOKUIN_NO",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "VTANMATSU_NO",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NTIME",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "VCHOHYO_ID",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "VWKTABLE",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "BRTN",
+      "type": "BOOLEAN",
+      "direction": "OUT",
+      "description": ""
+    },
+    {
+      "name": "ORDERBY",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "Batch",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    }
+  ],
+  "parameter_descriptions": {
+    "i_NSHOKUIN_NO": "職員個人番号",
+    "i_VTANMATSU_NO": "端末番号",
+    "i_NTIME": "時分秒",
+    "i_VCHOHYO_ID": "帳票ＩＤ（定義体名）",
+    "i_VWKTABLE": "中間テーブル名",
+    "o_BRTN": "ステータス",
+    "i_ORDERBY": "出力ソート順",
+    "i_Batch": "バッチ区分",
+    "IS": "--------------------------------------------------------------------"
+  },
+  "constants": [
+    {
+      "name": "c_BERROR",
+      "type": "BOOLEAN",
+      "value": "FALSE",
+      "description": ""
+    },
+    {
+      "name": "c_BNORMALEND",
+      "type": "BOOLEAN",
+      "value": "TRUE",
+      "description": ""
+    }
+  ],
+  "variables": [
+    {
+      "name": "BRTN",
+      "type": "BOOLEAN",
+      "default": "",
+      "description": "ステータス"
+    },
+    {
+      "name": "I_RTN",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "戻り値（共通）"
+    },
+    {
+      "name": "VERRMSG",
+      "type": "NVARCHAR2",
+      "default": "",
+      "description": "エラーメッセージ"
+    },
+    {
+      "name": "VORDER_BY",
+      "type": "NVARCHAR2",
+      "default": "",
+      "description": "中間TBLソート用"
+    },
+    {
+      "name": "VSQL",
+      "type": "VARCHAR2",
+      "default": "",
+      "description": "SQL文字列用"
+    },
+    {
+      "name": "V_WKORDER",
+      "type": "VARCHAR2",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "nROWNO",
+      "type": "NUMBER",
+      "default": "0",
+      "description": "SQL文作成"
+    },
+    {
+      "name": "v_GKB_TMP_YMDBI",
+      "type": "NVARCHAR2",
+      "default": "",
+      "description": "SQL文作成"
+    },
+    {
+      "name": "CR1",
+      "type": "GKBWCHECK%ROWTYPE",
+      "default": "",
+      "description": "C1カーソルのレコード"
+    },
+    {
+      "name": "r_WKRECORD001",
+      "type": "GKBWL320R001%ROWTYPE",
+      "default": "",
+      "description": "SQL文作成"
+    }
+  ],
+  "type_members": [],
+  "select_fields": [],
+  "subprograms": [
+    {
+      "name": "FSETBLOG",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FTrim",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "GKBSBCHKLCSV",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "JIBSKDAYEDIT1",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "JIBSKDAYEDIT2",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "NVL",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SUBSTR",
+      "type": "FUNCTION",
+      "description": ""
+    }
+  ],
+  "internal_functions": [
+    {
+      "name": "FUNC_GET_SORT_ORDER",
+      "type": "FUNCTION",
+      "return_type": "NVARCHAR2",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "V_WKORDER",
+          "type": "VARCHAR2",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "FUNCOUT_CSV",
+      "type": "FUNCTION",
+      "return_type": "BOOLEAN",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "IS",
+          "type": "REF CURSOR",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "nROWNO",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "v_GKB_TMP_YMDBI",
+          "type": "NVARCHAR2",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "CR1",
+          "type": "GKBWCHECK%ROWTYPE",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "r_WKRECORD001",
+          "type": "GKBWL320R001%ROWTYPE",
+          "default": "",
+          "description": ""
+        }
+      ],
+      "sql_statements": {
+        "SELECT": [
+          "-- Fetch C1 -> CR1"
+        ],
+        "INSERT": [
+          "INSERT INTO GKBWL320R001 VALUES r_WKRECORD001; END LOOP; IF C1%ISOPEN THEN CLOSE C1; END IF; RETURN(c_BNORMALEND); EXCEPTION WHEN OTHERS THEN IF C1%ISOPEN THEN CLOSE C1; END IF; RETURN(c_BERROR);"
+        ],
+        "UPDATE": [],
+        "DELETE": [
+          "DELETE FROM GKBWL320R001 WHERE WSNUM = i_VTANMATSU_NO AND BATCHKBN = i_Batch; OPEN C1 FOR VSQL; LOOP FETCH C1 INTO CR1; EXIT WHEN C1%NOTFOUND; nROWNO := nROWNO + 1; r_WKRECORD001 := NULL; r_WKRECORD001.NO                   := nROWNO;                       --ソート順 r_WKRECORD001.JIDO_KOJIN_NO        :="
+        ],
+        "MERGE": [],
+        "CREATE": []
+      }
+    }
+  ],
+  "sql_statements": {
+    "SELECT": [
+      "-- Fetch C1 -> CR1"
+    ],
+    "INSERT": [],
+    "UPDATE": [],
+    "DELETE": [
+      "DELETE FROM GKBWL320R001 WHERE WSNUM = i_VTANMATSU_NO AND BATCHKBN = i_Batch; OPEN C1 FOR VSQL; LOOP FETCH C1 INTO CR1; EXIT WHEN C1%NOTFOUND; nROWNO := nROWNO + 1; r_WKRECORD001 := NULL; r_WKRECORD001.NO                   := nROWNO;                       --ソート順 r_WKRECORD001.JIDO_KOJIN_NO        :="
+    ],
+    "MERGE": [],
+    "CREATE": []
+  },
+  "execution_flow": [
+    {
+      "type": "DELETE",
+      "content": "DELETE FROM GKBWL320R001 WHERE WSNUM = i_VTANMATSU_NO AND BATCHKBN = i_Batch;"
+    },
+    {
+      "type": "CALL",
+      "content": "JIBSKDAYEDIT1"
+    },
+    {
+      "type": "CALL",
+      "content": "JIBSKDAYEDIT1"
+    }
+  ],
+  "exception_handling": {
+    "has_others": true,
+    "actions": [
+      "LOG_SQLERRM",
+      "LOG_SQLCODE",
+      "CALL_SUBSTR",
+      "CALL_FSETBLOG",
+      "ERR_MSG: ＣＳＶ作成処理が異常終了しました。",
+      "WHEN_OTHERS: VERRMSG := SUBSTR('ＣＳＶ作成処理が異常終了しました。' || SQLERRM, "
+    ]
+  },
+  "header_comments": "i_NSHOKUIN_NO   IN  NVARCHAR2,\ni_VTANMATSU_NO  IN  NVARCHAR2,\ni_NTIME         IN  NUMBER,\ni_VCHOHYO_ID    IN  NVARCHAR2,\ni_VWKTABLE      IN  NVARCHAR2,\no_BRTN          OUT BOOLEAN,\ni_ORDERBY       IN  NVARCHAR2  DEFAULT NULL,\ni_Batch         IN  NVARCHAR2)",
+  "parameter_comments": [
+    {
+      "parameter": "i_NSHOKUIN_NO",
+      "description": "職員個人番号"
+    },
+    {
+      "parameter": "i_VTANMATSU_NO",
+      "description": "端末番号"
+    },
+    {
+      "parameter": "i_NTIME",
+      "description": "時分秒"
+    },
+    {
+      "parameter": "i_VCHOHYO_ID",
+      "description": "帳票ＩＤ（定義体名）"
+    },
+    {
+      "parameter": "i_VWKTABLE",
+      "description": "中間テーブル名"
+    },
+    {
+      "parameter": "o_BRTN",
+      "description": "ステータス"
+    },
+    {
+      "parameter": "i_ORDERBY",
+      "description": "出力ソート順"
+    },
+    {
+      "parameter": "i_Batch",
+      "description": "バッチ区分"
+    },
+    {
+      "parameter": "IS",
+      "description": "--------------------------------------------------------------------"
+    }
+  ],
+  "change_history": [
+    {
+      "date": "2024/04/25",
+      "author": "ZCZL.LIKEWEN",
+      "action": "UPDATE",
+      "version": "0.2.000.001",
+      "description": "512_GKB_00028対応"
+    },
+    {
+      "date": "2024/06/17",
+      "author": "ZCZL.muzhilin",
+      "action": "Update",
+      "version": "0.3.000.000",
+      "description": "新WizLIFE２次開発"
+    },
+    {
+      "date": "2024/06/18",
+      "author": "ZCZL.muzl",
+      "action": "Add",
+      "version": "0.3.000.000",
+      "description": "新WizLIFE２次開発"
+    },
+    {
+      "date": "2024/06/18",
+      "author": "ZCZL.muzl",
+      "action": "Add",
+      "version": "0.3.000.000",
+      "description": "新WizLIFE２次開発"
+    }
+  ]
+}

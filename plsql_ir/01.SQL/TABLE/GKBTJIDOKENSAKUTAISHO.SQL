@@ -1,0 +1,15 @@
+CREATE TABLE GKBTJIDOKENSAKUTAISHO
+(
+    SHOKUINKOJIN_NO                CHAR(12) DEFAULT 0 NOT NULL,
+    KOJIN_NO                       NUMBER(12,0) DEFAULT 0,
+    SHIMEI_KANJI                   NVARCHAR2(100),
+    SYS_SAKUSEIBI                  NUMBER(8,0) DEFAULT 0,
+    SYS_KOSHINBI                   NUMBER(8,0) DEFAULT 0,
+    SYS_JIKAN                      NUMBER(6,0) DEFAULT 0,
+    SYS_SHOKUINKOJIN_NO            CHAR(12),
+    SYS_TANMATU_NO                 NVARCHAR2(63)
+)
+TABLESPACE GK_DATA
+NOCACHE
+LOGGING
+/

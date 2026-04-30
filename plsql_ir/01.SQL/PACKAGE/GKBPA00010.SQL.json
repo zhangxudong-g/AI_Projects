@@ -1,0 +1,42 @@
+{
+  "file_name": "GKBPA00010.SQL",
+  "file_type": "PACKAGE",
+  "identifier": {
+    "name": "GKBPA00010",
+    "type": "PACKAGE",
+    "description": ""
+  },
+  "parameters": [],
+  "parameter_descriptions": {
+    "IS": "------------------------------------------------------------------------"
+  },
+  "constants": [],
+  "variables": [],
+  "type_members": [],
+  "select_fields": [],
+  "subprograms": [
+    {
+      "name": "PONLINE",
+      "type": "PROCEDURE",
+      "description": ""
+    }
+  ],
+  "internal_functions": [],
+  "sql_statements": {
+    "SELECT": [],
+    "INSERT": [],
+    "UPDATE": [],
+    "DELETE": [],
+    "MERGE": [],
+    "CREATE": []
+  },
+  "execution_flow": [],
+  "header_comments": "",
+  "parameter_comments": [
+    {
+      "parameter": "IS",
+      "description": "------------------------------------------------------------------------"
+    }
+  ],
+  "change_history": []
+}

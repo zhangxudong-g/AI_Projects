@@ -1,0 +1,567 @@
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE SW6303
+OBJECT MODULE PLACED IN .\SW6303.obj
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE ..\..\..\SW630X\SW6303.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(
+                    -../../../Library/Include;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC;..\..\..\DELAY;..\..\..
+                    -\CONFIG;..\..\..\SW630X) DEBUG PRINT(.\SW6303.lst) TABS(2) OBJECT(.\SW6303.obj)
+
+line level    source
+
+   1          #include "SW6303.h"
+   2          
+   3          
+   4          void SW6303_SET_H(void)
+   5          {
+   6   1        IIC_ADDRESS = 0X24;
+   7   1        IIC_DAT = 0X81;
+   8   1        SW6303_IIC_WRITE();   
+   9   1      }
+  10          
+  11          void SW6303_SET_L(void)
+  12          {
+  13   1        IIC_ADDRESS = 0X1FF;
+  14   1        IIC_DAT = 0;
+  15   1        SW6303_IIC_WRITE();   
+  16   1      }
+  17          
+  18          
+  19          void SW6303_SET_OUTPUT_POWER_45W(void)
+  20          {
+  21   1      
+  22   1        
+  23   1        SW6303_SET_H();
+  24   1        
+  25   1        IIC_ADDRESS = 0X140;
+  26   1        IIC_DAT = 0;
+  27   1        IIC_DAT |= (1<<7);      // PPS1恒功率
+  28   1        IIC_DAT |= 90;     // 4.5A
+  29   1        SW6303_IIC_WRITE(); 
+  30   1        
+  31   1        SW6303_SET_L();      // 切低位
+  32   1      
+  33   1        IIC_ADDRESS = 0X4F;   // 输出功率
+  34   1        SW6303_IIC_READ();
+  35   1        IIC_DAT &= 0x80;
+  36   1        IIC_DAT |= 45;
+  37   1        SW6303_IIC_WRITE(); 
+  38   1      
+  39   1        IIC_ADDRESS = 0X2E;     // 
+  40   1        SW6303_IIC_READ();
+  41   1        IIC_DAT &= 0XF0;
+  42   1        IIC_DAT |= (1<<0);      // PD source cap
+  43   1        SW6303_IIC_WRITE();   
+  44   1        
+  45   1        
+  46   1      }
+  47          
+  48          void SW6303_SET_OUTPUT_POWER_30W(void)
+  49          {
+  50   1        SW6303_SET_H();
+  51   1        
+  52   1        IIC_ADDRESS = 0X140;
+  53   1        IIC_DAT = 0;
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 2   
+
+  54   1        IIC_DAT |= (1<<7);      // PPS1恒功率
+  55   1        IIC_DAT |= 60;     // 4.5A
+  56   1        SW6303_IIC_WRITE(); 
+  57   1        
+  58   1        SW6303_SET_L();      // 切低位
+  59   1      
+  60   1        IIC_ADDRESS = 0X4F;   // 输出功率
+  61   1        SW6303_IIC_READ();
+  62   1        IIC_DAT &= 0x80;
+  63   1        IIC_DAT |= 30;
+  64   1        SW6303_IIC_WRITE(); 
+  65   1      
+  66   1        IIC_ADDRESS = 0X2E;     // 
+  67   1        SW6303_IIC_READ();
+  68   1        IIC_DAT &= 0XF0;
+  69   1        IIC_DAT |= (1<<0);      // PD source cap
+  70   1        SW6303_IIC_WRITE();   
+  71   1        
+  72   1        
+  73   1        
+  74   1      }
+  75          
+  76          
+  77          void SW6303_SET_OUTPUT_POWER_30W_A(void)
+  78          {
+  79   1      
+  80   1        //SW6303_SET_L();      // 切低位
+  81   1      
+  82   1      //  IIC_ADDRESS = 0X4F;   // 输出功率
+  83   1      //  SW6303_IIC_READ();
+  84   1      //  IIC_DAT &= 0x80;
+  85   1      //  IIC_DAT |= 18;
+  86   1      //  SW6303_IIC_WRITE(); 
+  87   1      
+  88   1      //  IIC_ADDRESS = 0X2E;     // 
+  89   1      //  SW6303_IIC_READ();
+  90   1      //  IIC_DAT &= 0XF0;
+  91   1      //  IIC_DAT |= (1<<0);      // PD source cap
+  92   1      //  SW6303_IIC_WRITE();   
+  93   1        
+  94   1      }
+  95          
+  96          
+  97          void SW6303_SET_INTPUT_POWER_45W(void)     // 输入功率
+  98          {
+  99   1        
+ 100   1        IIC_ADDRESS = 0X45;   // 输入功率
+ 101   1        SW6303_IIC_READ();
+ 102   1        IIC_DAT &= 0x80;
+ 103   1        IIC_DAT |= 45;
+ 104   1        SW6303_IIC_WRITE();   
+ 105   1        
+ 106   1        IIC_ADDRESS = 0X2E;     // 
+ 107   1        SW6303_IIC_READ();
+ 108   1        IIC_DAT &= 0XF0;
+ 109   1        IIC_DAT |= (1<<0);      // PD source cap
+ 110   1        SW6303_IIC_WRITE(); 
+ 111   1          
+ 112   1      }
+ 113          
+ 114          void SW6303_SET_INTPUT_POWER_30W(void)     // 输入功率
+ 115          {
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 3   
+
+ 116   1        
+ 117   1        IIC_ADDRESS = 0X45;   // 输入功率
+ 118   1        SW6303_IIC_READ();
+ 119   1        IIC_DAT &= 0x80;
+ 120   1        IIC_DAT |= 30;
+ 121   1        SW6303_IIC_WRITE();   
+ 122   1        
+ 123   1        IIC_ADDRESS = 0X2E;     // 
+ 124   1        SW6303_IIC_READ();
+ 125   1        IIC_DAT &= 0XF0;
+ 126   1        IIC_DAT |= (1<<0);      // PD source cap
+ 127   1        SW6303_IIC_WRITE(); 
+ 128   1          
+ 129   1      }
+ 130          
+ 131          void SW6303_SET_GUAN_INT(void)     // 关充电
+ 132          {
+ 133   1      
+ 134   1        IIC_ADDRESS = 0X28;   
+ 135   1        SW6303_IIC_READ();
+ 136   1        IIC_DAT |= (1<<2);
+ 137   1        SW6303_IIC_WRITE();   
+ 138   1        
+ 139   1      }
+ 140          
+ 141          void SW6303_SET_KAI_INT(void)     // 开充电
+ 142          {
+ 143   1        
+ 144   1        IIC_ADDRESS = 0X28;   
+ 145   1        SW6303_IIC_READ();
+ 146   1        IIC_DAT &= ~(1<<2);
+ 147   1        SW6303_IIC_WRITE();   
+ 148   1      }
+ 149          
+ 150          void SW6303_SET_GUAN_INT_OUT(void)     // 关充放电
+ 151          {
+ 152   1        
+ 153   1        IIC_ADDRESS = 0X28;   
+ 154   1        SW6303_IIC_READ();
+ 155   1        IIC_DAT |= (1<<2);
+ 156   1        IIC_DAT |= (1<<3);
+ 157   1        SW6303_IIC_WRITE(); 
+ 158   1      }
+ 159          
+ 160          void SW6303_SET_KAI_INT_OUT(void)     // 开充放电
+ 161          {
+ 162   1        
+ 163   1        IIC_ADDRESS = 0X28;   
+ 164   1        SW6303_IIC_READ();
+ 165   1        IIC_DAT &= ~(1<<2);
+ 166   1        IIC_DAT &= ~(1<<3);
+ 167   1        SW6303_IIC_WRITE(); 
+ 168   1        
+ 169   1        
+ 170   1        IIC_ADDRESS = 0X2E;   
+ 171   1        SW6303_IIC_READ();
+ 172   1        IIC_DAT &= 0XF0;
+ 173   1        IIC_DAT |= (1<<1);
+ 174   1        SW6303_IIC_WRITE(); 
+ 175   1      }
+ 176          
+ 177          
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 4   
+
+ 178          
+ 179          unsigned char SW6303_GET_STASE(void)
+ 180          {
+ 181   1        unsigned char sta = 0;
+ 182   1        IIC_ADDRESS = 0X19;
+ 183   1        SW6303_IIC_READ();
+ 184   1        IIC_DAT &= 0XC0;
+ 185   1        if((IIC_DAT & 0xC0)==0X80)     // 放电指示 
+ 186   1        {
+ 187   2          sta |= 0X01;
+ 188   2        }
+ 189   1        if((IIC_DAT & 0xC0)==0X40)     // SINK充电
+ 190   1        {
+ 191   2          sta |= 0X02;
+ 192   2        }
+ 193   1        
+ 194   1        return sta;
+ 195   1      }
+ 196          unsigned char SW_2B;
+ 197          unsigned char SW_2C;
+ 198          unsigned char SW6303_GET_PORT(void)
+ 199          {
+ 200   1        
+ 201   1        unsigned char sta = 0;
+ 202   1        IIC_ADDRESS = 0X1D;
+ 203   1        SW6303_IIC_READ();
+ 204   1        
+ 205   1        sta = IIC_DAT & 0xF7; 
+ 206   1      
+ 207   1        IIC_ADDRESS = 0X2B;
+ 208   1        SW6303_IIC_READ();
+ 209   1        SW_2B = IIC_DAT;
+ 210   1        
+ 211   1        if(IIC_DAT & 0x10)
+ 212   1        {
+ 213   2          SW6303_INIT();
+ 214   2        }
+ 215   1        
+ 216   1        IIC_ADDRESS = 0X2C;
+ 217   1        SW6303_IIC_READ();
+ 218   1        SW_2C = IIC_DAT;
+ 219   1        return sta;
+ 220   1      }
+ 221          
+ 222          void guang_shuchu(void)
+ 223          {
+ 224   1      
+ 225   1        IIC_ADDRESS = 0X21;   // 关输出
+ 226   1        SW6303_IIC_READ();
+ 227   1        IIC_DAT |= (1<<5);
+ 228   1        SW6303_IIC_WRITE(); 
+ 229   1      
+ 230   1      }
+ 231          
+ 232          
+ 233          unsigned int SW6303_GET_IBAT(void)
+ 234          {
+ 235   1      
+ 236   1        unsigned int sta = 0;
+ 237   1        IIC_ADDRESS = 0X30;
+ 238   1        SW6303_IIC_READ();
+ 239   1        IIC_DAT &= 0XE0;
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 5   
+
+ 240   1        IIC_DAT |= 3;
+ 241   1        SW6303_IIC_WRITE();
+ 242   1        
+ 243   1        IIC_ADDRESS = 0X31;
+ 244   1        SW6303_IIC_READ();
+ 245   1        sta = IIC_DAT;
+ 246   1        
+ 247   1        IIC_ADDRESS = 0X32;
+ 248   1        SW6303_IIC_READ();
+ 249   1        sta |= (IIC_DAT << 8);
+ 250   1        
+ 251   1        sta = sta*5;
+ 252   1        return sta;
+ 253   1      }
+ 254          unsigned int SW6303_25_FLAY;
+ 255          void SW6303_GET_RESET(void)
+ 256          {
+ 257   1        IIC_ADDRESS = 0X25;
+ 258   1        SW6303_IIC_READ();
+ 259   1      
+ 260   1        if((IIC_DAT & (1<<7)) == 0)
+ 261   1        {
+ 262   2      
+ 263   2          SW6303_25_FLAY++;
+ 264   2          SW6303_INIT();
+ 265   2        
+ 266   2        }
+ 267   1        
+ 268   1      
+ 269   1      }
+ 270          
+ 271          
+ 272          
+ 273          void SW6303_INIT(void)
+ 274          {
+ 275   1        
+ 276   1          IIC_ADDRESS = 0XFF;
+ 277   1          IIC_DAT = 0X00;
+ 278   1          SW6303_IIC_WRITE(); 
+ 279   1        
+ 280   1        IIC_ADDRESS = 0X23;   // 关闭低功耗
+ 281   1        SW6303_IIC_READ();
+ 282   1        IIC_DAT |= (1<<0);
+ 283   1        SW6303_IIC_WRITE();
+ 284   1        
+ 285   1        DelayUs(10000); 
+ 286   1        
+ 287   1        
+ 288   1        IIC_ADDRESS = 0X24;
+ 289   1        IIC_DAT = 0X20;
+ 290   1        SW6303_IIC_WRITE();
+ 291   1        
+ 292   1        IIC_DAT = 0X40;
+ 293   1        SW6303_IIC_WRITE();
+ 294   1        
+ 295   1        IIC_DAT = 0X80;
+ 296   1        SW6303_IIC_WRITE();
+ 297   1        
+ 298   1          IIC_ADDRESS = 0XFF;
+ 299   1          IIC_DAT = 0X00;
+ 300   1          SW6303_IIC_WRITE(); 
+ 301   1        
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 6   
+
+ 302   1        
+ 303   1        IIC_ADDRESS = 0X25;    // 芯片复位指示
+ 304   1        SW6303_IIC_READ();
+ 305   1        IIC_DAT |= (1<<7);
+ 306   1        SW6303_IIC_WRITE();   
+ 307   1        
+ 308   1        
+ 309   1        IIC_ADDRESS = 0X15;
+ 310   1        SW6303_IIC_READ();
+ 311   1        SW6303_IIC_WRITE();   
+ 312   1      
+ 313   1      
+ 314   1      
+ 315   1        
+ 316   1        SW6303_SET_H();     //切高位
+ 317   1        
+ 318   1        IIC_ADDRESS = 0X108;   // 
+ 319   1        SW6303_IIC_READ();
+ 320   1        IIC_DAT = 0XDC;
+ 321   1      //  IIC_DAT |= (1<<3);
+ 322   1      //  IIC_DAT |= (1<<1);  
+ 323   1      //  IIC_DAT |= (4<<0);    // 4节
+ 324   1      //  IIC_DAT |= (6<<4);    // 3.65V
+ 325   1      //  IIC_DAT |= (1<<7);
+ 326   1        SW6303_IIC_WRITE(); 
+ 327   1        
+ 328   1        IIC_ADDRESS = 0X116;   // 
+ 329   1        SW6303_IIC_READ();
+ 330   1        IIC_DAT |= (1<<4);      //放电 NTC 过温保护设置  禁止
+ 331   1        SW6303_IIC_WRITE();
+ 332   1        
+ 333   1        
+ 334   1        IIC_ADDRESS = 0X11B;  //关无线充模式
+ 335   1        SW6303_IIC_READ();
+ 336   1        IIC_DAT &= 0X3F;
+ 337   1        IIC_DAT |= 0X80;
+ 338   1        SW6303_IIC_WRITE();
+ 339   1      
+ 340   1        IIC_ADDRESS = 0X103;   // 
+ 341   1        SW6303_IIC_READ();
+ 342   1        IIC_DAT &= 0XF0;      //
+ 343   1        IIC_DAT |= 0x07;      //
+ 344   1        SW6303_IIC_WRITE();
+ 345   1        
+ 346   1        IIC_ADDRESS = 0X10D;   // 
+ 347   1        SW6303_IIC_READ();
+ 348   1        IIC_DAT &= ~(3<<6);      //
+ 349   1        IIC_DAT |= (2<<6);      //
+ 350   1        SW6303_IIC_WRITE();   
+ 351   1        
+ 352   1        
+ 353   1        IIC_ADDRESS = 0X132;   // 
+ 354   1        SW6303_IIC_READ();
+ 355   1        IIC_DAT &= ~(3<<0);    
+ 356   1        IIC_DAT |= (1<<0);     // only source
+ 357   1        SW6303_IIC_WRITE(); 
+ 358   1        
+ 359   1      
+ 360   1        IIC_ADDRESS = 0X155;   // 
+ 361   1        SW6303_IIC_READ();
+ 362   1        IIC_DAT |= (1<<7);      //放电 62368 低温保护使能  禁止
+ 363   1        SW6303_IIC_WRITE();
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 7   
+
+ 364   1        
+ 365   1        IIC_ADDRESS = 0X156;   // 
+ 366   1        SW6303_IIC_READ();
+ 367   1        IIC_DAT |= (1<<0);      //充电 62368 低温保护使能  禁止
+ 368   1        IIC_DAT |= (1<<1);      //充电 62368 高温保护使能  禁止
+ 369   1        IIC_DAT |= (1<<2);      //充电 NTC 过温保护使能    禁止
+ 370   1        SW6303_IIC_WRITE();
+ 371   1        
+ 372   1        IIC_ADDRESS = 0X118;   // 
+ 373   1        SW6303_IIC_READ();
+ 374   1        IIC_DAT &= ~(7<<2);      //空载使能
+ 375   1        SW6303_IIC_WRITE();
+ 376   1        
+ 377   1        IIC_ADDRESS = 0X119;    
+ 378   1        IIC_DAT = 0;
+ 379   1        IIC_DAT |= (1<<0);   
+ 380   1        IIC_DAT |= (1<<3); 
+ 381   1        IIC_DAT |= (2<<4);      
+ 382   1        IIC_DAT |= (1<<6);      
+ 383   1        SW6303_IIC_WRITE(); 
+ 384   1        
+ 385   1        
+ 386   1        IIC_ADDRESS = 0X135;   // 
+ 387   1        SW6303_IIC_READ();
+ 388   1        IIC_DAT |= (1<<0);      //不禁止PPS
+ 389   1        IIC_DAT |= (1<<3);      // PPS手动设置
+ 390   1        SW6303_IIC_WRITE();
+ 391   1        
+ 392   1        IIC_ADDRESS = 0X134;
+ 393   1        SW6303_IIC_READ();
+ 394   1        IIC_DAT |= (1<<2);    // 禁 PPS0
+ 395   1        IIC_DAT |= (1<<4);    // 禁 PPS2
+ 396   1        IIC_DAT |= (1<<5);    // 禁 PPS3
+ 397   1        SW6303_IIC_WRITE(); 
+ 398   1        
+ 399   1        
+ 400   1        IIC_ADDRESS = 0X140;
+ 401   1        IIC_DAT = 0;
+ 402   1        IIC_DAT |= (1<<7);      // PPS1恒功率
+ 403   1        IIC_DAT |= 100;     // 5A
+ 404   1        SW6303_IIC_WRITE(); 
+ 405   1      
+ 406   1        IIC_ADDRESS = 0X100;   // 
+ 407   1        SW6303_IIC_READ();
+ 408   1        IIC_DAT &= ~(1<<7);     // 使能返点恒温环
+ 409   1        IIC_DAT &= ~(7<<4);    
+ 410   1        IIC_DAT |= (1<<4);      // 恒温环阈值  70度
+ 411   1        SW6303_IIC_WRITE(); 
+ 412   1        
+ 413   1        IIC_ADDRESS = 0X101;   // 
+ 414   1        SW6303_IIC_READ();
+ 415   1        IIC_DAT &= ~(3<<6);      //多口输出 4.2V
+ 416   1      //  IIC_DAT |= (2<<6);
+ 417   1      //  IIC_DAT &= ~(3<<4);
+ 418   1      //  IIC_DAT |= (1<<4);
+ 419   1        SW6303_IIC_WRITE();
+ 420   1      
+ 421   1        IIC_ADDRESS = 0X150;     // 按键
+ 422   1        SW6303_IIC_READ();
+ 423   1        IIC_DAT |= (1<<0);      
+ 424   1        IIC_DAT |= (1<<1);      
+ 425   1        IIC_DAT |= (1<<2);      
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 8   
+
+ 426   1        SW6303_IIC_WRITE(); 
+ 427   1      
+ 428   1        IIC_ADDRESS = 0X151;     // 按键
+ 429   1        SW6303_IIC_READ();
+ 430   1        IIC_DAT |= (7<<4);           
+ 431   1        SW6303_IIC_WRITE(); 
+ 432   1      
+ 433   1        
+ 434   1        IIC_ADDRESS = 0X123;     // 
+ 435   1        SW6303_IIC_READ();
+ 436   1        IIC_DAT = 0;
+ 437   1        IIC_DAT |= (1<<0);      //FCP最高电压 9V
+ 438   1        IIC_DAT |= (1<<1);      //AFC最高电压 9V
+ 439   1        IIC_DAT |= (1<<2);      //QC3最高电压 12V
+ 440   1        IIC_DAT |= (0<<4);      //QC2最高电压 12V
+ 441   1        IIC_DAT |= (1<<6);      // QC3+ 27W
+ 442   1        SW6303_IIC_WRITE(); 
+ 443   1        
+ 444   1        IIC_ADDRESS = 0X122;     // 
+ 445   1        SW6303_IIC_READ();
+ 446   1        IIC_DAT &= ~(3<<6);
+ 447   1        IIC_DAT |= (1<<6);       // DPDM   30W
+ 448   1        SW6303_IIC_WRITE();   
+ 449   1        
+ 450   1        
+ 451   1        IIC_ADDRESS = 0X12D;     // 
+ 452   1        SW6303_IIC_READ();
+ 453   1        IIC_DAT |= (1<<3);      // UFCS 寄存器控制
+ 454   1        IIC_DAT |= (1<<4);      //UFCS source 20v 可编程档位使能  关闭
+ 455   1        SW6303_IIC_WRITE(); 
+ 456   1        
+ 457   1        IIC_ADDRESS = 0X12E;     // 
+ 458   1        SW6303_IIC_READ();
+ 459   1        IIC_DAT &= 0X80;
+ 460   1        IIC_DAT |= 60;      // UFCS 5V电流设置   50mA/step
+ 461   1        SW6303_IIC_WRITE(); 
+ 462   1        
+ 463   1        IIC_ADDRESS = 0X12F;     // 
+ 464   1        SW6303_IIC_READ();
+ 465   1        IIC_DAT &= 0X80;
+ 466   1        IIC_DAT |= 60;      // UFCS 10V电流设置   50mA/step
+ 467   1        SW6303_IIC_WRITE();
+ 468   1        
+ 469   1        
+ 470   1        SW6303_SET_L();        // 切低位
+ 471   1        
+ 472   1        IIC_ADDRESS = 0X40;
+ 473   1        SW6303_IIC_READ();
+ 474   1        IIC_DAT |= (1<<1);     // 46~47 控制充电目标电压
+ 475   1        IIC_DAT |= (1<<2);
+ 476   1        IIC_DAT |= (1<<7);
+ 477   1        SW6303_IIC_WRITE(); 
+ 478   1        
+ 479   1        IIC_ADDRESS = 0X46;    //  充电目标电压低八位
+ 480   1        SW6303_IIC_READ();   
+ 481   1        IIC_DAT = 0X91; 
+ 482   1        SW6303_IIC_WRITE(); 
+ 483   1        
+ 484   1        IIC_ADDRESS = 0X47;     // 充电目标电压高四位
+ 485   1        SW6303_IIC_READ();
+ 486   1        IIC_DAT &= 0xE0;
+ 487   1        IIC_DAT |= 0X05;
+C51 COMPILER V9.59.0.0   SW6303                                                            02/03/2026 11:17:50 PAGE 9   
+
+ 488   1        SW6303_IIC_WRITE();   
+ 489   1        
+ 490   1      
+ 491   1        IIC_ADDRESS = 0X45;   // 输入功率
+ 492   1        SW6303_IIC_READ();
+ 493   1        IIC_DAT &= 0x80;
+ 494   1        IIC_DAT |= 45;
+ 495   1        SW6303_IIC_WRITE(); 
+ 496   1        
+ 497   1        IIC_ADDRESS = 0X4F;   // 输出功率
+ 498   1        SW6303_IIC_READ();
+ 499   1        IIC_DAT &= 0x80;
+ 500   1        IIC_DAT |= 45;
+ 501   1        SW6303_IIC_WRITE();   
+ 502   1        
+ 503   1        
+ 504   1      //  IIC_ADDRESS = 0X2E;     // 
+ 505   1      //  SW6303_IIC_READ();
+ 506   1      //  IIC_DAT &= 0XF0;
+ 507   1      //  IIC_DAT |= (1<<0);      // PD source cap
+ 508   1      //  SW6303_IIC_WRITE(); 
+ 509   1      //  
+ 510   1      //  IIC_ADDRESS = 0X2F;     // 
+ 511   1      //  SW6303_IIC_READ();
+ 512   1      //  IIC_DAT |= (1<<0);      // UFCS source cap
+ 513   1      //  SW6303_IIC_WRITE(); 
+ 514   1        
+ 515   1      }
+ 516          
+ 517          
+ 518          
+ 519          
+ 520          
+ 521          
+ 522          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    927    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

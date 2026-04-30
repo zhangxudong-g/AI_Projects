@@ -1,0 +1,3206 @@
+{
+  "file_name": "ZLBSKCALKWFUTU.SQL",
+  "file_type": "PROCEDURE",
+  "identifier": {
+    "name": "ZLBSKCALKWFUTU",
+    "type": "PROCEDURE",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "NGENKA_KBN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NTSUCHI_NO",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NNENDO",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NNENDO_BUN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NSHORIBI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NDANTAI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NSETAI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NJIKKOU_KBN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NFUTU_TUKI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NTOKU_TUKI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NKEISAN_KBN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NCHUSHI_JIYU",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "VTANMATSU",
+      "type": "NVARCHAR2",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NTRENBAN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NRESULT",
+      "type": "NUMBER",
+      "direction": "OUT",
+      "description": ""
+    },
+    {
+      "name": "NKOSEIBI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    }
+  ],
+  "parameter_descriptions": {
+    "i_NTSUCHI_NO": "通知書番号",
+    "i_NNENDO": "調定年度",
+    "i_NNENDO_BUN": "年度分",
+    "i_NSHORIBI": "処理日",
+    "i_NDANTAI": "算定団体コード",
+    "i_NSETAI": "国保世帯番号(ログ出力用)",
+    "i_NJIKKOU_KBN": "実行区分(0:バッチから起動 本算定",
+    "i_NFUTU_TUKI": "普徴月",
+    "i_NTOKU_TUKI": "特徴月",
+    "i_NKEISAN_KBN": "計算区分(1:普徴更正(金額調整)",
+    "i_NCHUSHI_JIYU": "中止事由,",
+    "i_VTANMATSU": "端末番号",
+    "i_NTRENBAN": "登録連番",
+    "o_NRESULT": "処理結果",
+    "i_NKOSEIBI": "更正日（入力なし:システム日付、入力あり:入力値を使用）",
+    "IS": "TYPE MTNUMARRAY1  IS TABLE OF NUMBER(1)  INDEX BY BINARY_INTEGER;",
+    "INTO": "NHOKENRYO_B",
+    "IF": "NlRTN = c_NOK THEN           -- 正常"
+  },
+  "constants": [
+    {
+      "name": "c_NOK",
+      "type": "NUMBER(1)",
+      "value": "0",
+      "description": ""
+    },
+    {
+      "name": "c_NERR",
+      "type": "NUMBER(1)",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NSTEPNO",
+      "type": "NUMBER",
+      "value": "99",
+      "description": ""
+    },
+    {
+      "name": "c_NKAMOKU_CD",
+      "type": "NUMBER(3)",
+      "value": "15",
+      "description": ""
+    },
+    {
+      "name": "c_NKAMOKUS_FUTU",
+      "type": "NUMBER(2)",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NKAMOKUS_TOKU",
+      "type": "NUMBER(2)",
+      "value": "2",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_1",
+      "type": "NUMBER",
+      "value": "-3",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_2",
+      "type": "NUMBER",
+      "value": "-2",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_3",
+      "type": "NUMBER",
+      "value": "0",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_10",
+      "type": "NUMBER",
+      "value": "-1",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_KBN_1",
+      "type": "NUMBER",
+      "value": "0",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_KBN_2",
+      "type": "NUMBER",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_KBN_3",
+      "type": "NUMBER",
+      "value": "2",
+      "description": ""
+    },
+    {
+      "name": "c_NHASU_KBN_10",
+      "type": "NUMBER",
+      "value": "3",
+      "description": ""
+    },
+    {
+      "name": "c_NMODE_ZEN",
+      "type": "NUMBER(1)",
+      "value": "0",
+      "description": ""
+    },
+    {
+      "name": "c_NMODE_TAI",
+      "type": "NUMBER(1)",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NBATCH_H",
+      "type": "NUMBER(1)",
+      "value": "0",
+      "description": ""
+    },
+    {
+      "name": "c_NBATCH_G",
+      "type": "NUMBER(1)",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NONL_CALZEI",
+      "type": "NUMBER(1)",
+      "value": "2",
+      "description": ""
+    },
+    {
+      "name": "c_NONL_SOKUJI",
+      "type": "NUMBER(1)",
+      "value": "9",
+      "description": ""
+    },
+    {
+      "name": "c_NKEI_CHOSEI",
+      "type": "NUMBER(1)",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NKEI_STR_TOKU",
+      "type": "NUMBER(1)",
+      "value": "2",
+      "description": ""
+    },
+    {
+      "name": "c_NKEI_STP_TOKU",
+      "type": "NUMBER(1)",
+      "value": "3",
+      "description": ""
+    },
+    {
+      "name": "c_NKEI_CHOSEI_STP",
+      "type": "NUMBER(1)",
+      "value": "4",
+      "description": ""
+    },
+    {
+      "name": "c_NKEI_CNL_TOKU",
+      "type": "NUMBER(2)",
+      "value": "11",
+      "description": ""
+    },
+    {
+      "name": "c_NGENNEN",
+      "type": "NUMBER(1)",
+      "value": "0",
+      "description": ""
+    },
+    {
+      "name": "c_NKANEN",
+      "type": "NUMBER(1)",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NDANTAI",
+      "type": "NUMBER",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_NFKAZEI",
+      "type": "NUMBER",
+      "value": "1",
+      "description": ""
+    },
+    {
+      "name": "c_KIKUCHI",
+      "type": "PLS_INTEGER",
+      "value": "43210",
+      "description": ""
+    },
+    {
+      "name": "c_HAGI",
+      "type": "PLS_INTEGER",
+      "value": "35204",
+      "description": ""
+    },
+    {
+      "name": "c_UWAJIMA",
+      "type": "PLS_INTEGER",
+      "value": "38203",
+      "description": ""
+    },
+    {
+      "name": "c_TAMANA",
+      "type": "PLS_INTEGER",
+      "value": "43206",
+      "description": ""
+    },
+    {
+      "name": "c_KAMIAMA",
+      "type": "PLS_INTEGER",
+      "value": "43212",
+      "description": ""
+    },
+    {
+      "name": "c_YAMATO",
+      "type": "PLS_INTEGER",
+      "value": "43447",
+      "description": ""
+    },
+    {
+      "name": "c_DATE",
+      "type": "PLS_INTEGER",
+      "value": "12335",
+      "description": ""
+    },
+    {
+      "name": "c_SASEBO",
+      "type": "PLS_INTEGER",
+      "value": "42202",
+      "description": ""
+    },
+    {
+      "name": "c_NONL_KIWARI",
+      "type": "NUMBER(1)",
+      "value": "8",
+      "description": ""
+    }
+  ],
+  "variables": [
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NlRTN",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "BlRTN",
+      "type": "BOOLEAN",
+      "default": "",
+      "description": "通知書"
+    },
+    {
+      "name": "VlMSG",
+      "type": "NVARCHAR2",
+      "default": "",
+      "description": "通知書番号"
+    },
+    {
+      "name": "NlTSUCHI_NO",
+      "type": "NUMBER",
+      "default": "",
+      "description": "通知書番号"
+    },
+    {
+      "name": "NlNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "年税額"
+    },
+    {
+      "name": "NlGENMEN",
+      "type": "NUMBER",
+      "default": "",
+      "description": "減免額"
+    },
+    {
+      "name": "NlTAI_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "退年税額"
+    },
+    {
+      "name": "NlTAI_GENMEN",
+      "type": "NUMBER",
+      "default": "",
+      "description": "退減免額"
+    },
+    {
+      "name": "NlKAI_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "介護年税額"
+    },
+    {
+      "name": "NlKAI_TAI_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "介護退年税額"
+    },
+    {
+      "name": "NlNENZEI_SV",
+      "type": "NUMBER",
+      "default": "",
+      "description": "保存用年税額"
+    },
+    {
+      "name": "NlNENZEI_HAN",
+      "type": "NUMBER",
+      "default": "",
+      "description": "増減判定用年税額"
+    },
+    {
+      "name": "NlSAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "差額"
+    },
+    {
+      "name": "NlZEN_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "全差額"
+    },
+    {
+      "name": "NlZENTAI_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "全退職差額"
+    },
+    {
+      "name": "NlTAI_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "退差額"
+    },
+    {
+      "name": "NlKAI_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "介護差額"
+    },
+    {
+      "name": "NlKAI_TAI_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "介護退差額"
+    },
+    {
+      "name": "NlLOOP_FLG",
+      "type": "NUMBER",
+      "default": "",
+      "description": "期割団体コード("
+    },
+    {
+      "name": "NlCUT_COL",
+      "type": "NUMBER",
+      "default": "",
+      "description": "期割団体コード(過年度：収納条件取得時使用)"
+    },
+    {
+      "name": "NlKIWARIDANTAI_CD",
+      "type": "NUMBER",
+      "default": "",
+      "description": "期割団体コード(過年度：収納条件取得時使用)"
+    },
+    {
+      "name": "NlZO_FLG",
+      "type": "NUMBER",
+      "default": "",
+      "description": "増FLG（0:減/1:増）"
+    },
+    {
+      "name": "MIKIWARIHOUHOU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "期割方法の条件設定（0：地方税方による 1：均し）"
+    },
+    {
+      "name": "MIKIJYUN_KIWARIGK",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最低期割基準額"
+    },
+    {
+      "name": "MIKIJYUN_TEKIYOU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最低期割基準適用（0：なし 1：本算定のみ ２：常に適用）"
+    },
+    {
+      "name": "NlSHIME_NENGETSU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "本算定時処理判定"
+    },
+    {
+      "name": "BlSHORI_HANI_FLG",
+      "type": "BOOLEAN",
+      "default": "",
+      "description": "処理範囲中判断フラグ"
+    },
+    {
+      "name": "c_NNOKI_HON",
+      "type": "NUMBER",
+      "default": "",
+      "description": "納期区分 (2:本算定"
+    },
+    {
+      "name": "NlSIEN_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "支援年税額"
+    },
+    {
+      "name": "NlSIEN_TAI_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "支援退年税額"
+    },
+    {
+      "name": "NlSIEN_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "支援差額"
+    },
+    {
+      "name": "NlSIEN_TAI_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "支援退差額"
+    },
+    {
+      "name": "NlKDM_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "子ども年税額"
+    },
+    {
+      "name": "NlKDM_SAGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "子ども差額"
+    },
+    {
+      "name": "IKIWARI_STYLE",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "（0:現在期におめてしまう, 1:現在期以降も振り付け）"
+    },
+    {
+      "name": "NSHORIBI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "処理日"
+    },
+    {
+      "name": "NFUTU_TUKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "普徴月"
+    },
+    {
+      "name": "NDATE",
+      "type": "NUMBER",
+      "default": "",
+      "description": "システム日付用"
+    },
+    {
+      "name": "INOKI_FROM",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "仮算定開始インデックス（1:４月、2:５月・・・12:３月）"
+    },
+    {
+      "name": "INOKI_TO",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "仮算定終了インデックス（1:４月、2:５月・・・12:３月）"
+    },
+    {
+      "name": "INOKI",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "期割用納期"
+    },
+    {
+      "name": "IZAN_MODE",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "0:通常 1:仮算定中"
+    },
+    {
+      "name": "IZANTEIKIWAI_JCONS",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "IZANTEIKIWARI_FLG",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "IHON_GENZON_CNT",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "期別税額の端数カット"
+    },
+    {
+      "name": "NlCUT_COL_KIBETSU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "期別税額の端数カット"
+    },
+    {
+      "name": "NlNENZEI_TOKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "増減判定用年税額・特徴"
+    },
+    {
+      "name": "IRTN",
+      "type": "PLS_INTEGER",
+      "default": "c_NOK",
+      "description": "収納条件取得"
+    },
+    {
+      "name": "BRTN",
+      "type": "BOOLEAN",
+      "default": "TRUE",
+      "description": "収納条件取得"
+    },
+    {
+      "name": "IRTN",
+      "type": "PLS_INTEGER",
+      "default": "c_NOK",
+      "description": "収納条件取得"
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwCHOTEI_4",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_6",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_8",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_10",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_12",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_2",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_4_AF",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_6_AF",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_8_AF",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_10_AF",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_12_AF",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwCHOTEI_2_AF",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NRETURN",
+      "type": "NUMBER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NHOKENRYO_B",
+      "type": "NUMBER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NHOKENRYO_A",
+      "type": "NUMBER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "IHANTEI_MODE",
+      "type": "NUMBER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NJIYU",
+      "type": "NUMBER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "資格区分(全員)"
+    },
+    {
+      "name": "NwSHIK_4",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_5",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_6",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_7",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_8",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_9",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_10",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_11",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_12",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_1",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_2",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK_3",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwEnd",
+      "type": "NUMBER",
+      "default": "",
+      "description": "計算区分が特徴開始のとき"
+    },
+    {
+      "name": "NwIDX",
+      "type": "NUMBER",
+      "default": "0",
+      "description": "計算区分が特徴開始のとき"
+    },
+    {
+      "name": "NwRTN",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwGenKibetsu",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwNEN",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwTUKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "年と月を算出(処理日)"
+    },
+    {
+      "name": "NNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "実行区分が即時異動期割以外の場合、仮算定額を算出する"
+    },
+    {
+      "name": "NNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "実行区分が即時異動期割以外の場合、仮算定額を算出する"
+    },
+    {
+      "name": "NwRTN",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwWK_ZEIGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "マイナス直前税額"
+    },
+    {
+      "name": "NwWK_INDEX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "インデックス保持"
+    },
+    {
+      "name": "NwNEXT_KIBETSU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "次期別"
+    },
+    {
+      "name": "NwNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "計算年税"
+    },
+    {
+      "name": "NwSUMZEIGAKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "普徴の税額"
+    },
+    {
+      "name": "NwSUMZEIGAKU_TOKU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "特徴の税額"
+    },
+    {
+      "name": "NNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "実行区分が即時異動期割以外の場合、仮算定額を算出する"
+    },
+    {
+      "name": "NNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "実行区分が即時異動期割以外の場合、仮算定額を算出する"
+    },
+    {
+      "name": "NNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "実行区分が即時異動期割以外の場合、仮算定額を算出する"
+    },
+    {
+      "name": "NNENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "実行区分が即時異動期割以外の場合、仮算定額を算出する"
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwZANKI_CNT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "残期数"
+    },
+    {
+      "name": "NwMAXKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最大期別"
+    },
+    {
+      "name": "NwKIZEI_AFT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "処理後期別税額"
+    },
+    {
+      "name": "NwFLG",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最終期別"
+    },
+    {
+      "name": "NwLASTKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最終期別"
+    },
+    {
+      "name": "NwHASU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "端数"
+    },
+    {
+      "name": "NwCHOSEIKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "調整期"
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwZANKI_CNT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "残期数"
+    },
+    {
+      "name": "NwMAXKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最大期別"
+    },
+    {
+      "name": "NwKIZEI_AFT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "処理後期別税額"
+    },
+    {
+      "name": "NwFLG",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最終期別"
+    },
+    {
+      "name": "NwLASTKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "最終期別"
+    },
+    {
+      "name": "NwHASU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "端数"
+    },
+    {
+      "name": "NwCHOSEIKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "調整期"
+    },
+    {
+      "name": "NwKIZEI_HANTEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "未到来期数変更判定"
+    },
+    {
+      "name": "NwIX_MI_CNT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "未到来期数カウント"
+    },
+    {
+      "name": "WiNlCUT_COL",
+      "type": "NUMBER",
+      "default": "",
+      "description": "残期数"
+    },
+    {
+      "name": "WKLOOPCNT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "残期数"
+    },
+    {
+      "name": "IwRTN",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "戻り値"
+    },
+    {
+      "name": "IwCOUNT",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "SELECT検索カウント"
+    },
+    {
+      "name": "NwRTN",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwGENZAIKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwRTN",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwKIZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "期別税額"
+    },
+    {
+      "name": "NwNUSHI_KOJIN_NO",
+      "type": "NUMBER",
+      "default": "",
+      "description": "主個人番号"
+    },
+    {
+      "name": "NwGENZAIKI",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwSYSDATE",
+      "type": "NUMBER",
+      "default": "",
+      "description": "収納条件取得"
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwSUMZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "更正前期別(賦課試算)カーソル"
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "NwSUMZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "更正前期別(賦課試算)カーソル"
+    },
+    {
+      "name": "NlZEN_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "賦課期別(最新)カーソル"
+    },
+    {
+      "name": "NlZENTAI_NENZEI",
+      "type": "NUMBER",
+      "default": "",
+      "description": "賦課期別(最新)カーソル"
+    },
+    {
+      "name": "NR_NO",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "NWCNT",
+      "type": "NUMBER",
+      "default": "",
+      "description": "世帯数"
+    },
+    {
+      "name": "NTOKUKIBETSU",
+      "type": "NUMBER",
+      "default": "",
+      "description": "特徴期別"
+    },
+    {
+      "name": "NJOTAIKBN",
+      "type": "NUMBER",
+      "default": "",
+      "description": "状態区分"
+    },
+    {
+      "name": "NKOJIN_NO",
+      "type": "NUMBER",
+      "default": "",
+      "description": "主個人番号"
+    },
+    {
+      "name": "NwSYSDATE",
+      "type": "NUMBER",
+      "default": "",
+      "description": "収納条件取得"
+    },
+    {
+      "name": "ISHICHOSON_CD",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": ""
+    },
+    {
+      "name": "NwIX",
+      "type": "NUMBER",
+      "default": "",
+      "description": "変数初期化"
+    },
+    {
+      "name": "BY",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "個人レコード"
+    },
+    {
+      "name": "SOU_IDX",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "喪失月のインデックス"
+    },
+    {
+      "name": "BY",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "個人レコード"
+    },
+    {
+      "name": "IIDX_R",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "レコードのインデックス"
+    },
+    {
+      "name": "IIDX_C",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "資格区分のインデックス"
+    },
+    {
+      "name": "ISOSHITSU_CNT",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "喪失人数"
+    },
+    {
+      "name": "ISO_KARI_CNT",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "仮算定期間内の喪失人数"
+    },
+    {
+      "name": "ISO_MAX_IDX",
+      "type": "PLS_INTEGER",
+      "default": "0",
+      "description": "喪失した月の最大インデックス"
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER",
+      "default": "",
+      "description": ""
+    },
+    {
+      "name": "BY",
+      "type": "PLS_INTEGER",
+      "default": "",
+      "description": "個人レコード"
+    },
+    {
+      "name": "NwFUKI_KAZEI",
+      "type": "ZLBTJOKEN.FUKI_KAZEI%TYPE",
+      "default": "",
+      "description": "システム条件より不均一課税を取得(年度分)"
+    },
+    {
+      "name": "OF",
+      "type": "ZLBTKOJIN_CAL.SHIK_4%TYPE",
+      "default": "",
+      "description": "個人レコード"
+    },
+    {
+      "name": "KOJIN_NO",
+      "type": "ZLBTKOJIN_CAL.KOJIN_NO%TYPE",
+      "default": "",
+      "description": "個人番号"
+    },
+    {
+      "name": "RlKIHONCAL",
+      "type": "ZLBTKIHON_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算基本"
+    },
+    {
+      "name": "RlTAICAL",
+      "type": "ZLBTTAI_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算退職"
+    },
+    {
+      "name": "RlKAIKIHONCAL",
+      "type": "ZLBTKAI_KIHON_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算介護基本"
+    },
+    {
+      "name": "RlKAITAICAL",
+      "type": "ZLBTKAI_TAI_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算介護退職"
+    },
+    {
+      "name": "RlKIBETSUCAL",
+      "type": "ZLBTKIBETSU_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算期別"
+    },
+    {
+      "name": "RlSIENKIHONCAL",
+      "type": "ZLBTSIEN_KIHON_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算支援基本"
+    },
+    {
+      "name": "RlSIENTAICAL",
+      "type": "ZLBTSIEN_TAI_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算支援退職"
+    },
+    {
+      "name": "RlKDMKIHONCAL",
+      "type": "ZLBTKDM_KIHON_CAL%ROWTYPE",
+      "default": "",
+      "description": "計算子ども基本"
+    },
+    {
+      "name": "RTOKU_IDO_CAL",
+      "type": "ZLBTTOKU_IDO_CAL%ROWTYPE",
+      "default": "",
+      "description": "システム日付取得"
+    },
+    {
+      "name": "RwJOKEN",
+      "type": "ZLBTJOKEN%ROWTYPE",
+      "default": "",
+      "description": "システム条件より不均一課税を取得(年度分)"
+    },
+    {
+      "name": "RwJOKEN",
+      "type": "ZLBTJOKEN%ROWTYPE",
+      "default": "",
+      "description": "システム条件より不均一課税を取得(年度分)"
+    }
+  ],
+  "type_members": [],
+  "select_fields": [],
+  "subprograms": [
+    {
+      "name": "ABS",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "CHOTEI_NENDO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "COMMIT発行",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "COUNT",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "DECODE",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FCFFJKN2",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FCPRMSHUTOKU",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FCZANMODE",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FCZANMODE_ONL",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FSETBLOG",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FUNCGETR_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FUNCTOKUGENCHK",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "KOKU_SETAI_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MAX",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MINOKI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MINOKIGEN",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_CHOTEI_NENDO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_KAMOKUS",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_KIBETSU",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_NENDO_BUN",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_NOUFU_KBN",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_NUSI_KOJIN_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_TAI_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_TSUCHI_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlCAL_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlIRY_TAI_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlIRY_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlKAI_TAI_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlKAI_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlKAMOKUS",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlKDM_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlKIBETSU",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlKIZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlNOUKI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlNUSI_KOJIN_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlSIEN_TAI_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlSIEN_ZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "MlTAI_KIZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "NENDO_BUN",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "NVL",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "NwSHIK",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "PRCAL_ZANKINENZEI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "PUT_LINE",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "RKOJIN",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SANTEIDANTAI_CD",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SHIK_KBN",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SUBSTR",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SUM",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SYS_TANMATSU_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "TO_CHAR",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "TO_NUMBER",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "TRUNC",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "TSUCHI_NO",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "ZLBSKCALKWFUTU",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "funcGenzaiKibetsu",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "funcKiwari20",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "funcMaxKibetsuGet",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "funcSoshitsuHantei",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "subCalKibetsuSet",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "subKiwari30",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "subKiwari30NARASI",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "subKiwari40",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "subKiwariMain",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "subTokuSaveToCal",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "システム条件より不均一課税を取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "システム条件取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "不能欠損額",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "介護退職",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "個人取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "処理フラグを1に変換",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "到来分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "医療退職",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "団体内外区分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "国保世帯番号",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "子ども子育て支援金対応",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "実行区分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "履歴番号",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "差額算出",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "年と月を算出",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "年度分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "年税が0円以上",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "年税が減っている場合のみ判定",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "支援退職",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "普徴以外",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "普徴更正",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "普徴期別",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前介護基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前介護基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前子ども基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前子ども基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前支援基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前支援基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前期別",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前期別取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正前期別取得2",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "更正日",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "最終セット",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "最終期までの処理",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "期割処理40",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "期割処理メイン",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "期割団体コード",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "未到来分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "残期数計算",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "残税額を残期数で割る",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "特徴依頼日",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "特徴月が",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "現年過年区分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "科目コード",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "科目詳細コード",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "算定団体コード",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "納期区分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "納期区分を取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "納期月",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "納期限",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "納期限情報",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算介護基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算介護退職取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算区分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算子ども基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算支援基本取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算支援退職取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算期別セット",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算期別取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算期別登録",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算異動TBL作成",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "計算退職取得",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "資格区分",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課介護基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課介護退職",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課子ども基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課支援基本",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課支援退職",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課期別",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課期別税情報取得エラー",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "賦課退職",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "過年区分",
+      "type": "FUNCTION",
+      "description": ""
+    }
+  ],
+  "internal_functions": [
+    {
+      "name": "NOKIGENGET",
+      "type": "FUNCTION",
+      "return_type": "PLS_INTEGER",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "IRTN",
+          "type": "PLS_INTEGER",
+          "default": "c_NOK",
+          "description": ""
+        },
+        {
+          "name": "BRTN",
+          "type": "BOOLEAN",
+          "default": "TRUE",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "FUNCNOKIGENGETMAIN",
+      "type": "FUNCTION",
+      "return_type": "NUMBER",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "IRTN",
+          "type": "PLS_INTEGER",
+          "default": "c_NOK",
+          "description": ""
+        },
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "FUNCTOKUGENCHK",
+      "type": "FUNCTION",
+      "return_type": "NUMBER",
+      "parameters": "i_NKOJIN_NO IN NUMBER",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwCHOTEI_4",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_6",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_8",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_10",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_12",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_2",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_4_AF",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_6_AF",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_8_AF",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_10_AF",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_12_AF",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NwCHOTEI_2_AF",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NRETURN",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NHOKENRYO_B",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NHOKENRYO_A",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "IHANTEI_MODE",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "NJIYU",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "funcMaxKibetsuGet",
+      "type": "FUNCTION",
+      "return_type": "NUMBER",
+      "parameters": "i_NwGENZAIKI IN NUMBER",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_4",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_5",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_6",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_7",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_8",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_9",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_10",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_11",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_12",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_1",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_2",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSHIK_3",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwEnd",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwIDX",
+          "type": "NUMBER",
+          "default": "0",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "FNC_SHORI_HANI",
+      "type": "FUNCTION",
+      "return_type": "NUMBER",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "IwRTN",
+          "type": "PLS_INTEGER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "IwCOUNT",
+          "type": "PLS_INTEGER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "FUNCGETR_NO",
+      "type": "FUNCTION",
+      "return_type": "NUMBER",
+      "parameters": "i_NKOJIN_NO IN NUMBER",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NR_NO",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "funcSoshitsuHantei",
+      "type": "FUNCTION",
+      "return_type": "NUMBER",
+      "parameters": "o_IwSOSHITSU_IDX     OUT PLS_INTEGER",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "BY",
+          "type": "PLS_INTEGER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "SOU_IDX",
+          "type": "PLS_INTEGER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "BY",
+          "type": "PLS_INTEGER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "IIDX_R",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "IIDX_C",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "ISOSHITSU_CNT",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "ISO_KARI_CNT",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        },
+        {
+          "name": "ISO_MAX_IDX",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subKiwari30",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwZANKI_CNT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwMAXKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwKIZEI_AFT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwFLG",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwLASTKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwHASU",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwCHOSEIKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subKiwari40",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": ""
+    },
+    {
+      "name": "subKiwari30NARASI",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwZANKI_CNT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwMAXKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwKIZEI_AFT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwFLG",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwLASTKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwHASU",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwCHOSEIKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwKIZEI_HANTEI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwIX_MI_CNT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "WiNlCUT_COL",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "WKLOOPCNT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subTokuSaveToCal",
+      "type": "PROCEDURE",
+      "parameters": "i_NwMODE IN NUMBER",
+      "description": ""
+    },
+    {
+      "name": "subKiwariMain",
+      "type": "PROCEDURE",
+      "parameters": "i_NwMODE IN NUMBER",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwRTN",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwGENZAIKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subCalKibetsuSet",
+      "type": "PROCEDURE",
+      "parameters": "i_NwMODE IN NUMBER",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwRTN",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwKIZEI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwNUSHI_KOJIN_NO",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwGENZAIKI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subInsert",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSYSDATE",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ],
+      "sql_statements": {
+        "SELECT": [],
+        "INSERT": [
+          "INSERT INTO ZLBTKIBETSU_CAL VALUES RlKIBETSUCAL;"
+        ],
+        "UPDATE": [],
+        "DELETE": [],
+        "MERGE": [],
+        "CREATE": []
+      }
+    },
+    {
+      "name": "subMain",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": ""
+    },
+    {
+      "name": "subWorkSaveTS",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSUMZEI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ],
+      "sql_statements": {
+        "SELECT": [],
+        "INSERT": [],
+        "UPDATE": [],
+        "DELETE": [
+          "DELETE FROM ZLBTKIBETSU_CAL\n                     WHERE KAMOKU_CD       = c_NKAMOKU_CD               -- 科目コード(新規分)\n                       AND KOKU_SETAI_NO   = i_NSETAI                   -- 国保世帯番号\n    "
+        ],
+        "MERGE": [],
+        "CREATE": []
+      }
+    },
+    {
+      "name": "subWorkSave",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSUMZEI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NlZEN_NENZEI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NlZENTAI_NENZEI",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ],
+      "sql_statements": {
+        "SELECT": [],
+        "INSERT": [],
+        "UPDATE": [],
+        "DELETE": [
+          "DELETE FROM ZLBTKIBETSU_CAL\n               WHERE KAMOKU_CD       = c_NKAMOKU_CD               -- 科目コード(新規分)\n                 AND KOKU_SETAI_NO   = i_NSETAI                   -- 国保世帯番号\n                "
+        ],
+        "MERGE": [],
+        "CREATE": []
+      }
+    },
+    {
+      "name": "subKihonSel",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": ""
+    },
+    {
+      "name": "subIdoMake",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NWCNT",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NTOKUKIBETSU",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NJOTAIKBN",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NKOJIN_NO",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "NwSYSDATE",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "RTOKU_IDO_CAL",
+          "type": "ZLBTTOKU_IDO_CAL%ROWTYPE",
+          "default": "",
+          "description": ""
+        }
+      ],
+      "sql_statements": {
+        "SELECT": [],
+        "INSERT": [
+          "INSERT INTO ZLBTTOKU_IDO_CAL   VALUES RTOKU_IDO_CAL;"
+        ],
+        "UPDATE": [],
+        "DELETE": [],
+        "MERGE": [],
+        "CREATE": []
+      }
+    },
+    {
+      "name": "subJokenSel",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "RwJOKEN",
+          "type": "ZLBTJOKEN%ROWTYPE",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "SUB_KIWARI_STYLE",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "ISHICHOSON_CD",
+          "type": "PLS_INTEGER",
+          "default": "0",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subInit",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "NwIX",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "subJokenSel2",
+      "type": "PROCEDURE",
+      "parameters": "",
+      "description": "",
+      "local_variables": [
+        {
+          "name": "OF",
+          "type": "NUMBER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "BY",
+          "type": "PLS_INTEGER",
+          "default": "",
+          "description": ""
+        },
+        {
+          "name": "RwJOKEN",
+          "type": "ZLBTJOKEN%ROWTYPE",
+          "default": "",
+          "description": ""
+        }
+      ]
+    }
+  ],
+  "sql_statements": {
+    "SELECT": [],
+    "INSERT": [],
+    "UPDATE": [],
+    "DELETE": [],
+    "MERGE": [],
+    "CREATE": []
+  },
+  "cursors": {
+    "declarations": [],
+    "usages": []
+  },
+  "execution_flow": [
+    {
+      "type": "IF_CONDITION",
+      "condition": "MINOKI(IDX) = 1"
+    }
+  ],
+  "exception_handling": {},
+  "header_comments": "i_NTSUCHI_NO            IN  NUMBER,\ni_NNENDO                IN  NUMBER,\ni_NNENDO_BUN            IN  NUMBER,\ni_NSHORIBI              IN  NUMBER,\ni_NDANTAI               IN  NUMBER,\ni_NSETAI                IN  NUMBER,\ni_NJIKKOU_KBN           IN  NUMBER,\ni_NFUTU_TUKI            IN  NUMBER,\ni_NTOKU_TUKI            IN  NUMBER,\ni_NKEISAN_KBN           IN  NUMBER,\ni_NCHUSHI_JIYU          IN  NUMBER,\ni_VTANMATSU             IN  NVARCHAR2,\ni_NTRENBAN              IN  NUMBER,\no_NRESULT               OUT NUMBER,\ni_NKOSEIBI              IN  NUMBER := 0)",
+  "parameter_comments": [
+    {
+      "parameter": "i_NTSUCHI_NO",
+      "description": "通知書番号"
+    },
+    {
+      "parameter": "i_NNENDO",
+      "description": "調定年度"
+    },
+    {
+      "parameter": "i_NNENDO_BUN",
+      "description": "年度分"
+    },
+    {
+      "parameter": "i_NSHORIBI",
+      "description": "処理日"
+    },
+    {
+      "parameter": "i_NDANTAI",
+      "description": "算定団体コード"
+    },
+    {
+      "parameter": "i_NSETAI",
+      "description": "国保世帯番号(ログ出力用)"
+    },
+    {
+      "parameter": "i_NJIKKOU_KBN",
+      "description": "実行区分(0:バッチから起動 本算定"
+    },
+    {
+      "parameter": "i_NFUTU_TUKI",
+      "description": "普徴月"
+    },
+    {
+      "parameter": "i_NTOKU_TUKI",
+      "description": "特徴月"
+    },
+    {
+      "parameter": "i_NKEISAN_KBN",
+      "description": "計算区分(1:普徴更正(金額調整)"
+    },
+    {
+      "parameter": "i_NCHUSHI_JIYU",
+      "description": "中止事由,"
+    },
+    {
+      "parameter": "i_VTANMATSU",
+      "description": "端末番号"
+    },
+    {
+      "parameter": "i_NTRENBAN",
+      "description": "登録連番"
+    },
+    {
+      "parameter": "o_NRESULT",
+      "description": "処理結果"
+    },
+    {
+      "parameter": "i_NKOSEIBI",
+      "description": "更正日（入力なし:システム日付、入力あり:入力値を使用）"
+    },
+    {
+      "parameter": "IS",
+      "description": "TYPE MTNUMARRAY1  IS TABLE OF NUMBER(1)  INDEX BY BINARY_INTEGER;"
+    },
+    {
+      "parameter": "INTO",
+      "description": "NHOKENRYO_A"
+    },
+    {
+      "parameter": "INTO",
+      "description": "NHOKENRYO_B"
+    },
+    {
+      "parameter": "IF",
+      "description": "NlRTN = c_NOK THEN"
+    },
+    {
+      "parameter": "IF",
+      "description": "NlRTN = c_NOK THEN           -- 正常"
+    }
+  ],
+  "change_history": [
+    {
+      "date": "2024/09/18",
+      "author": "ZCZL.TAOYAN",
+      "action": "UPDATE",
+      "version": "0.3.000.001",
+      "description": "国保2次故障対応_IT_ZLB_00018"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2024/09/18",
+      "author": "ZCZL.TAOYAN",
+      "action": "UPDATE",
+      "version": "0.2.000.001",
+      "description": "国保2次故障対応_IT_ZLB_00018"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "ADD",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    },
+    {
+      "date": "2025/08/11",
+      "author": "ZCZL.LIUDI",
+      "action": "UPDATE",
+      "version": "1.1.200.000",
+      "description": "子ども子育て支援金対応"
+    }
+  ]
+}

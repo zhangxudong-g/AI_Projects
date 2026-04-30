@@ -1,0 +1,129 @@
+C51 COMPILER V9.59.0.0   SLEEP                                                             05/14/2025 11:03:36 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE SLEEP
+OBJECT MODULE PLACED IN sleep.OBJ
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE sleep.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(../../../Library/
+                    -Include;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC) DEBUG
+
+line level    source
+
+   1          #include "LED.h"
+   2          #include "IIC.h"
+   3          #include "KEY.h"
+   4          #include "LED.h"
+   5          u8 dai_ji_cnt;
+   6          
+   7          void sleep()
+   8          {
+   9   1                      if((!dis_charge)&&(!f_charge))
+  10   1                      {
+  11   2                                              dai_ji_cnt++;
+  12   2                                              if(dai_ji_cnt >= 60)
+  13   2                                      {               
+  14   3                                                                              dai_ji_cnt = 0; 
+  15   3                                              
+  16   3      //                                                                        SCL_IN;
+  17   3      //                                                                              SDA_IN;
+  18   3      //                                                                              
+  19   3      //                                                                              LED1 = 0;
+  20   3      //                                                                              LED2 = 0;
+  21   3      //                                                                              LED3 = 0;
+  22   3      //                                                                              LED4 = 0;
+  23   3      //                                      
+  24   3      //                                                                              TMR0_DIS;
+  25   3      //                                                                              TMR0_INT_DIS;
+  26   3                                              
+  27   3      //                                                                              P2_DAT= 0X00;
+  28   3      //                                      
+  29   3      //                                                                              WDT_DIS;
+  30   3                                                                                      CLR_WDT;
+  31   3                                                                                      R_Address=0x0C; // INDTA1泄放电压 开
+  32   3                                                                                      IIC_ReadByte(); 
+  33   3                                                                                      R_Value |= (1<<1);              
+  34   3                                                                                      IIC_WriteByte();
+  35   3      
+  36   3                                                                                      R_Address=0x0C; // VBUS泄放电压 开
+  37   3                                                                                      IIC_ReadByte(); 
+  38   3                                                                                      R_Value |= (1<<3);              
+  39   3                                                                                      IIC_WriteByte();                                                                                
+  40   3      
+  41   3                                                                                      delay_1ms(500);
+  42   3      
+  43   3                                                                                      R_Address=0x0C; // VBUS泄放电压 开
+  44   3                                                                                      IIC_ReadByte(); 
+  45   3                                                                                      R_Value &= ~(1<<3);             
+  46   3                                                                                      IIC_WriteByte();
+  47   3                                                                                      
+  48   3                                                                                      R_Address=0x0C; // INDTA1泄放电压 关
+  49   3                                                                                      IIC_ReadByte(); 
+  50   3                                                                                      R_Value &= ~(1<<1);
+  51   3                                                                                      IIC_WriteByte();                                
+  52   3      
+  53   3                                                                                      R_Address=0x04; // 
+  54   3                                                                                      IIC_ReadByte(); 
+C51 COMPILER V9.59.0.0   SLEEP                                                             05/14/2025 11:03:36 PAGE 2   
+
+  55   3                                                                                      R_Value |= (1<<0);
+  56   3                                                                                      IIC_WriteByte();        
+  57   3                                                                                      
+  58   3                                                                                      R_Address=0x18; // 负载接入检测使能
+  59   3                                                                                      IIC_ReadByte(); 
+  60   3                                                                                      R_Value &= ~(1<<1);
+  61   3                                                                                      IIC_WriteByte();        
+  62   3                                                                                      
+  63   3                                                                                      R_Address=0x18; // 负载接入检测使能
+  64   3                                                                                      IIC_ReadByte(); 
+  65   3                                                                                      R_Value |= (1<<1);
+  66   3                                                                                      IIC_WriteByte();        
+  67   3                                                                                      
+  68   3                                                                                      R_Address=0x02; // 负载接入检测中断使能
+  69   3                                                                                      IIC_ReadByte(); 
+  70   3                                                                                      R_Value &= ~(1<<0);
+  71   3                                                                                      IIC_WriteByte();                                        
+  72   3      
+  73   3                                                                                      R_Address=0x18; // 低功耗模式使能
+  74   3                                                                                      IIC_ReadByte(); 
+  75   3                                                                                      R_Value &= ~(1<<4);
+  76   3                                                                                      IIC_WriteByte();
+  77   3                                                                                      
+  78   3                                                                                      
+  79   3                                                                                      WKUP_T_8US;
+  80   3                                                                                      SLEEP_MD;
+  81   3                                                                                      NOP();
+  82   3                                              
+  83   3      //                                                                              TMR0_EN;
+  84   3      //                                                                              TMR0_INT_EN;
+  85   3                                                                      
+  86   3      //                                                                              PowerOn_Chk();
+  87   3                                                                                      
+  88   3                                                                                      CLR_WDT;
+  89   3                                                                                      dai_ji_cnt = 0;
+  90   3                                              
+  91   3                                                                                      
+  92   3                                                                                                                                                                      
+  93   3                                                                                      
+  94   3                                              
+  95   3                                                                      
+  96   3                                      }
+  97   2                      }
+  98   1                      else dai_ji_cnt = 0;
+  99   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    221    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,7 +1,6 @@
 import os
 from typing import List, Dict
-import litellm
-from litellm import completion
+import anthropic
 from config import load_config
 
 class LLMError(Exception):
@@ -78,41 +77,45 @@ TOOL_SCHEMAS = [
 class LLMClient:
     def __init__(self, config=None):
         self.config = config or load_config()
-        self.model = self.config.get("minimax_model", "MiniMax-Text-01")
-        self.api_key = self.config.get("minimax_api_key")
-        self.base_url = self.config.get("minimax_base_url")
+        self.model = self.config.get("minimax_model", "MiniMax-M2.7")
+        self.api_key = self.config.get("anthropic_api_key")
+        self.base_url = self.config.get("anthropic_base_url", "https://api.minimaxi.com/anthropic")
 
-    def _litellm_model(self):
-        return f"minimax/{self.model}"
+        if not self.api_key:
+            raise LLMError("ANTHROPIC_API_KEY not configured")
 
     def send(self, messages: List[Dict[str, str]]) -> str:
         if not self.api_key:
-            raise LLMError("MINIMAX_API_KEY not configured")
+            raise LLMError("ANTHROPIC_API_KEY not configured")
 
-        os.environ["MINIMAX_API_KEY"] = self.api_key
-        if self.base_url:
-            os.environ["MINIMAX_BASE_URL"] = self.base_url
+        client = anthropic.Anthropic(
+            api_key=self.api_key,
+            base_url=self.base_url,
+        )
 
         try:
-            response = completion(
-                model=self._litellm_model(),
+            response = client.messages.create(
+                model=self.model,
+                max_tokens=1024,
                 messages=messages,
             )
-            return response["choices"][0]["message"]["content"]
+            return response.content[0].text
         except Exception as e:
             raise LLMError(f"LLM call failed: {e}")
 
     def send_with_tools(self, messages: List[Dict[str, str]], tools: List[Dict]) -> Dict:
         if not self.api_key:
-            raise LLMError("MINIMAX_API_KEY not configured")
+            raise LLMError("ANTHROPIC_API_KEY not configured")
 
-        os.environ["MINIMAX_API_KEY"] = self.api_key
-        if self.base_url:
-            os.environ["MINIMAX_BASE_URL"] = self.base_url
+        client = anthropic.Anthropic(
+            api_key=self.api_key,
+            base_url=self.base_url,
+        )
 
         try:
-            response = completion(
-                model=self._litellm_model(),
+            response = client.messages.create(
+                model=self.model,
+                max_tokens=1024,
                 messages=messages,
                 tools=tools,
             )

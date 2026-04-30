@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
-
+Key= "sk-cp-q6hyCftIk8An1s5VHPJZYFQOfypT4XVKnIuXoI0rtoqlh8I2h5CE3nbwxwkqErT3cm3CwjL-rGeVvfRiTDCLjHM0wLrTpvxZUPh6uCKWedeUnK0NulTpaPw"
 DEFAULT_CONFIG = {
-    "minimax_api_key": os.environ.get("MINIMAX_API_KEY", ""),
-    "minimax_model": "MiniMax-Text-01",
-    "minimax_base_url": "https://api.minimax.chat/v1",
+    "anthropic_api_key": os.environ.get("ANTHROPIC_API_KEY", Key),
+    "anthropic_base_url": "https://api.minimaxi.com/anthropic",
+    "minimax_model": "MiniMax-M2.7",
     "workspace": "opencli",
     "trusted_commands": ["git", "python", "pip", "npm", "node", "pytest"],
 }

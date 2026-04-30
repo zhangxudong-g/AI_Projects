@@ -1,0 +1,27 @@
+# Keil 编译产物
+*.hex
+*.lst
+*.map
+*.obj
+*.o
+*.d
+*.axf
+*.i
+*.crf
+*.dep
+*.bak
+*.M51
+*.SBR
+*.lnp
+__Previews/
+prj/Output/
+RTE/
+
+# Keil 用户界面状态
+*.uvgui.*
+ExtDll.iex
+CodeOption.bin
+*.build_log.htm
+
+# macOS
+.DS_Store

@@ -5,6 +5,7 @@ from config import ServerConfig
 import logging
 import time
 from collections import deque
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +27,20 @@ class SSHClient:
                 "port": self.server_config.port,
                 "username": self.server_config.username,
                 "known_hosts": None,
+                "connect_timeout": 10,  # 添加10秒连接超时
             }
 
             # 根据认证方式选择参数
             if self.server_config.ssh_key_path:
-                conn_args["client_keys"] = [self.server_config.ssh_key_path]
+                # 展开路径中的 ~ 并转换为绝对路径
+                key_path = Path(self.server_config.ssh_key_path).expanduser()
+                conn_args["client_keys"] = [str(key_path)]
+                logger.debug(f"Using SSH key: {key_path}")
             elif self.server_config.password:
                 conn_args["password"] = self.server_config.password
+                # 禁用默认的密钥认证，避免尝试不存在的默认密钥文件
+                conn_args["client_keys"] = []
+                logger.debug(f"Using password authentication for {self.server_config.name}")
             else:
                 raise ValueError("Either ssh_key_path or password must be provided")
 
@@ -45,6 +53,9 @@ class SSHClient:
             )
             return True
 
+        except asyncio.TimeoutError:
+            logger.error(f"Connection timeout to {self.server_config.name}: {self.server_config.host}:{self.server_config.port}")
+            return False
         except Exception as e:
             logger.error(f"Failed to connect to {self.server_config.name}: {str(e)}")
             return False

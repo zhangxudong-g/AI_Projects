@@ -1,7 +1,25 @@
 import yaml
+import os
+import re
 from typing import List, Optional
 from pydantic import BaseModel
 from pathlib import Path
+
+
+def substitute_env_vars(value):
+    """Replace ${VAR_NAME} with environment variable values."""
+    if isinstance(value, str):
+        pattern = re.compile(r'\$\{([^}]+)\}')
+        matches = pattern.findall(value)
+        for var_name in matches:
+            env_val = os.getenv(var_name, '')
+            value = value.replace(f'${{{var_name}}}', env_val)
+        return value
+    elif isinstance(value, dict):
+        return {k: substitute_env_vars(v) for k, v in value.items()}
+    elif isinstance(value, list):
+        return [substitute_env_vars(item) for item in value]
+    return value
 
 
 class ServerConfig(BaseModel):
@@ -71,16 +89,18 @@ class AppConfig(BaseModel):
 
 def load_config(config_path: str = "config.yaml") -> AppConfig:
     """
-    从 YAML 文件加载配置
+    从 YAML 文件加载配置，替换环境变量占位符
     """
     config_file = Path(config_path)
-    
+
     if not config_file.exists():
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
-    
+
     with open(config_file, 'r', encoding='utf-8') as f:
         config_data = yaml.safe_load(f)
-    
+
+    config_data = substitute_env_vars(config_data)
+
     return AppConfig(**config_data)
 
 

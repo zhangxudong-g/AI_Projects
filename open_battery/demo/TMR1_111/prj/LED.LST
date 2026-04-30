@@ -1,0 +1,182 @@
+C51 COMPILER V9.59.0.0   LED                                                               05/14/2025 11:03:36 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE LED
+OBJECT MODULE PLACED IN LED.OBJ
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE LED.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(../../../Library/In
+                    -clude;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC) DEBUG
+
+line level    source
+
+   1          #include "LED.h"
+   2          #include "IIC.h"
+   3          u8 LED_Power_onflag_TIME;
+   4          bit Fast_charging;
+   5          u8 Electricity;
+   6          bit load_IN;
+   7          u16 TIME_1S;
+   8          u8  LED_BUFF_CNT;
+   9          u32 VBAT_Temp5 = 12601;
+  10          u8 time_500ms_cnt;
+  11          void LED_mode(void)
+  12          {
+  13   1                      if((dis_charge)&&(!PB1))
+  14   1                      {                                       
+  15   2                                      if(VBAT_Temp > 5000)
+  16   2                                      {
+  17   3                                              if (VBAT_Temp < VBAT_Temp5)
+  18   3                                              {
+  19   4                                                      VBAT_Temp5 = VBAT_Temp;
+  20   4                                              }       
+  21   3                                      }
+  22   2                                      if(VBAT_Temp5 < 6200)
+  23   2                                      {
+  24   3                                                      time_500ms_cnt ++;
+  25   3                                                      if(time_500ms_cnt >= 5)
+  26   3                                                      {
+  27   4                                                              LED1 = !LED1;
+  28   4                                                              time_500ms_cnt = 0;
+  29   4                                                      }
+  30   3                                                      LED2 = 0;
+  31   3                                                      LED3 = 0;
+  32   3                                                      LED4 = 0;                               
+  33   3                                      }else   if(VBAT_Temp5 < 6600)
+  34   2                                      {
+  35   3                                                      LED1 = 1;
+  36   3                                                      LED2 = 0;
+  37   3                                                      LED3 = 0;
+  38   3                                                      LED4 = 0;
+  39   3                                      }
+  40   2                                      else if(VBAT_Temp5 < 7200)
+  41   2                                      {
+  42   3                                                      LED1 = 1;
+  43   3                                                      LED2 = 1;
+  44   3                                                      LED3 = 0;
+  45   3                                                      LED4 = 0;
+  46   3                                      }
+  47   2                                      else if(VBAT_Temp5 < 7800)
+  48   2                                      {
+  49   3                                                              LED1 = 1;
+  50   3                                                              LED2 = 1;
+  51   3                                                              LED3 = 1;
+  52   3                                                              LED4 = 0;
+  53   3                                      }
+  54   2                                      else if(VBAT_Temp5 < 15000)
+C51 COMPILER V9.59.0.0   LED                                                               05/14/2025 11:03:36 PAGE 2   
+
+  55   2                                      {
+  56   3                                                              LED1 = 1;
+  57   3                                                              LED2 = 1;
+  58   3                                                              LED3 = 1;
+  59   3                                                              LED4 = 1;
+  60   3                                      }                                       
+  61   2                      }
+  62   1                      else    if((dis_charge)||(PB1))
+  63   1                      {
+  64   2                                              time_500ms_cnt ++;
+  65   2                                              R_Address=0x04; //ADC ÅäÖÃ
+  66   2                                              IIC_ReadByte();                 
+  67   2                                      if(R_Value & 0x10)
+  68   2                                      {
+  69   3                                                              R_Address=0x04; //ADC ÅäÖÃ
+  70   3                                                              R_Value &= 0XEF;
+  71   3                                                              IIC_WriteByte();
+  72   3                                                              time_500ms_cnt = 0;
+  73   3                                                              LED1 = 1;
+  74   3                                                              LED2 = 1;
+  75   3                                                              LED3 = 1;
+  76   3                                                              LED4 = 1;                               
+  77   3                                      
+  78   3                                      }else
+  79   2                                      {
+  80   3                                      
+  81   3                                                                      if(VBAT_Temp > 3000)
+  82   3                                                              {
+  83   4                                                                      if (VBAT_Temp > VBAT_Temp5)
+  84   4                                                                      {
+  85   5                                                                              VBAT_Temp5 = VBAT_Temp;
+  86   5                                                                      }       
+  87   4                                                              }
+  88   3                                                              if(VBAT_Temp5 < 6600)
+  89   3                                                              {
+  90   4                                                                      
+  91   4                                                                      if(time_500ms_cnt >= 5)
+  92   4                                                                      {
+  93   5                                                                              LED1 = !LED1;
+  94   5                                                                              time_500ms_cnt = 0;
+  95   5                                                                      }
+  96   4                                                                              LED2 = 0;
+  97   4                                                                              LED3 = 0;
+  98   4                                                                              LED4 = 0;
+  99   4                                                              }
+ 100   3                                                              else if(VBAT_Temp5 < 7200)
+ 101   3                                                              {
+ 102   4                                                                              LED1 = 1;
+ 103   4                                                                      if(time_500ms_cnt >= 5)
+ 104   4                                                                      {
+ 105   5                                                                              LED2 = !LED2;
+ 106   5                                                                              time_500ms_cnt = 0;
+ 107   5                                                                      }
+ 108   4                                                                              LED3 = 0;
+ 109   4                                                                              LED4 = 0;
+ 110   4                                                              }
+ 111   3                                                              else if(VBAT_Temp5 < 7800)
+ 112   3                                                              {
+ 113   4                                                                                      LED1 = 1;
+ 114   4                                                                                      LED2 = 1;
+ 115   4                                                                              if(time_500ms_cnt >= 5)
+ 116   4                                                                      {
+C51 COMPILER V9.59.0.0   LED                                                               05/14/2025 11:03:36 PAGE 3   
+
+ 117   5                                                                              LED3 = !LED3;
+ 118   5                                                                              time_500ms_cnt = 0;
+ 119   5                                                                      }
+ 120   4                                                                                      LED4 = 0;
+ 121   4                                                              }
+ 122   3                                                              else if(VBAT_Temp5 < 15000)
+ 123   3                                                              {
+ 124   4                                                                                      LED1 = 1;
+ 125   4                                                                                      LED2 = 1;
+ 126   4                                                                                      LED3 = 1;
+ 127   4                                                                              if(time_500ms_cnt >= 5)
+ 128   4                                                                      {
+ 129   5                                                                              LED4 = !LED4;
+ 130   5                                                                              time_500ms_cnt = 0;
+ 131   5                                                                      }
+ 132   4                                                              }                                               
+ 133   3                                      
+ 134   3                                      }
+ 135   2      
+ 136   2      
+ 137   2                      }
+ 138   1                      else
+ 139   1                      {
+ 140   2                                                      LED1 = 0;
+ 141   2                                                      LED2 = 0;
+ 142   2                                                      LED3 = 0;
+ 143   2                                                      LED4 = 0;
+ 144   2                      }
+ 145   1                      
+ 146   1                      
+ 147   1                      
+ 148   1      }
+ 149          
+ 150          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    491    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

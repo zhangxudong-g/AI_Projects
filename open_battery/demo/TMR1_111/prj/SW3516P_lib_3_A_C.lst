@@ -1,0 +1,334 @@
+C51 COMPILER V9.59.0.0   SW3516P_LIB_3_A_C                                                 11/12/2025 15:54:08 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE SW3516P_LIB_3_A_C
+OBJECT MODULE PLACED IN .\SW3516P_lib_3_A_C.obj
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE ..\..\..\3516P\SW3516P_lib_3_A_C.c OMF2 OPTIMIZE(8,SPEED) BROW
+                    -SE INCDIR(../../../Library/Include;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC;..\..\..\DELA
+                    -Y;..\..\..\CONFIG;..\..\..\3516P) DEBUG PRINT(.\SW3516P_lib_3_A_C.lst) OBJECT(.\SW3516P_lib_3_A_C.obj)
+
+line level    source
+
+   1          #include "SW3516P_lib_3_A_C.h"
+   2          
+   3          
+   4          
+   5          
+   6          
+   7          void SW3516P_POWE_100W_3_C(void)
+   8          {
+   9   1      
+  10   1              IIC_ADDRESS =  0x16;
+  11   1          SW3516P_3_IIC_READ();       
+  12   1          IIC_DAT |=0X01;              // 强制关闭 Buck
+  13   1          SW3516P_3_IIC_WRITE(); 
+  14   1              
+  15   1              IIC_ADDRESS =  0xD2;
+  16   1          SW3516P_3_IIC_READ();       
+  17   1              IIC_DAT &= 0XF8;            
+  18   1              IIC_DAT |= 0X04;            //  跟随系统功率
+  19   1              SW3516P_3_IIC_WRITE();
+  20   1              
+  21   1              
+  22   1          IIC_ADDRESS =  0x16;
+  23   1          SW3516P_3_IIC_READ();       
+  24   1          IIC_DAT &=0XFE;           // 恢复 Buck
+  25   1          SW3516P_3_IIC_WRITE();              
+  26   1              
+  27   1              
+  28   1               IIC_ADDRESS =  0xB7;  IIC_DAT = 0x7D;   // 使能  PPS1不使能
+  29   1           SW3516P_3_IIC_WRITE();
+  30   1      
+  31   1           IIC_ADDRESS =  0xB2;  IIC_DAT = 0x50;
+  32   1               SW3516P_3_IIC_WRITE();   // 12V 电压4A
+  33   1              
+  34   1               IIC_ADDRESS =  0xB3;  IIC_DAT = 0x64;
+  35   1               SW3516P_3_IIC_WRITE();   // 15V 电压5A
+  36   1              
+  37   1           IIC_ADDRESS =  0xB4;  
+  38   1              SW3516P_3_IIC_READ(); 
+  39   1              IIC_DAT &= 0X80;
+  40   1              IIC_DAT = 0x64;
+  41   1               SW3516P_3_IIC_WRITE();   // 20V 电压5A
+  42   1              
+  43   1               IIC_ADDRESS =  0xBE;  IIC_DAT = 0XF7;
+  44   1               SW3516P_3_IIC_WRITE();    // 设置PPS0电压  21V
+  45   1              
+  46   1               IIC_ADDRESS =  0xB5;  IIC_DAT = 0x64;
+  47   1               SW3516P_3_IIC_WRITE();   //pps0电流 5A
+  48   1               
+  49   1               IIC_ADDRESS =  0X73;
+  50   1              SW3516P_3_IIC_READ();        // 电流的变化都需要写 src cap 命令才会重新广播
+  51   1          IIC_DAT |= 0X80;
+  52   1          SW3516P_3_IIC_WRITE();      
+  53   1      }
+C51 COMPILER V9.59.0.0   SW3516P_LIB_3_A_C                                                 11/12/2025 15:54:08 PAGE 2   
+
+  54          
+  55          
+  56          void SW3516P_POWE_35W_3_C(void)
+  57          {
+  58   1              IIC_ADDRESS =  0x16;
+  59   1          SW3516P_3_IIC_READ();       
+  60   1          IIC_DAT |=0X01;              // 强制关闭 Buck
+  61   1          SW3516P_3_IIC_WRITE(); 
+  62   1              
+  63   1              IIC_ADDRESS =  0xD2;
+  64   1          SW3516P_3_IIC_READ();       
+  65   1              IIC_DAT &= 0XF8;            
+  66   1              IIC_DAT |= 0X04;            //  跟随系统功率
+  67   1              SW3516P_3_IIC_WRITE();
+  68   1              
+  69   1              
+  70   1          IIC_ADDRESS =  0x16;
+  71   1          SW3516P_3_IIC_READ();       
+  72   1          IIC_DAT &=0XFE;           // 恢复 Buck
+  73   1          SW3516P_3_IIC_WRITE();              
+  74   1              
+  75   1               IIC_ADDRESS =  0xB7;  IIC_DAT = 0x7D;   // 使能  PPS1不使能
+  76   1           SW3516P_3_IIC_WRITE();
+  77   1      
+  78   1           IIC_ADDRESS =  0xB2;  IIC_DAT = 0x3A;
+  79   1               SW3516P_3_IIC_WRITE();   // 12V 电压2.9A
+  80   1              
+  81   1               IIC_ADDRESS =  0xB3;  IIC_DAT = 0x2E;
+  82   1               SW3516P_3_IIC_WRITE();   // 15V 电压2.3A
+  83   1              
+  84   1           IIC_ADDRESS =  0xB4;  
+  85   1              SW3516P_3_IIC_READ(); 
+  86   1              IIC_DAT &= 0X80;
+  87   1              IIC_DAT = 0x23;
+  88   1               SW3516P_3_IIC_WRITE();   // 20V 电压1.75A
+  89   1              
+  90   1               IIC_ADDRESS =  0xBE;  IIC_DAT = 0XF5;
+  91   1               SW3516P_3_IIC_WRITE();    // 设置PPS0电压  11V
+  92   1              
+  93   1               IIC_ADDRESS =  0xB5;  IIC_DAT = 0x3C;
+  94   1               SW3516P_3_IIC_WRITE();   //pps0电流 3A
+  95   1               
+  96   1               IIC_ADDRESS =  0X73;
+  97   1              SW3516P_3_IIC_READ();        // 电流的变化都需要写 src cap 命令才会重新广播
+  98   1          IIC_DAT |= 0X80;
+  99   1          SW3516P_3_IIC_WRITE();      
+ 100   1      }
+ 101          
+ 102          void SW3516P_POWE_60W_3_A(void)
+ 103          {
+ 104   1              IIC_ADDRESS =  0x16;
+ 105   1          SW3516P_3_IIC_READ();       
+ 106   1          IIC_DAT |=0X01;              // 强制关闭 Buck
+ 107   1          SW3516P_3_IIC_WRITE(); 
+ 108   1              
+ 109   1              IIC_ADDRESS =  0xD2;         
+ 110   1          SW3516P_3_IIC_READ();           // 18W  30W  45W  60W
+ 111   1              IIC_DAT &= 0XF8;           //  3    2    1    0
+ 112   1              SW3516P_3_IIC_WRITE();      // 非PD功率  60W
+ 113   1      
+ 114   1          IIC_ADDRESS =  0x16;
+ 115   1          SW3516P_3_IIC_READ();       
+C51 COMPILER V9.59.0.0   SW3516P_LIB_3_A_C                                                 11/12/2025 15:54:08 PAGE 3   
+
+ 116   1          IIC_DAT &=0XFE;           // 恢复 Buck
+ 117   1          SW3516P_3_IIC_WRITE();      
+ 118   1      }
+ 119          
+ 120          void SW3516P_POWE_35W_3_A(void)
+ 121          {
+ 122   1              IIC_ADDRESS =  0x16;
+ 123   1          SW3516P_3_IIC_READ();       
+ 124   1          IIC_DAT |=0X01;              // 强制关闭 Buck
+ 125   1          SW3516P_3_IIC_WRITE(); 
+ 126   1              
+ 127   1              IIC_ADDRESS =  0xD2;
+ 128   1          SW3516P_3_IIC_READ();       
+ 129   1              IIC_DAT &= 0XF8;            // 18W  30W  45W  60W
+ 130   1              IIC_DAT |= 0X02;            //  3    2    1    0
+ 131   1              SW3516P_3_IIC_WRITE();      // 非PD功率  60W
+ 132   1      
+ 133   1          IIC_ADDRESS =  0x16;
+ 134   1          SW3516P_3_IIC_READ();       
+ 135   1          IIC_DAT &=0XFE;           // 恢复 Buck
+ 136   1          SW3516P_3_IIC_WRITE();      
+ 137   1              
+ 138   1      }
+ 139          
+ 140          
+ 141          //unsigned char SW3516p_Get_Port_State_07_3_A_C(void)   // 适用单C
+ 142          //{
+ 143          //      IIC_ADDRESS =  0X07;
+ 144          //    SW3516P_3_IIC_READ();
+ 145          //    
+ 146          //    if(IIC_DAT&0x01)         // 单C模式  表示C口开启 
+ 147          //    {
+ 148          //              return 0x01;
+ 149          //    }
+ 150          //      return 0;
+ 151          //}
+ 152          
+ 153          unsigned char SW3516p_Get_Port_State_3_A_C(void)
+ 154          {
+ 155   1              static unsigned char por = 0;
+ 156   1              unsigned int temp = 0;
+ 157   1              IIC_ADDRESS = 0X08;
+ 158   1          SW3516P_3_IIC_READ();
+ 159   1          IIC_DAT &= 0xF0;
+ 160   1          if(IIC_DAT == 0X60 || IIC_DAT == 0X80)         // 单C模式  表示C口开
+ 161   1          {
+ 162   2                      por |= 0x04;
+ 163   2          }else
+ 164   1          {
+ 165   2              por &= 0xFB;
+ 166   2          
+ 167   2          }
+ 168   1          IIC_ADDRESS = 0X3A;
+ 169   1          SW3516P_3_IIC_READ();
+ 170   1          IIC_DAT &= 0XF8;
+ 171   1          IIC_DAT |= 0X04;
+ 172   1          SW3516P_3_IIC_WRITE();
+ 173   1          
+ 174   1          IIC_ADDRESS = 0X3B;
+ 175   1          SW3516P_3_IIC_READ();  // 2.5mA/bit
+ 176   1          temp = IIC_DAT << 4;
+ 177   1          IIC_ADDRESS = 0X3C;
+C51 COMPILER V9.59.0.0   SW3516P_LIB_3_A_C                                                 11/12/2025 15:54:08 PAGE 4   
+
+ 178   1          SW3516P_3_IIC_READ();
+ 179   1          temp |= (IIC_DAT & 0x0F);
+ 180   1          temp *= 2.5;
+ 181   1          if(temp > 80)
+ 182   1          {
+ 183   2              por |= 0x08;
+ 184   2          }else if(temp < 15)
+ 185   1          {
+ 186   2              por &= 0xF7;
+ 187   2          }
+ 188   1              return por;
+ 189   1      }
+ 190          
+ 191          
+ 192          
+ 193          void SW3516P_Init_3_A_C(void)
+ 194          {
+ 195   1              IIC_ADDRESS =  0x12;  IIC_DAT = 0x20;
+ 196   1              SW3516P_3_IIC_WRITE();    // SW3516P IIC使能控制
+ 197   1              IIC_DAT = 0x40;
+ 198   1          SW3516P_3_IIC_WRITE();
+ 199   1          IIC_DAT = 0x80;
+ 200   1          SW3516P_3_IIC_WRITE();
+ 201   1          
+ 202   1          IIC_ADDRESS =  0x15;  IIC_DAT = 0x20;
+ 203   1          SW3516P_3_IIC_WRITE();
+ 204   1              IIC_DAT = 0x40; 
+ 205   1          SW3516P_3_IIC_WRITE();
+ 206   1          IIC_DAT = 0x80; 
+ 207   1          SW3516P_3_IIC_WRITE();
+ 208   1          
+ 209   1          
+ 210   1          IIC_ADDRESS =  0x16;
+ 211   1          SW3516P_3_IIC_READ();       
+ 212   1          IIC_DAT |=0X01;              // 强制关闭 Buck
+ 213   1          SW3516P_3_IIC_WRITE();   
+ 214   1          
+ 215   1          IIC_ADDRESS =  0xAB;
+ 216   1          SW3516P_3_IIC_READ();       
+ 217   1              IIC_DAT |= (1<<7);         // 使能线补
+ 218   1          IIC_DAT |= (3<<2);
+ 219   1          SW3516P_3_IIC_WRITE();   // 设置端口 0 单A口  1双A口  2单C口  3 C+A口
+ 220   1      
+ 221   1          SW3516P_POWE_100W_3_C();
+ 222   1          
+ 223   1          IIC_ADDRESS =  0xA6;
+ 224   1          SW3516P_3_IIC_READ();       
+ 225   1          IIC_DAT &= ~(1<<7);                         // 修改CC掉线时间为 12MS
+ 226   1          SW3516P_3_IIC_WRITE();     
+ 227   1          
+ 228   1          
+ 229   1      //    IIC_ADDRESS =  0xB9;
+ 230   1      //      SW3516P_3_IIC_READ();              
+ 231   1      //    IIC_DAT &=~(1<<0);           // PE协议不使能
+ 232   1      //    SW3516P_3_IIC_WRITE();    
+ 233   1             
+ 234   1          
+ 235   1      //    IIC_ADDRESS =  0xAD;
+ 236   1      //    SW3516P_3_IIC_READ();       
+ 237   1      //    IIC_DAT &=~(1<<2);           // 三星1.2V模式使能  不使能
+ 238   1      //    SW3516P_3_IIC_WRITE();  
+ 239   1      
+C51 COMPILER V9.59.0.0   SW3516P_LIB_3_A_C                                                 11/12/2025 15:54:08 PAGE 5   
+
+ 240   1      
+ 241   1              IIC_ADDRESS =  0xBA;
+ 242   1          SW3516P_3_IIC_READ();       
+ 243   1          IIC_DAT |=0X0C;           // 非PD最高电压  20V
+ 244   1          SW3516P_3_IIC_WRITE();
+ 245   1      
+ 246   1      //    IIC_ADDRESS =  0xD2;
+ 247   1      //    SW3516P_3_IIC_READ();       
+ 248   1      //      IIC_DAT &= 0XF8;
+ 249   1      //    IIC_DAT |=0X03;           // 非PD功率 18W
+ 250   1      //    SW3516P_3_IIC_WRITE();
+ 251   1              
+ 252   1      //      IIC_ADDRESS =  0xC9;      
+ 253   1      //    IIC_DAT =0X97;           // SCP 功率 23W
+ 254   1      //    SW3516P_3_IIC_WRITE();    
+ 255   1              
+ 256   1              
+ 257   1              IIC_ADDRESS =  0xC4;
+ 258   1          SW3516P_3_IIC_READ();       
+ 259   1              IIC_DAT &= 0XFC;
+ 260   1          IIC_DAT |=0X01;           // Offset  450mA
+ 261   1          SW3516P_3_IIC_WRITE();
+ 262   1              
+ 263   1      
+ 264   1          
+ 265   1          IIC_ADDRESS =  0xBD;
+ 266   1          SW3516P_3_IIC_READ();       
+ 267   1              IIC_DAT &=0XCF;                                         // 双口同插限流    2.6V 
+ 268   1          SW3516P_3_IIC_WRITE();
+ 269   1           
+ 270   1          IIC_ADDRESS = 0xD5;
+ 271   1          SW3516P_3_IIC_READ();   // PPS过流点
+ 272   1          IIC_DAT &=0xE3;              // 0=150；1=450；2=600；3=300
+ 273   1          IIC_DAT |=0x0C;          // 300
+ 274   1          SW3516P_3_IIC_WRITE();   
+ 275   1          
+ 276   1          IIC_ADDRESS =  0xB8;
+ 277   1          SW3516P_3_IIC_READ();   // PPS后出现Hardreset,不禁止PPS
+ 278   1          IIC_DAT |=(1<<3); 
+ 279   1          SW3516P_3_IIC_WRITE();        
+ 280   1          
+ 281   1          IIC_ADDRESS =  0x16;
+ 282   1          SW3516P_3_IIC_READ();       
+ 283   1          IIC_DAT &=0XFE;           // 恢复 Buck
+ 284   1          SW3516P_3_IIC_WRITE();   
+ 285   1      }
+ 286          
+ 287          
+ 288          
+ 289          
+ 290          
+ 291          
+ 292          
+ 293          
+ 294          
+ 295          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    595    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.59.0.0   SW3516P_LIB_3_A_C                                                 11/12/2025 15:54:08 PAGE 6   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

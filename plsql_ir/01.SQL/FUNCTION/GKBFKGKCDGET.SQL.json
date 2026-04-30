@@ -1,0 +1,119 @@
+{
+  "file_name": "GKBFKGKCDGET.SQL",
+  "file_type": "FUNCTION",
+  "identifier": {
+    "name": "GKBFKGKCDGET",
+    "type": "FUNCTION",
+    "description": "RETURN NUMBER"
+  },
+  "parameters": [
+    {
+      "name": "nGAKO_KBN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "nKOJIN_NO",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "nATENA_RIREKI_RENBAN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    }
+  ],
+  "parameter_descriptions": {
+    "i_nKOJIN_NO": "宛名番号",
+    "i_nATENA_RIREKI_RENBAN": "宛名履歴連番 (999で最新履歴を指定可能)",
+    "IS": "------------------------------------------------------------------------------"
+  },
+  "constants": [],
+  "variables": [],
+  "type_members": [],
+  "select_fields": [],
+  "subprograms": [
+    {
+      "name": "COUNT",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "FCTGetR",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "GAKKOKU_CD",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "GKBFKGKCDGET",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "SAKUJO_FLG",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "g_tITEM",
+      "type": "FUNCTION",
+      "description": ""
+    },
+    {
+      "name": "宛名履歴連番",
+      "type": "FUNCTION",
+      "description": ""
+    }
+  ],
+  "internal_functions": [],
+  "sql_statements": {
+    "SELECT": [],
+    "INSERT": [],
+    "UPDATE": [],
+    "DELETE": [],
+    "MERGE": [],
+    "CREATE": []
+  },
+  "cursors": {
+    "declarations": [],
+    "usages": []
+  },
+  "execution_flow": [],
+  "exception_handling": {
+    "has_others": true,
+    "actions": [
+      "WHEN_NO_DATA_FOUND: RETURN g_nERR;"
+    ]
+  },
+  "header_comments": "i_nGAKO_KBN               IN  NUMBER,\ni_nKOJIN_NO               IN  NUMBER,\ni_nATENA_RIREKI_RENBAN    IN NUMBER\n) RETURN  NUMBER",
+  "parameter_comments": [
+    {
+      "parameter": "i_nKOJIN_NO",
+      "description": "宛名番号"
+    },
+    {
+      "parameter": "i_nATENA_RIREKI_RENBAN",
+      "description": "宛名履歴連番 (999で最新履歴を指定可能)"
+    },
+    {
+      "parameter": "IS",
+      "description": "------------------------------------------------------------------------------"
+    }
+  ],
+  "change_history": [
+    {
+      "date": "2024/10/11",
+      "author": "ZCZL.WANGMING",
+      "action": "UPDATE",
+      "version": "0.3.000.001",
+      "description": "仕様変更　IT_GKB_00041 横展開"
+    }
+  ]
+}

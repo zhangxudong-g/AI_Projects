@@ -1,0 +1,27 @@
+{
+  "file_name": "GKBPB00130.SQL",
+  "file_type": "PACKAGE",
+  "identifier": {
+    "name": "GKBPB00130",
+    "type": "PACKAGE",
+    "description": ""
+  },
+  "parameters": [],
+  "columns": [],
+  "variables": [],
+  "constants": [],
+  "subprograms": [
+    {
+      "name": "PBPRMCHK",
+      "type": "PROCEDURE",
+      "description": ""
+    },
+    {
+      "name": "PBATCH",
+      "type": "PROCEDURE",
+      "description": ""
+    }
+  ],
+  "select_fields": [],
+  "type_members": []
+}

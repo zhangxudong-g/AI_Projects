@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_serena_serena__read_file",
+      "mcp__plugin_serena_serena__get_symbols_overview",
+      "mcp__plugin_serena_serena__activate_project",
+      "mcp__plugin_serena_serena__search_for_pattern",
+      "Bash(mv \"/Users/jyo/workspace/AI 电源/.claude/skills/phase1-interface-gen\" \"/Users/jyo/workspace/AI 电源/.claude/skills/gen-interface\")",
+      "Bash(mv \"/Users/jyo/workspace/AI 电源/.claude/skills/phase2-main-gen\" \"/Users/jyo/workspace/AI 电源/.claude/skills/gen-project\")",
+      "Bash(sed -i '' 's/name: phase1-interface-gen/name: gen-interface/' \"/Users/jyo/workspace/AI 电源/.claude/skills/gen-interface/SKILL.md\")",
+      "Bash(sed -i '' 's/name: phase2-main-gen/name: gen-project/' \"/Users/jyo/workspace/AI 电源/.claude/skills/gen-project/SKILL.md\")",
+      "WebSearch",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  }
+}

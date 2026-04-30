@@ -1,0 +1,188 @@
+{
+  "file_name": "GKBWSENTAKUSEI.SQL",
+  "file_type": "TABLE",
+  "identifier": {
+    "name": "GKBWSENTAKUSEI",
+    "type": "TABLE",
+    "description": "選択制対象者ワーク"
+  },
+  "parameters": [],
+  "columns": [
+    {
+      "name": "SOFU_YUBIN",
+      "type": "NVARCHAR2(10)",
+      "description": "送付先郵便番号"
+    },
+    {
+      "name": "SOFU_JUSHO",
+      "type": "NVARCHAR2(186)",
+      "description": "送付先住所"
+    },
+    {
+      "name": "ATESAKI_KATAGAKI",
+      "type": "NVARCHAR2(300)",
+      "description": "宛先方書"
+    },
+    {
+      "name": "ATESAKI",
+      "type": "NVARCHAR2(102)",
+      "description": "宛先"
+    },
+    {
+      "name": "YUBIN_NOBC",
+      "type": "NVARCHAR2(30)",
+      "description": "郵便番号BC"
+    },
+    {
+      "name": "SOFUBI",
+      "type": "NVARCHAR2(11)",
+      "description": "送付日"
+    },
+    {
+      "name": "KYOIKU_KAI_MEI",
+      "type": "NVARCHAR2(60)",
+      "description": "教育委員会名"
+    },
+    {
+      "name": "KYOIKU_CHO_MEI",
+      "type": "NVARCHAR2(100)",
+      "description": "教育長名"
+    },
+    {
+      "name": "GAKKO_KBN_CD",
+      "type": "NUMBER(3,0)",
+      "description": "学校区分"
+    },
+    {
+      "name": "GAKKO_KBN_MEI",
+      "type": "NVARCHAR2(15)",
+      "description": "学校区分名"
+    },
+    {
+      "name": "JIDO_KOJIN_NO",
+      "type": "NUMBER(15,0)",
+      "description": "児童生徒宛名番号"
+    },
+    {
+      "name": "JIDO_SHIMEI_KANA",
+      "type": "NVARCHAR2(100)",
+      "description": "児童生徒氏名カナ"
+    },
+    {
+      "name": "JIDO_SHIMEI_KANJI",
+      "type": "NVARCHAR2(100)",
+      "description": "児童生徒氏名漢字"
+    },
+    {
+      "name": "HYOJI_SEINENGAPPI",
+      "type": "NVARCHAR2(11)",
+      "description": "表示生年月日"
+    },
+    {
+      "name": "CHOMEI_BANCHI",
+      "type": "NVARCHAR2(186)",
+      "description": "児童生徒現住所"
+    },
+    {
+      "name": "KATAGAKI",
+      "type": "NVARCHAR2(300)",
+      "description": "児童生徒方書"
+    },
+    {
+      "name": "SEIBETSU",
+      "type": "NVARCHAR2(4)",
+      "description": "性別"
+    },
+    {
+      "name": "JIDO_KOKUSEKI",
+      "type": "NUMBER(3,0)",
+      "description": "児童生徒国籍"
+    },
+    {
+      "name": "JIDO_SHIENSOCHI",
+      "type": "NVARCHAR2(2)",
+      "description": "児童生徒_支援措置"
+    },
+    {
+      "name": "HOGOSHA_KOJIN_NO",
+      "type": "NUMBER(15,0)",
+      "description": "保護者宛名番号"
+    },
+    {
+      "name": "HOGOSHA_SHIMEI_KANA",
+      "type": "NVARCHAR2(100)",
+      "description": "保護者氏名カナ"
+    },
+    {
+      "name": "HOGOSHA_SHIMEI_KANJI",
+      "type": "NVARCHAR2(100)",
+      "description": "保護者氏名漢字"
+    },
+    {
+      "name": "HOGOSHA_ZOKUGARA",
+      "type": "NVARCHAR2(30)",
+      "description": "児童生徒との関係"
+    },
+    {
+      "name": "HOGOSHA_SHIENSOCHI",
+      "type": "NVARCHAR2(2)",
+      "description": "保護者_支援措置"
+    },
+    {
+      "name": "SHUGAKUSHITEIKOU",
+      "type": "NUMBER(3,0)",
+      "description": "就学指定校"
+    },
+    {
+      "name": "SHUGAKUSHITEIKOU_MEI",
+      "type": "NVARCHAR2(60)",
+      "description": "就学指定校名"
+    },
+    {
+      "name": "KYOIKUIINKAI_CD",
+      "type": "NUMBER(2,0)",
+      "description": "教育委員会コード"
+    },
+    {
+      "name": "GAKKOBLOCK_CD",
+      "type": "NUMBER(3,0)",
+      "description": "学校ブロック"
+    },
+    {
+      "name": "HYOJI_SENTAKUKANO_GAKKO",
+      "type": "NVARCHAR2(1000)",
+      "description": "表示選択可能学校"
+    },
+    {
+      "name": "JINKAKU_KBN",
+      "type": "NUMBER(1,0)",
+      "description": "人格区分"
+    },
+    {
+      "name": "WSNUM",
+      "type": "NVARCHAR2(63)",
+      "description": "端末番号"
+    },
+    {
+      "name": "BATCHKBN",
+      "type": "NUMBER(2,0)",
+      "description": "即時バッチ区分"
+    },
+    {
+      "name": "JOBNUM",
+      "type": "NUMBER(38,0)",
+      "description": "ジョブNO"
+    },
+    {
+      "name": "YUHEN_KBN",
+      "type": "NUMBER(1,0)",
+      "description": "郵返区分"
+    }
+  ],
+  "variables": [],
+  "constants": [],
+  "subprograms": [],
+  "select_fields": [],
+  "type_members": [],
+  "source_code": "CREATE TABLE GKBWSENTAKUSEI\n(\n    SOFU_YUBIN                     NVARCHAR2(10),\n    SOFU_JUSHO                     NVARCHAR2(186),\n    ATESAKI_KATAGAKI               NVARCHAR2(300),\n    ATESAKI                        NVARCHAR2(102),\n    YUBIN_NOBC                     NVARCHAR2(30),\n    SOFUBI                         NVARCHAR2(11),\n    KYOIKU_KAI_MEI                 NVARCHAR2(60),\n    KYOIKU_CHO_MEI                 NVARCHAR2(100),\n    GAKKO_KBN_CD                   NUMBER(3,0),\n    GAKKO_KBN_MEI                  NVARCHAR2(15),\n    JIDO_KOJIN_NO                  NUMBER(15,0),\n    JIDO_SHIMEI_KANA               NVARCHAR2(100),\n    JIDO_SHIMEI_KANJI              NVARCHAR2(100),\n    HYOJI_SEINENGAPPI              NVARCHAR2(11),\n    CHOMEI_BANCHI                  NVARCHAR2(186),\n    KATAGAKI                       NVARCHAR2(300),\n    SEIBETSU                       NVARCHAR2(4),\n    JIDO_KOKUSEKI                  NUMBER(3,0),\n    JIDO_SHIENSOCHI                NVARCHAR2(2),\n    HOGOSHA_KOJIN_NO               NUMBER(15,0),\n    HOGOSHA_SHIMEI_KANA            NVARCHAR2(100),\n    HOGOSHA_SHIMEI_KANJI           NVARCHAR2(100),\n    HOGOSHA_ZOKUGARA               NVARCHAR2(30),\n    HOGOSHA_SHIENSOCHI             NVARCHAR2(2),\n    SHUGAKUSHITEIKOU               NUMBER(3,0),\n    SHUGAKUSHITEIKOU_MEI           NVARCHAR2(60),\n    KYOIKUIINKAI_CD                NUMBER(2,0),\n    GAKKOBLOCK_CD                  NUMBER(3,0),\n    HYOJI_SENTAKUKANO_GAKKO        NVARCHAR2(1000),\n    JINKAKU_KBN                    NUMBER(1,0),\n    WSNUM                          NVARCHAR2(63),\n    BATCHKBN                       NUMBER(2,0),\n    JOBNUM                         NUMBER(38,0),\n    YUHEN_KBN                      NUMBER(1,0)\n)\nTABLESPACE GK_DATA\nNOCACHE\nLOGGING\n/\nCOMMENT ON TABLE GKBWSENTAKUSEI IS '選択制対象者ワーク'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.SOFU_YUBIN IS '送付先郵便番号'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.SOFU_JUSHO IS '送付先住所'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.ATESAKI_KATAGAKI IS '宛先方書'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.ATESAKI IS '宛先'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.YUBIN_NOBC IS '郵便番号BC'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.SOFUBI IS '送付日'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.KYOIKU_KAI_MEI IS '教育委員会名'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.KYOIKU_CHO_MEI IS '教育長名'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.GAKKO_KBN_CD IS '学校区分'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.GAKKO_KBN_MEI IS '学校区分名'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JIDO_KOJIN_NO IS '児童生徒宛名番号'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JIDO_SHIMEI_KANA IS '児童生徒氏名カナ'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JIDO_SHIMEI_KANJI IS '児童生徒氏名漢字'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HYOJI_SEINENGAPPI IS '表示生年月日'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.CHOMEI_BANCHI IS '児童生徒現住所'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.KATAGAKI IS '児童生徒方書'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.SEIBETSU IS '性別'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JIDO_KOKUSEKI IS '児童生徒国籍'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JIDO_SHIENSOCHI IS '児童生徒_支援措置'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HOGOSHA_KOJIN_NO IS '保護者宛名番号'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HOGOSHA_SHIMEI_KANA IS '保護者氏名カナ'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HOGOSHA_SHIMEI_KANJI IS '保護者氏名漢字'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HOGOSHA_ZOKUGARA IS '児童生徒との関係'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HOGOSHA_SHIENSOCHI IS '保護者_支援措置'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.SHUGAKUSHITEIKOU IS '就学指定校'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.SHUGAKUSHITEIKOU_MEI IS '就学指定校名'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.KYOIKUIINKAI_CD IS '教育委員会コード'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.GAKKOBLOCK_CD IS '学校ブロック'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.HYOJI_SENTAKUKANO_GAKKO IS '表示選択可能学校'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JINKAKU_KBN IS '人格区分'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.WSNUM IS '端末番号'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.BATCHKBN IS '即時バッチ区分'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.JOBNUM IS 'ジョブNO'\n/\nCOMMENT ON COLUMN GKBWSENTAKUSEI.YUHEN_KBN IS '郵返区分'\n/\n"
+}

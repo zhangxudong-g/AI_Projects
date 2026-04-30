@@ -1,0 +1,11 @@
+CREATE GLOBAL TEMPORARY TABLE GKBWGAKKOJINKOTOKEI
+(
+    SHOGAKU_CD                     NUMBER(5,0),
+    SANTEIDANTAI_CD                NUMBER(2,0),
+    SEIBETSU                       NUMBER(1,0),
+    NENREI                         NUMBER(3,0)
+)
+ON COMMIT DELETE ROWS
+NOCACHE
+DISABLE ROW MOVEMENT
+/

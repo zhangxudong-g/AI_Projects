@@ -1,0 +1,33 @@
+{
+  "file_name": "GKBEKENSU_RECORD.SQL",
+  "file_type": "TYPE",
+  "identifier": {
+    "name": "GKBEKENSU_RECORD",
+    "type": "TYPE",
+    "description": ""
+  },
+  "parameters": [],
+  "columns": [],
+  "variables": [],
+  "constants": [],
+  "subprograms": [],
+  "select_fields": [],
+  "type_members": [
+    {
+      "name": "CNT",
+      "type": "NUMBER",
+      "description": ""
+    },
+    {
+      "name": "NAIYOU",
+      "type": "NVARCHAR2(1000)",
+      "description": ""
+    },
+    {
+      "name": "KBN",
+      "type": "NUMBER",
+      "description": ""
+    }
+  ],
+  "source_code": "CREATE OR REPLACE TYPE GKBEKENSU_RECORD FORCE AS OBJECT (\n     CNT     NUMBER,          --件数\n     NAIYOU  NVARCHAR2(1000), --件数名称\n     KBN     NUMBER           --件数区分 INFO：0、INPUT：1、OUTPUT：2\n);\n/\n"
+}

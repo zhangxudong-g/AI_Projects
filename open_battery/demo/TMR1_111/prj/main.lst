@@ -1,0 +1,741 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\main.obj
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE ..\src\main.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(../../../Li
+                    -brary/Include;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC;..\..\..\DELAY;..\..\..\CONFIG;..\
+                    -..\..\SW630X) DEBUG PRINT(.\main.lst) TABS(2) OBJECT(.\main.obj)
+
+line level    source
+
+   1          /*********************************************************
+   2          *Copyright (C)
+   3          *文件名:
+   4          *作  者:
+   5          *版  本:  V1.00
+   6          *日  期:
+   7          *描  述:
+   8          *备  注:
+   9          **********************************************************/
+  10          #include "main.h"
+  11          #include "Inc_mcu.h"
+  12          #include "iic_2.h"
+  13          #include "iic_1.h"
+  14          #include "config.h"
+  15          #include "SW6301.h"
+  16          #include "SW6303.h"
+  17          
+  18          /*********************************************************
+  19          函数名: void main(void)
+  20          描  述:
+  21          输入值: 无
+  22          输出值: 无
+  23          返回值: 无
+  24          **********************************************************/
+  25          extern void SW6301_SET_L(void);
+  26          extern void SW6301_SET_H(void);
+  27          void IO_INIT(void)
+  28          {
+  29   1        P06_IN_EN;   //IRQ  
+  30   1        P06_PU_EN;   // 上拉
+  31   1        P06_INT_IF_CLR;
+  32   1        P06_NEG_INT_EN;    // 下降沿触发  
+  33   1        
+  34   1        P20_IN_EN;   //IRQ  
+  35   1        P20_PU_EN;   // 上拉
+  36   1        P20_INT_IF_CLR;
+  37   1        P20_NEG_INT_EN;    // 下降沿触发  
+  38   1      
+  39   1        P13_IN_EN;   //IRQ    按键
+  40   1        P13_PU_EN;   // 上拉
+  41   1        P13_INT_IF_CLR;
+  42   1        P13_NEG_INT_EN;    // 下降沿触发  
+  43   1        
+  44   1        INT0_EN;
+  45   1        
+  46   1        P21_IN_EN;   //  底座接入
+  47   1        P21_PU_EN;  
+  48   1        
+  49   1        P21_INT_IF_CLR;
+  50   1        P21_NEG_INT_EN;    // 下降沿触发    
+  51   1        
+  52   1        
+  53   1        P17_OUT_EN;         // LED1
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 2   
+
+  54   1        P12_OUT_EN;         // LED2
+  55   1        P11_OUT_EN;         // LED3
+  56   1        
+  57   1        P17_IN_DIS;
+  58   1        P12_IN_DIS; 
+  59   1        P11_IN_DIS;
+  60   1        
+  61   1        
+  62   1        P00_OUT_EN;         
+  63   1        P01_OUT_EN;         
+  64   1        P02_OUT_EN;  
+  65   1        P03_OUT_EN; 
+  66   1        
+  67   1        P00_IN_DIS;
+  68   1        P01_IN_DIS; 
+  69   1        P02_IN_DIS;
+  70   1        P03_IN_DIS; 
+  71   1        
+  72   1        P14_OUT_EN;        
+  73   1        P14_IN_DIS; 
+  74   1        
+  75   1        P14 = 0;
+  76   1        
+  77   1        P00 = 1;
+  78   1        P01 = 0;
+  79   1        P02 = 0;
+  80   1        P03 = 0;
+  81   1      }
+  82          
+  83          void ADC_INIT(void)
+  84          {
+  85   1      //  P16_IN_EN;
+  86   1      //  P00_IN_EN;
+  87   1        P15_IN_DIS
+  88   1        P16_IN_DIS
+  89   1        P16_OUT_DIS;  
+  90   1        P15_OUT_DIS;  
+  91   1        VREF_EN;             //ADC参考使用配置
+  92   1        ADC_EN;
+  93   1        ADC_RVDD_AVG8;     //ADC 内部2.5v参考
+  94   1      
+  95   1      }
+  96          
+  97          unsigned int  tmp_data;
+  98          unsigned int  VDD_data;
+  99          float dizuo_adc;
+ 100          
+ 101          
+ 102          unsigned int GET_VDD_VALUE(void)
+ 103          {
+ 104   1        
+ 105   1        P15_IN_DIS
+ 106   1        P16_IN_DIS
+ 107   1        P16_OUT_DIS;  
+ 108   1        P15_OUT_DIS;  
+ 109   1        VREF_EN;             //ADC参考使用配置
+ 110   1        ADC_EN;
+ 111   1        ADC_RVDD_AVG8;     //ADC 内部2.5v参考 
+ 112   1        
+ 113   1        ADC_VDD_DIV4;       //选择通道0
+ 114   1        DelayUs(1000);
+ 115   1        ADC_SOFT_TG;        //ADC启动
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 3   
+
+ 116   1        ADC_WAIT;
+ 117   1        VDD_data = (ADC_DH << 8)| ADC_DL;
+ 118   1      //  VDD_data = VDD_data <<8;
+ 119   1      //  VDD_data = VDD_data | ADC_DL;
+ 120   1        VDD_data =VDD_data *4;
+ 121   1        ADC_INT_IF_CLR;    //清中断标志位 
+ 122   1        
+ 123   1      
+ 124   1        return 0;
+ 125   1      }
+ 126          unsigned int GET_ADC_VALUE(void)
+ 127          {
+ 128   1        P15_IN_DIS
+ 129   1        P16_IN_DIS
+ 130   1        P16_OUT_DIS;  
+ 131   1        P15_OUT_DIS;  
+ 132   1        VREF_EN;             //ADC参考使用配置
+ 133   1        ADC_EN;
+ 134   1        ADC_RVREF25_AVG8;     //ADC 内部2.5v参考  
+ 135   1        
+ 136   1        ADC_P16_AN10;       //选择通道0
+ 137   1        DelayUs(1000);
+ 138   1        ADC_SOFT_TG;        //ADC启动
+ 139   1        ADC_WAIT;
+ 140   1        tmp_data = (ADC_DH << 8) | ADC_DL;
+ 141   1      //  tmp_data = tmp_data <<8 | ADC_DL;
+ 142   1      //  tmp_data = tmp_data | ADC_DL;
+ 143   1        ADC_INT_IF_CLR;    //清中断标志位
+ 144   1        
+ 145   1        dizuo_adc = tmp_data*1.010;
+ 146   1        
+ 147   1        return tmp_data;
+ 148   1      }
+ 149          float GET_NTC_VALUE(void)
+ 150          {
+ 151   1        unsigned int Ntcdata = 0;
+ 152   1      
+ 153   1        P15_IN_DIS
+ 154   1        P16_IN_DIS
+ 155   1        P16_OUT_DIS;  
+ 156   1        P15_OUT_DIS;  
+ 157   1        VREF_EN;             //ADC参考使用配置
+ 158   1        ADC_EN;
+ 159   1        ADC_RVDD_AVG8;     //ADC 内部2.5v参考 
+ 160   1      
+ 161   1        ADC_P15_AN11;       //选择通道0
+ 162   1        DelayUs(1000);
+ 163   1        ADC_SOFT_TG;        //ADC启动
+ 164   1        ADC_WAIT;
+ 165   1        Ntcdata = (ADC_DH<<8)| ADC_DL;
+ 166   1      //  Ntcdata = Ntcdata <<8;
+ 167   1      //  Ntcdata = Ntcdata | ADC_DL;
+ 168   1        ADC_INT_IF_CLR;    //清中断标志位
+ 169   1      
+ 170   1      
+ 171   1        return (51.0*Ntcdata/(VDD_data-Ntcdata)); //单位R
+ 172   1      }
+ 173          void UART0_BRR_WR(unsigned int brr)
+ 174          {
+ 175   1        unsigned int tmp_data;
+ 176   1        tmp_data =brr>>8;
+ 177   1        UART0_BRL =  (unsigned char)brr;
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 4   
+
+ 178   1        UART0_BRH =  (unsigned char)tmp_data;
+ 179   1      }
+ 180          void UART_INIT(void)
+ 181          {
+ 182   1          P02_SET;
+ 183   1          P02_FUN_TX0;         //P16设置为UART发送
+ 184   1          P02_OUT_EN;          //该管脚设置成输出 
+ 185   1      
+ 186   1          UART0_RX8;           //八位数据接收
+ 187   1          UART0_TX8_1S;        //发送为发送一个stop位
+ 188   1          UART0_BRR_WR(34);  //8M/(832+1)=9600  8M为系统时钟
+ 189   1          UART0_RX0_INT_EN;    //接收中断使能
+ 190   1          INT5_EN;             //UART所属中断使能
+ 191   1          GIE_EN;              //总中断开启，接收到数据后进中断，数据加1后发送出来
+ 192   1      }
+ 193          
+ 194          void LED_RUN(void);
+ 195          void KEY_RUN(void);
+ 196          //float last_dizuo_adc;
+ 197          
+ 198          unsigned char sw6301_num;
+ 199          
+ 200          //unsigned char dizuo_adc_level;
+ 201          void main()
+ 202          {
+ 203   1        SYSCK_DIV4;  //16M启动，4分频，4M
+ 204   1      
+ 205   1        CLK_PR = 0XA5; 
+ 206   1        CLK_C0 = 0x02;
+ 207   1        CLK_PR = 0X5a;
+ 208   1        TMR0_CY = 0X7C;   //周期设置  1/4 us *4*8=8us *125=1ms
+ 209   1        //tmr使能
+ 210   1        TMR0_CY = 0X7C;   //周期设置  1/4 us *4*8=8us *125=1ms
+ 211   1                          //tmr使能
+ 212   1        TMR0_C0 = 0XC3;
+ 213   1        TMR0_INT_EN;      //中断使能
+ 214   1        INT1_EN;          //使能对应中断
+ 215   1        GIE_EN;     // 总中断使能
+ 216   1        
+ 217   1      
+ 218   1      
+ 219   1      
+ 220   1        GIE_EN;
+ 221   1      
+ 222   1        DelayUs(1000000);
+ 223   1        DelayUs(1000000);
+ 224   1        
+ 225   1        
+ 226   1      IO_INIT();     //IO 初始化
+ 227   1      ADC_INIT();   //ADC初始化
+ 228   1      //===============
+ 229   1        IIC_ADDRESS = 0X23;   // 关闭低功耗    第一次上电误进无线充模式，上电稳定后复位1次IC
+ 230   1        SW6303_IIC_READ();
+ 231   1        IIC_DAT |= (1<<0);
+ 232   1        SW6303_IIC_WRITE();
+ 233   1        
+ 234   1      //  IIC_ADDRESS = 0X23;     // 关闭低功耗
+ 235   1      //  SW6301_IIC_READ();
+ 236   1      //  IIC_DAT |= (1<<0);  
+ 237   1      //  SW6301_IIC_WRITE();   
+ 238   1        
+ 239   1        DelayUs(10000); 
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 5   
+
+ 240   1        
+ 241   1        
+ 242   1        IIC_ADDRESS = 0X24;
+ 243   1        IIC_DAT = 0X20;
+ 244   1        SW6303_IIC_WRITE();
+ 245   1        
+ 246   1        IIC_DAT = 0X40;
+ 247   1        SW6303_IIC_WRITE();
+ 248   1        
+ 249   1        IIC_DAT = 0X80;
+ 250   1        SW6303_IIC_WRITE();
+ 251   1        
+ 252   1        
+ 253   1        IIC_ADDRESS = 0XD9;
+ 254   1        IIC_DAT = 0X20;
+ 255   1        SW6303_IIC_WRITE();
+ 256   1        
+ 257   1        IIC_DAT = 0X40;
+ 258   1        SW6303_IIC_WRITE();
+ 259   1        
+ 260   1        IIC_DAT = 0X80;
+ 261   1        SW6303_IIC_WRITE();
+ 262   1        
+ 263   1        
+ 264   1      //  SW6303_SET_H();     //切高位
+ 265   1      //  
+ 266   1      //  IIC_ADDRESS = 0X11B;
+ 267   1      //  SW6303_IIC_READ();
+ 268   1      //  IIC_DAT &= 0X3F;
+ 269   1      //  IIC_DAT |= 0X80;
+ 270   1      //  SW6303_IIC_WRITE();
+ 271   1      //  
+ 272   1      //  SW6303_SET_L();  //切低位
+ 273   1        
+ 274   1        
+ 275   1        IIC_ADDRESS = 0X24;
+ 276   1        IIC_DAT = 0X20;
+ 277   1        SW6301_IIC_WRITE();
+ 278   1        
+ 279   1        IIC_DAT = 0X40;
+ 280   1        SW6301_IIC_WRITE(); 
+ 281   1      
+ 282   1        IIC_DAT = 0X80;
+ 283   1        SW6301_IIC_WRITE(); 
+ 284   1        
+ 285   1        IIC_ADDRESS = 0XD9;
+ 286   1        IIC_DAT = 0X20;
+ 287   1        SW6301_IIC_WRITE();
+ 288   1        
+ 289   1        IIC_DAT = 0X40;
+ 290   1        SW6301_IIC_WRITE();
+ 291   1        
+ 292   1        IIC_DAT = 0X80;
+ 293   1        SW6301_IIC_WRITE();
+ 294   1      //=================
+ 295   1        SW6303_INIT();
+ 296   1        SW6301_INIT();
+ 297   1        UART_INIT();
+ 298   1        UART0_TX_DAT(1+48);
+ 299   1        UART0_TX_DAT(1+48);
+ 300   1        UART0_TX_DAT(1+48);
+ 301   1        WDT_C = 0X20;                       //使能看门狗
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 6   
+
+ 302   1        
+ 303   1        dizuo_flay = 0;
+ 304   1      
+ 305   1        SLEED_TIME_S = 10000;
+ 306   1        while(1)
+ 307   1        {
+ 308   2          CLR_WDT;                      // 看门狗
+ 309   2          GET_VDD_VALUE();
+ 310   2          KEY_RUN();
+ 311   2          
+ 312   2          if(power_time_1ms > 100)
+ 313   2          {
+ 314   3            power_time_1ms = 0;
+ 315   3            if(P21 == 0)                 // 检测底座
+ 316   3            {
+ 317   4              GET_ADC_VALUE();  
+ 318   4      //        if((last_dizuo_adc-dizuo_adc > 200) && (dizuo_adc<50))
+ 319   4      //        {
+ 320   4      //          dizuo_adc_level = 1;
+ 321   4      //        
+ 322   4      //        }
+ 323   4      //        if((dizuo_adc - last_dizuo_adc > 200) && (dizuo_adc>150))
+ 324   4      //        {
+ 325   4      //          dizuo_adc_level = 0;
+ 326   4      //        }
+ 327   4      //        last_dizuo_adc = dizuo_adc;
+ 328   4      //        if(dizuo_adc_level == 1)
+ 329   4      //        {
+ 330   4      ////          dizuo_adc = 0;
+ 331   4      //          //dizuo_flay = 0;   
+ 332   4      //          //P14 = 0;
+ 333   4      //        }else
+ 334   4      //        {
+ 335   4      //          dizuo_flay = 1;
+ 336   4      ////          P14 = 1;
+ 337   4      //        } 
+ 338   4      
+ 339   4                dizuo_flay = 1;
+ 340   4      //          P14 = 1;  
+ 341   4      
+ 342   4              if(ntc_flay)                // NTC保护  时底座充电不打开
+ 343   4              {
+ 344   5                P14 = 0;
+ 345   5              
+ 346   5              }else
+ 347   4              {
+ 348   5                P14 = 1;  
+ 349   5              
+ 350   5              }
+ 351   4              
+ 352   4              if(sw6301_num != 1)   //新增测试需求，1.5S内5次开C口充电  底座在线恢复不充电
+ 353   4              {
+ 354   5                sw6301_num = 1;
+ 355   5                SW6301_SET_H();    // 置高位    
+ 356   5                IIC_ADDRESS = 0X14B;     // 
+ 357   5                SW6301_IIC_READ();
+ 358   5                IIC_DAT &= ~(3<<6);    
+ 359   5                IIC_DAT |= (1<<6);     
+ 360   5                SW6301_IIC_WRITE();   
+ 361   5                SW6301_SET_L();        // 切低位
+ 362   5                
+ 363   5              }       
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 7   
+
+ 364   4                  
+ 365   4            }
+ 366   3            else
+ 367   3            {
+ 368   4              //dizuo_adc_level = 0;
+ 369   4              dizuo_adc = 0;
+ 370   4              P14 = 0;    
+ 371   4              dizuo_flay = 0;
+ 372   4            }     
+ 373   3            
+ 374   3            Set_Power();
+ 375   3            
+ 376   3          }
+ 377   2          
+ 378   2      
+ 379   2        }
+ 380   1          
+ 381   1      }
+ 382          
+ 383          
+ 384          
+ 385          #define KEY    P13
+ 386          
+ 387          
+ 388          unsigned char key_sta;
+ 389          
+ 390          //void KEY_RUN(void)
+ 391          //{
+ 392          //  if(key_time_flay)
+ 393          //  {
+ 394          //    if(KEY == 1)
+ 395          //    {
+ 396          //      key_time_flay = 0;
+ 397          //      if(key_time_1ms > 10000)   // 3S
+ 398          //      {
+ 399          //        key_sta = 2;
+ 400          //  
+ 401          ////        IIC_ADDRESS = 0X21;   // 关输出
+ 402          ////        SW6303_IIC_READ();
+ 403          ////        IIC_DAT |= (1<<5);
+ 404          ////        SW6303_IIC_WRITE(); 
+ 405          //        guang_shuchu();
+ 406          //        IIC_ADDRESS = 0X21;   // 关输出
+ 407          //        SW6301_IIC_READ();
+ 408          //        IIC_DAT |= (1<<5);
+ 409          //        SW6301_IIC_WRITE(); 
+ 410          //        
+ 411          //      }else if(key_time_1ms > 5  && key_time_1ms< 500)   // 单击
+ 412          //      {
+ 413          //        key_sta = 1;
+ 414          //        sleep_time_1ms = 0;
+ 415          //        IIC_ADDRESS = 0X20;   // 触发短按  开输出
+ 416          //        SW6303_IIC_READ();
+ 417          //        IIC_DAT |= (1<<0);
+ 418          //        SW6303_IIC_WRITE(); 
+ 419          //        IIC_ADDRESS = 0X20;   // 触发短按  开输出
+ 420          //        SW6301_IIC_READ();
+ 421          //        IIC_DAT |= (1<<0);
+ 422          //        SW6301_IIC_WRITE(); 
+ 423          //      }
+ 424          //      key_time_1ms = 0;
+ 425          //    }
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 8   
+
+ 426          //  }
+ 427          //}
+ 428          
+ 429          extern unsigned char VALUE_100;
+ 430          extern unsigned char ntc_time;
+ 431          void KEY_RUN(void)
+ 432          {
+ 433   1        
+ 434   1        static unsigned char num = 0;
+ 435   1        if(key_sta == 2)
+ 436   1        {
+ 437   2      //        IIC_ADDRESS = 0X21;   // 关输出
+ 438   2      //        SW6303_IIC_READ();
+ 439   2      //        IIC_DAT |= (1<<5);
+ 440   2      //        SW6303_IIC_WRITE(); 
+ 441   2              guang_shuchu();
+ 442   2              IIC_ADDRESS = 0X21;   // 关输出
+ 443   2              SW6301_IIC_READ();
+ 444   2              IIC_DAT |= (1<<5);
+ 445   2              SW6301_IIC_WRITE(); 
+ 446   2          
+ 447   2              IIC_ADDRESS = 0XA4;   // 
+ 448   2              SW6301_IIC_READ();
+ 449   2              IIC_DAT &= ~(1<<3);   
+ 450   2              SW6301_IIC_WRITE(); 
+ 451   2          
+ 452   2          
+ 453   2          key_sta = 0;
+ 454   2        }else if(key_sta == 1)
+ 455   1        {
+ 456   2          key_sta = 0;
+ 457   2          VALUE_100 = 0;
+ 458   2      //    sleep_time_1ms = 0;
+ 459   2          ntc_time = 0;
+ 460   2          if(key_time_flay == 0)
+ 461   2          {
+ 462   3            key_time_flay = 1;
+ 463   3            key_time_1ms = 0;
+ 464   3            num = 0;
+ 465   3            sleep_time_1ms = 0;
+ 466   3            IIC_ADDRESS = 0X20;   // 触发短按  开输出
+ 467   3            SW6303_IIC_READ();
+ 468   3            IIC_DAT |= (1<<0);
+ 469   3            SW6303_IIC_WRITE(); 
+ 470   3            IIC_ADDRESS = 0X20;   // 触发短按  开输出
+ 471   3            SW6301_IIC_READ();
+ 472   3            IIC_DAT |= (1<<0);
+ 473   3            SW6301_IIC_WRITE();       
+ 474   3          }
+ 475   2          num++;
+ 476   2          
+ 477   2        }
+ 478   1          if(key_time_1ms <= 1500)    //新增测试需求，1.5S内5次开C口充电
+ 479   1          {
+ 480   2            if(num >= 5)
+ 481   2            {
+ 482   3              if(sw6301_num != 2)
+ 483   3              {
+ 484   4                sw6301_num = 2;
+ 485   4                SW6301_SET_H();    // 置高位    
+ 486   4                IIC_ADDRESS = 0X14B;     // 
+ 487   4                SW6301_IIC_READ();
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 9   
+
+ 488   4                IIC_DAT &= ~(3<<6);    
+ 489   4                IIC_DAT |= (0<<6);     
+ 490   4                SW6301_IIC_WRITE();   
+ 491   4                SW6301_SET_L();        // 切低位
+ 492   4                
+ 493   4              }
+ 494   3              num = 0;
+ 495   3            }
+ 496   2          }else
+ 497   1          {
+ 498   2            key_time_flay = 0;
+ 499   2            key_time_1ms = 0; 
+ 500   2            num = 0;      
+ 501   2          }
+ 502   1      
+ 503   1      }
+ 504          unsigned int Cnt_Keys = 0;
+ 505          void KEY_Scan(void)
+ 506          {
+ 507   1        
+ 508   1        
+ 509   1        if(KEY == 0)
+ 510   1        {
+ 511   2          Cnt_Keys++;
+ 512   2          if(Cnt_Keys > 10000)
+ 513   2          {
+ 514   3            key_sta = 2;
+ 515   3          }
+ 516   2        }
+ 517   1        else
+ 518   1        {
+ 519   2           if((Cnt_Keys >=5) && (Cnt_Keys <=500))
+ 520   2          {
+ 521   3            key_sta = 1;
+ 522   3          }
+ 523   2          Cnt_Keys = 0;
+ 524   2        }
+ 525   1      }
+ 526          
+ 527          
+ 528          
+ 529          
+ 530          unsigned char LED_Bright = 0;
+ 531          
+ 532          //void LED_RUN1(void)
+ 533          //{
+ 534          //  static unsigned char LEDScan_cnt;
+ 535          //    if(LED_time_1ms >= 2)
+ 536          //    {
+ 537          //      LED_time_1ms = 0;
+ 538          //  
+ 539          //      LED1_IN ;
+ 540          //      LED2_IN ;
+ 541          //      LED3_IN ;
+ 542          //  
+ 543          //  
+ 544          //       LEDScan_cnt++;
+ 545          //      if(LEDScan_cnt >= 3)  
+ 546          //      {
+ 547          //        LEDScan_cnt = 0;
+ 548          //      }
+ 549          //      
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 10  
+
+ 550          ////      LED_Bright = 0X07;
+ 551          
+ 552          //      LED_Bright |= (1<<0);
+ 553          //      LED_Bright |= (1<<1);
+ 554          //      LED_Bright &= ~(1<<2);
+ 555          //      LED_Bright &= ~(1<<3);
+ 556          //      LED_Bright |= (1<<4);
+ 557          //      LED_Bright |= (1<<5);
+ 558          //      switch(LEDScan_cnt)
+ 559          //      {
+ 560          //          case 0:
+ 561          //              LED1_OUT;
+ 562          //              LED1 = 0;
+ 563          //              if(LED_Bright &  0X02) {LED3_OUT; LED3 = 1; } //  202
+ 564          //              if(LED_Bright &  0X20) {LED2_OUT; LED2 = 1; }  //  206  
+ 565          //          break;
+ 566          
+ 567          //          case 1:
+ 568          //              LED2_OUT; 
+ 569          //              LED2 = 0;
+ 570          //              if(LED_Bright &  0X10) {LED1_OUT; LED1 = 1; } //  205
+ 571          //              if(LED_Bright &  0X08) {LED3_OUT; LED3 = 1; }  //  204                
+ 572          //          break;
+ 573          
+ 574          //          case 2:
+ 575          //              LED3_OUT;
+ 576          //              LED3 = 0;
+ 577          //              if(LED_Bright &  0X01) {LED1_OUT; LED1 = 1; } //  201
+ 578          //              if(LED_Bright &  0X04) {LED2_OUT; LED2 = 1; }  //  203  
+ 579          //          break;
+ 580          ////          case 3:
+ 581          ////              LED2_OUT;
+ 582          ////              LED2 = 0;
+ 583          ////              
+ 584          ////          break;
+ 585          ////          case 4:
+ 586          ////              LED2_OUT;
+ 587          ////              LED2 = 0;
+ 588          ////              if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; } //  205
+ 589          ////          break;              
+ 590          //      }   
+ 591          //    }
+ 592          //    
+ 593          //    
+ 594          //  
+ 595          //}
+ 596          
+ 597          void LED_RUN(void)
+ 598          {
+ 599   1        static unsigned char LEDScan_cnt;
+ 600   1          if(LED_time_1ms >= 0)
+ 601   1          {
+ 602   2            LED_time_1ms = 0;
+ 603   2        
+ 604   2            LED1_IN ;
+ 605   2            LED2_IN ;
+ 606   2            LED3_IN ;
+ 607   2            LEDScan_cnt++;
+ 608   2            if(LEDScan_cnt >= 5)  
+ 609   2            {
+ 610   3              LEDScan_cnt = 0;
+ 611   3            }
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 11  
+
+ 612   2      
+ 613   2            switch(LEDScan_cnt)
+ 614   2            {
+ 615   3                case 0:
+ 616   3                    if(LED_Bright &  (1<<2)) {LED3_OUT; LED3 = 1; } //  202
+ 617   3                    if(LED_Bright &  (1<<6)) {LED2_OUT; LED2 = 1; }  //  206
+ 618   3                    LED1_OUT;LED1 = 0;
+ 619   3                break;
+ 620   3      
+ 621   3                case 1:
+ 622   3                    
+ 623   3                    if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; } //  205
+ 624   3                    if(LED_Bright &  (1<<4)) {LED3_OUT; LED3 = 1; }  //  204
+ 625   3                    LED2_OUT; LED2 = 0;
+ 626   3                break;
+ 627   3      
+ 628   3                case 2:
+ 629   3                    
+ 630   3                    if(LED_Bright &  (1<<1)) {LED1_OUT; LED1 = 1; } //  202
+ 631   3                    if(LED_Bright &  (1<<3)) {LED2_OUT; LED2 = 1; }  //  206  
+ 632   3                    LED3_OUT; LED3 = 0;
+ 633   3                break;
+ 634   3                case 3:
+ 635   3                    
+ 636   3                    if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; LED2_OUT; LED2 = 0;}  //  205 
+ 637   3                  break;
+ 638   3                case 4:
+ 639   3                
+ 640   3                    if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; LED2_OUT; LED2 = 0;}  //  205
+ 641   3                break;              
+ 642   3            }
+ 643   2      
+ 644   2      
+ 645   2      //          if(LEDScan_cnt == 0)
+ 646   2      //          {
+ 647   2      //              if(LED_Bright &  (1<<2)) {LED3_OUT; LED3 = 1; } //  202
+ 648   2      //              if(LED_Bright &  (1<<6)) {LED2_OUT; LED2 = 1; }  //  206
+ 649   2      //              LED1_OUT;LED1 = 0;          
+ 650   2      //          }else if(LEDScan_cnt == 1)
+ 651   2      //          {
+ 652   2      //              if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; } //  205
+ 653   2      //              if(LED_Bright &  (1<<4)) {LED3_OUT; LED3 = 1; }  //  204
+ 654   2      //              LED2_OUT; LED2 = 0;         
+ 655   2      //          }else if(LEDScan_cnt == 2)
+ 656   2      //          {
+ 657   2      //              if(LED_Bright &  (1<<1)) {LED1_OUT; LED1 = 1; } //  202
+ 658   2      //              if(LED_Bright &  (1<<3)) {LED2_OUT; LED2 = 1; }  //  206  
+ 659   2      //              LED3_OUT; LED3 = 0;       
+ 660   2      //          }else if(LEDScan_cnt == 3)
+ 661   2      //          {
+ 662   2      //              if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; LED2_OUT; LED2 = 0;}  //  205       
+ 663   2      //          }
+ 664   2      //          else if(LEDScan_cnt == 4)
+ 665   2      //          {
+ 666   2      //              if(LED_Bright &  (1<<5)) {LED1_OUT; LED1 = 1; LED2_OUT; LED2 = 0;}  //  205     
+ 667   2      //          }
+ 668   2      
+ 669   2          }
+ 670   1          
+ 671   1          
+ 672   1        
+ 673   1      }
+C51 COMPILER V9.59.0.0   MAIN                                                              02/03/2026 11:17:49 PAGE 12  
+
+ 674          
+ 675          
+ 676          
+ 677          
+ 678          void INT5Interrupt() interrupt 10
+ 679          {
+ 680   1        if(RX0_IF)
+ 681   1        {
+ 682   2      
+ 683   2        }
+ 684   1      }
+ 685          
+ 686          
+ 687          
+ 688          
+ 689          
+ 690          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1312    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

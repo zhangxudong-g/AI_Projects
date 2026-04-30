@@ -1,0 +1,33 @@
+servers:
+  - name: "Server - ps"
+    host: "133.238.128.175"
+    port: 22
+    username: "ps"
+    # ssh_key_path: "~/.ssh/id_rsa"
+    password: "${SSH_PASSWORD}"  # Use environment variable
+    sudo_password: "${SUDO_PASSWORD}"
+  # - name: "Server 2"
+  #   host: "192.168.1.101"
+  #   port: 22
+  #   username: "admin"
+  #   ssh_key_path: "~/.ssh/id_rsa"
+
+monitoring:
+  refresh_interval: 1  # 监控刷新间隔（秒）
+  gpu_refresh_interval: 2  # GPU监控刷新间隔（秒）
+  custom_commands:
+  - name: "Disk Usage Check"
+    command: "df -h | grep -E '^/dev/' | awk '{print $5 \" \" $1 \" \" $6}'"
+    enabled: true
+    interval: 60
+  - name: "Load Average"
+    command: "uptime | awk -F'load average:' '{print $2}'"
+    enabled: true
+    interval: 30
+  - name: "Top Memory Process"
+    command: "ps aux --sort=-%mem | head -n 2 | tail -n 1 | awk '{print $4 \"% \" $11}'"
+    enabled: true
+    interval: 60
+ollama:
+  enabled: true
+  endpoint: "http://133.238.128.175:51434/"  # 本地Ollama端点，如果需要的话

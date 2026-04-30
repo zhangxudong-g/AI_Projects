@@ -1,0 +1,306 @@
+{
+  "identifier": {
+    "name": "ZLBSKCALKWFUTU",
+    "type": "PROCEDURE",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "NGENKA_KBN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NTSUCHI_NO",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NNENDO",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NNENDO_BUN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NSHORIBI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NDANTAI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NSETAI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NJIKKOU_KBN",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NFUTU_TUKI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    },
+    {
+      "name": "NTOKU_TUKI",
+      "type": "NUMBER",
+      "direction": "IN",
+      "description": ""
+    }
+  ],
+  "file_type": "PROCEDURE",
+  "constants": [
+    {
+      "name": "c_NOK",
+      "type": "NUMBER(1)",
+      "value": "0"
+    },
+    {
+      "name": "c_NERR",
+      "type": "NUMBER(1)",
+      "value": "1"
+    },
+    {
+      "name": "c_NSTEPNO",
+      "type": "NUMBER",
+      "value": "99"
+    },
+    {
+      "name": "c_NKAMOKU_CD",
+      "type": "NUMBER(3)",
+      "value": "15"
+    },
+    {
+      "name": "c_NKAMOKUS_FUTU",
+      "type": "NUMBER(2)",
+      "value": "1"
+    },
+    {
+      "name": "c_NKAMOKUS_TOKU",
+      "type": "NUMBER(2)",
+      "value": "2"
+    },
+    {
+      "name": "c_NHASU_1",
+      "type": "NUMBER",
+      "value": "-3"
+    },
+    {
+      "name": "c_NHASU_2",
+      "type": "NUMBER",
+      "value": "-2"
+    },
+    {
+      "name": "c_NHASU_3",
+      "type": "NUMBER",
+      "value": "0"
+    },
+    {
+      "name": "c_NHASU_10",
+      "type": "NUMBER",
+      "value": "-1"
+    },
+    {
+      "name": "c_NHASU_KBN_1",
+      "type": "NUMBER",
+      "value": "0"
+    },
+    {
+      "name": "c_NHASU_KBN_2",
+      "type": "NUMBER",
+      "value": "1"
+    },
+    {
+      "name": "c_NHASU_KBN_3",
+      "type": "NUMBER",
+      "value": "2"
+    },
+    {
+      "name": "c_NHASU_KBN_10",
+      "type": "NUMBER",
+      "value": "3"
+    },
+    {
+      "name": "c_NMODE_ZEN",
+      "type": "NUMBER(1)",
+      "value": "0"
+    },
+    {
+      "name": "c_NMODE_TAI",
+      "type": "NUMBER(1)",
+      "value": "1"
+    },
+    {
+      "name": "c_NBATCH_H",
+      "type": "NUMBER(1)",
+      "value": "0"
+    },
+    {
+      "name": "c_NBATCH_G",
+      "type": "NUMBER(1)",
+      "value": "1"
+    },
+    {
+      "name": "c_NONL_CALZEI",
+      "type": "NUMBER(1)",
+      "value": "2"
+    },
+    {
+      "name": "c_NONL_SOKUJI",
+      "type": "NUMBER(1)",
+      "value": "9"
+    }
+  ],
+  "variables": [
+    {
+      "name": "OF",
+      "type": "NUMBER"
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER"
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER"
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER"
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER"
+    },
+    {
+      "name": "OF",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlRTN",
+      "type": "NUMBER"
+    },
+    {
+      "name": "BlRTN",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "VlMSG",
+      "type": "NVARCHAR2"
+    },
+    {
+      "name": "NlTSUCHI_NO",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlNENZEI",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlGENMEN",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlTAI_NENZEI",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlTAI_GENMEN",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlKAI_NENZEI",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlKAI_TAI_NENZEI",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlNENZEI_SV",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlNENZEI_HAN",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlSAGAKU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlZEN_SAGAKU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlZENTAI_SAGAKU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlTAI_SAGAKU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlKAI_SAGAKU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlKAI_TAI_SAGAKU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlLOOP_FLG",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlCUT_COL",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlKIWARIDANTAI_CD",
+      "type": "NUMBER"
+    },
+    {
+      "name": "NlZO_FLG",
+      "type": "NUMBER"
+    },
+    {
+      "name": "MIKIWARIHOUHOU",
+      "type": "NUMBER"
+    },
+    {
+      "name": "MIKIJYUN_KIWARIGK",
+      "type": "NUMBER"
+    }
+  ],
+  "sql_summary": {
+    "SELECT_count": 0,
+    "INSERT_count": 0,
+    "UPDATE_count": 0,
+    "DELETE_count": 0
+  },
+  "cursors": {
+    "declarations": [],
+    "usages": []
+  },
+  "execution_flow_summary": "[{'type': 'IF_CONDITION', 'condition': 'MINOKI(IDX) = 1'}]",
+  "exception_handling": {}
+}

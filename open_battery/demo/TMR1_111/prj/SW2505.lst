@@ -1,0 +1,171 @@
+C51 COMPILER V9.59.0.0   SW2505                                                            05/21/2025 11:19:23 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE SW2505
+OBJECT MODULE PLACED IN .\SW2505.obj
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE ..\..\..\SW2505\SW2505.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(
+                    -../../../Library/Include;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC;..\..\..\DELAY;..\..\..
+                    -\CONFIG;..\..\..\SW2505) DEBUG PRINT(.\SW2505.lst) OBJECT(.\SW2505.obj)
+
+line level    source
+
+   1          #include "SW2505.h"
+   2          #include "iic_1.h"
+   3          #include "iic_2.h"
+   4          
+   5          
+   6          void SW2505_1_SET_PD_20V(unsigned  char value)
+   7          {
+   8   1              IIC1_WRITE(0x41,value);
+   9   1              IIC1_WRITE(0x0D,0X08);
+  10   1      }
+  11          
+  12          void SW2505_1_SET_POWER_140W(void)
+  13          {
+  14   1              SW2505_1_SET_PD_20V(5000/50);  // 5A
+  15   1      
+  16   1      
+  17   1      }
+  18          
+  19          void SW2505_1_SET_POWER_100W(void)
+  20          {
+  21   1              SW2505_1_SET_PD_20V(5000/50);  // 5A
+  22   1      
+  23   1      }
+  24          
+  25          void SW2505_1_SET_POWER_45W(void)
+  26          {
+  27   1              SW2505_1_SET_PD_20V(2250/50);  // 2.25A
+  28   1      
+  29   1      }
+  30          
+  31          
+  32          void SW2505_1_Init(void)
+  33          {
+  34   1              unsigned  char  value;
+  35   1              value = IIC1_READ(0x0E);      
+  36   1              value &=~(1<<4);           // FB调压
+  37   1              value &=~(1<<3);           // FB调压
+  38   1              value &=~(1<<5);           // 运行模式配置
+  39   1              value &=~(1<<6);           // 运行模式配置        0：TYPEC SRC
+  40   1              value &=~(1<<7);           //Charger IBUS 检流电阻配置  10mr
+  41   1              IIC1_WRITE(0x0E,value);
+  42   1              
+  43   1              value = IIC1_READ(0x12);      
+  44   1              value &=~(1<<5);           // 
+  45   1              value &=~(1<<6);           // 
+  46   1              value &=~(1<<7);           // 电池两节
+  47   1              value |=(2<<5);
+  48   1              IIC1_WRITE(0x12,value);
+  49   1              
+  50   1              
+  51   1              value = IIC1_READ(0x26);      
+  52   1              value &=~(1<<3);           // DPDM 协议 SRC 角色下支持的最大输出功率
+  53   1              value &=~(1<<4);           // DPDM 协议 SRC 角色下支持的最大输出功率   0：18W
+C51 COMPILER V9.59.0.0   SW2505                                                            05/21/2025 11:19:23 PAGE 2   
+
+  54   1              IIC1_WRITE(0x26,value); 
+  55   1      
+  56   1      
+  57   1      }
+  58          
+  59          unsigned char SW2505_1_Get_Port_State(void)
+  60          {
+  61   1              unsigned char port;
+  62   1              port = IIC1_READ(0x04);
+  63   1              if((port & 0XC0) != 0XC0)
+  64   1              {
+  65   2                      return 1;
+  66   2              }
+  67   1              return 0;
+  68   1      }
+  69          
+  70          
+  71          
+  72          void SW2505_2_SET_PD_20V(unsigned  char value)
+  73          {
+  74   1              
+  75   1              IIC2_WRITE(0x41,value);
+  76   1              
+  77   1              IIC2_WRITE(0x0D,0X08);
+  78   1              
+  79   1      }
+  80          
+  81          void SW2505_2_SET_POWER_140W(void)
+  82          {
+  83   1              SW2505_2_SET_PD_20V(5000/50);  // 5A
+  84   1      
+  85   1      
+  86   1      }
+  87          
+  88          void SW2505_2_SET_POWER_100W(void)
+  89          {
+  90   1              SW2505_2_SET_PD_20V(5000/50);  // 5A
+  91   1      
+  92   1      }
+  93          
+  94          void SW2505_2_SET_POWER_45W(void)
+  95          {
+  96   1              SW2505_2_SET_PD_20V(2250/50);  // 2.25A
+  97   1      
+  98   1      }
+  99          
+ 100          void SW2505_2_Init(void)
+ 101          {
+ 102   1              unsigned  char  value;
+ 103   1              value = IIC2_READ(0x0E);      
+ 104   1              value &=~(1<<4);           // FB调压
+ 105   1              value &=~(1<<3);           // FB调压
+ 106   1              value &=~(1<<5);           // 运行模式配置
+ 107   1              value &=~(1<<6);           // 运行模式配置        0：TYPEC SRC
+ 108   1              value &=~(1<<7);           //Charger IBUS 检流电阻配置  10mr
+ 109   1              IIC2_WRITE(0x0E,value);
+ 110   1              
+ 111   1              value = IIC2_READ(0x12);      
+ 112   1              value &=~(1<<5);           // 
+ 113   1              value &=~(1<<6);           // 
+ 114   1              value &=~(1<<7);           //
+ 115   1              value |=(2<<5);            // 电池两节
+C51 COMPILER V9.59.0.0   SW2505                                                            05/21/2025 11:19:23 PAGE 3   
+
+ 116   1              IIC2_WRITE(0x12,value);
+ 117   1              
+ 118   1              
+ 119   1              value = IIC2_READ(0x26);      
+ 120   1              value &=~(1<<3);           // DPDM 协议 SRC 角色下支持的最大输出功率
+ 121   1              value &=~(1<<4);           // DPDM 协议 SRC 角色下支持的最大输出功率   0：18W
+ 122   1              IIC2_WRITE(0x26,value); 
+ 123   1      
+ 124   1      }
+ 125          
+ 126          
+ 127          unsigned char SW2505_2_Get_Port_State(void)
+ 128          {
+ 129   1              unsigned char port;
+ 130   1              port = IIC2_READ(0x04);
+ 131   1              if((port & 0XC0) != 0XC0)
+ 132   1              {
+ 133   2                      return 1;
+ 134   2              }
+ 135   1              return 0;
+ 136   1      }
+ 137          
+ 138          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    230    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

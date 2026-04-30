@@ -1,0 +1,14 @@
+".\STARTUP_F06.obj",
+".\main.obj",
+".\int.obj",
+".\user_com.obj",
+".\iic_2.obj",
+".\delay.obj",
+".\config.obj",
+".\iic_1.obj",
+".\iic_3.obj",
+".\SW6301.obj",
+".\SW6303.obj" 
+TO "io_test" 
+
+REMOVEUNUSED 

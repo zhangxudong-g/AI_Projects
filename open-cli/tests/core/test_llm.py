@@ -2,17 +2,16 @@ import pytest
 from core.llm import LLMClient, LLMError
 
 def test_llm_client_initialization():
-    client = LLMClient()
-    assert client.model == "MiniMax-Text-01"
+    config = {"anthropic_api_key": "test-key", "minimax_model": "MiniMax-M2.7", "anthropic_base_url": "https://api.minimaxi.com/anthropic"}
+    client = LLMClient(config=config)
+    assert client.model == "MiniMax-M2.7"
 
-def test_llm_send_message():
-    client = LLMClient()
-    response = client.send([{"role": "user", "content": "Hello"}])
-    assert isinstance(response, str)
-    assert len(response) > 0
+def test_llm_client_default_base_url():
+    config = {"anthropic_api_key": "test-key", "minimax_model": "MiniMax-M2.7", "anthropic_base_url": "https://api.minimaxi.com/anthropic"}
+    client = LLMClient(config=config)
+    assert client.base_url == "https://api.minimaxi.com/anthropic"
 
-def test_llm_error_on_missing_api_key(monkeypatch):
-    monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
-    client = LLMClient()
+def test_llm_error_on_missing_api_key():
+    config = {"anthropic_api_key": "", "minimax_model": "MiniMax-M2.7", "anthropic_base_url": "https://api.minimaxi.com/anthropic"}
     with pytest.raises(LLMError):
-        client.send([{"role": "user", "content": "test"}])
+        LLMClient(config=config)

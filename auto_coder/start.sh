@@ -28,4 +28,4 @@ echo "[信息] 启动服务..."
 echo "访问 http://localhost:8000 查看 API 文档"
 echo
 
-python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001

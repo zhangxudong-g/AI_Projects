@@ -1,0 +1,12 @@
+{
+  "completed": [
+    "GKBEKENSU_LIST.SQL",
+    "GKBFKGZSHNT.SQL",
+    "GKBEKENSU_RECORD.SQL",
+    "GKBFKHMCTRL.SQL",
+    "GKBFKGKNCDHK.SQL"
+  ],
+  "failed": [],
+  "total_processed": 5,
+  "timestamp": "2026-02-09T14:14:50.595965"
+}

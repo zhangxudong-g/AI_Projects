@@ -1,0 +1,30 @@
+C51 COMPILER V9.59.0.0   KEY                                                               05/14/2025 11:03:36 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN KEY.OBJ
+COMPILER INVOKED BY: D:\Software\keil_c51\C51\BIN\C51.EXE KEY.c OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(../../../Library/In
+                    -clude;../../../Library/Source;../../../2_CMSIS;../../../user_com;..\..\..\IIC) DEBUG
+
+line level    source
+
+   1          #include "KEY.h"
+   2          #include "IIC.h"
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

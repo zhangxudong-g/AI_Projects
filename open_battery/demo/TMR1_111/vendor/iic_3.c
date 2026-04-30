@@ -1,0 +1,219 @@
+#include "iic_3.h"
+#include "config.h"
+ 
+ 
+ 
+ 
+ 
+static void IIC3_Start(void)
+{
+    IIC3_SCL_Out();
+    IIC3_SDA_Out();   //Set SDA Output
+    IIC3_SDA = 1;   //SDA HIGH
+    IIC3_SCL = 1;   //SCL HIGH  
+    DelayUs(3);
+    
+    IIC3_SDA = 0;   //SDA LOW //��SCL�ߵ�ƽʱ����SDA
+    DelayUs(3);
+    IIC3_SCL = 0;     //SCL LOW //������ʼ�ź�֮��͸�����SCL����ֹ���ݴ���
+  }
+ 
+static void IIC3_Stop(void)
+{
+    IIC3_SDA_Out();   //Set SDA Output
+    IIC3_SDA = 0;   //SDA LOW
+    IIC3_SCL = 1;   //SCL HIGH
+    DelayUs(3);
+    IIC3_SDA = 1;   //SDA HIGH  ��SCL�ߵ�ƽʱ����SDA
+  }
+ 
+ 
+/*-------------------------------------------------
+*  ��������IIC3_Wait_Ack
+*  ���ܣ�  �ȴ�Ӧ���źŵ���
+*  ���룺  ��
+*  �����  ����ֵ��1������Ӧ��ʧ��
+*                  0������Ӧ��ɹ�
+--------------------------------------------------*/
+ 
+static unsigned char IIC3_Wait_Ack(void)
+{
+    unsigned char i=0;   
+      IIC3_SDA=1;  
+    IIC3_SDA_In();               //SDA����Ϊ����  
+    
+    DelayUs(3);    
+    IIC3_SCL=1;
+    DelayUs(3);  
+    while(IIC3_SDA)
+    {
+      i++;
+      if(i>250) //�ȴ���ʱ
+      {
+        IIC3_Stop();
+        return 1;
+      }
+    }
+    IIC3_SCL=0;            //ʱ�����0     
+    return 0;  
+  } 
+ 
+/*-------------------------------------------------
+*  ��������IIC3_Ack
+*  ���ܣ�  ����ACKӦ��
+*  ���룺  ��
+*  �����  ��
+--------------------------------------------------*/
+//static void IIC3_Ack(void)
+//{
+//  IIC3_SCL=0;
+//  IIC3_SDA_Out();   //Set SDA Output
+//  IIC3_SDA=0;
+//  DelayUs(3); 
+//  IIC3_SCL=1;
+//  DelayUs(3); 
+//  IIC3_SCL=0;
+//}
+ 
+/*-------------------------------------------------
+*  ��������IIC3_NAck
+*  ���ܣ�  ������ACKӦ��
+*  ���룺  ��
+*  �����  ��
+--------------------------------------------------*/     
+static void IIC3_NAck(void)
+{
+    IIC3_SCL=0;
+    IIC3_SDA_Out();   //Set SDA Output
+    IIC3_SDA=1;
+    DelayUs(3); 
+    IIC3_SCL=1;
+    DelayUs(3); 
+    IIC3_SCL=0;
+  } 
+ 
+/*-------------------------------------------------
+*  ��������IIC3_Send_Byte
+*  ���ܣ�  IIC����һ���ֽ�
+*  ���룺  д��Ҫ���͵�һ���ֽ�����txd
+*  �����  ��
+--------------------------------------------------*/ 
+ 
+static void IIC3_Send_Byte(unsigned char txd)
+{
+    unsigned char i;
+    IIC3_SDA_Out();   //Set SDA Output 
+      IIC3_SCL=0;            //����ʱ�ӿ�ʼ���ݴ���
+      for(i=0;i<8;i++)
+      {              
+      if(txd&0x80)
+        IIC3_SDA=1;
+      else
+        IIC3_SDA=0;
+      txd<<=1;    
+      DelayUs(3);         
+      IIC3_SCL=1;
+      DelayUs(3); 
+      IIC3_SCL=0; 
+      DelayUs(3);
+      }  
+  } 
+ 
+/*-------------------------------------------------
+*  ��������IIC3_Read_Byte
+*  ���ܣ�  IIC��һ���ֽ�
+*  ���룺  ��
+*  �����  �����洢����������ݲ�����receive
+--------------------------------------------------*/
+ 
+static unsigned char IIC3_Read_Byte(void)
+{
+    unsigned char i;
+    unsigned char dat=0;
+    IIC3_SDA_In();               //SDA����Ϊ����  
+      for(i=0;i<8;i++ )
+    {
+          IIC3_SCL=0; 
+          DelayUs(3); 
+        IIC3_SCL=1;
+          dat<<=1;
+          if(IIC3_SDA)dat++;   
+      DelayUs(3); 
+      }          
+      IIC3_NAck();           //����nACK
+    
+      return dat;
+  }
+ 
+ 
+void IIC3_WRITE(void)
+{
+    unsigned char i=0;
+  IIC1_WRITE_Begin:
+    IIC3_Start();
+    IIC3_Send_Byte(IIC3_ADDRESS0<<1);
+    if(IIC3_Wait_Ack() && i<2)
+      {   
+      i++;
+      goto IIC1_WRITE_Begin; 
+      }
+  
+    IIC3_Send_Byte(IIC_ADDRESS);
+    if(IIC3_Wait_Ack() && i<2)
+      {
+          i++;
+      goto IIC1_WRITE_Begin; 
+      }
+  
+    IIC3_Send_Byte(IIC_DAT);
+    if(IIC3_Wait_Ack() && i<2)
+      {
+          i++;
+      goto IIC1_WRITE_Begin; 
+      }
+  
+    IIC3_Stop();  
+  }
+ 
+void IIC3_READ(void)
+{
+    unsigned char i=0;
+  IIC1_READ_Begin:
+    IIC3_Start();
+    IIC3_Send_Byte(IIC3_ADDRESS0<<1);
+    if(IIC3_Wait_Ack() && i<2)
+      {
+      i++;
+      goto IIC1_READ_Begin;
+      }
+    IIC3_Send_Byte(IIC_ADDRESS);        //��Ҫ�������ݵ�ַ
+    if(IIC3_Wait_Ack() && i<2)
+      {
+      i++;
+      goto IIC1_READ_Begin;
+      }
+    IIC3_Start();
+    IIC3_Send_Byte((IIC3_ADDRESS0<<1)|0x01);
+    if(IIC3_Wait_Ack() && i<2)
+      {
+      i++;
+      goto IIC1_READ_Begin;
+      }
+    IIC_DAT = IIC3_Read_Byte();
+    IIC3_Stop();    
+  
+  }
+ 
+CODE SIZE        =    478    ----
+CONSTANT SIZE    =   ----    ----
+XDATA SIZE       =   ----    ----
+PDATA SIZE       =   ----    ----
+DATA SIZE        =   ----       7
+IDATA SIZE       =   ----    ----
+BIT SIZE         =   ----    ----
+EDATA SIZE       =   ----    ----
+HDATA SIZE       =   ----    ----
+XDATA CONST SIZE =   ----    ----
+FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
