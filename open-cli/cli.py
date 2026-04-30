@@ -108,11 +108,18 @@ class REPL:
         global TOOL_MAP
         TOOL_MAP = {
             "read_file": self.file_tool.read_file,
+            "read_pdf": self.file_tool.read_pdf,
+            "read_image": self.file_tool.read_image,
             "write_file": self.file_tool.write_file,
             "list_directory": self.file_tool.list_directory_formatted,
+            "fetch_url": self.file_tool.fetch_url,
+            "grep_search": self.file_tool.grep_search,
+            "format_json": self.file_tool.format_json,
             "run_command": self._run_command,
             "git_status": self.git_tool.status,
             "git_commit": self.git_tool.commit,
+            "git_log": self.git_tool.log_formatted,
+            "git_diff": self.git_tool.diff,
         }
 
         self.session_manager = SessionManager()

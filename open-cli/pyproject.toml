@@ -31,6 +31,11 @@ dependencies = [
     "markdown>=3.0",
     "Pygments>=2.0",
     "blessed>=1.0",
+    "pymupdf>=1.0",
+    "requests>=2.0",
+    "beautifulsoup4>=4.0",
+    "pillow>=10.0",
+    "pytesseract>=0.3",
 ]
 
 [project.optional-dependencies]

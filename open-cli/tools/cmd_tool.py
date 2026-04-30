@@ -1,5 +1,7 @@
 import subprocess
 import shlex
+import sys
+import locale
 from typing import Dict, Any, List
 
 class CmdError(Exception):
@@ -47,19 +49,32 @@ class CmdTool:
             }
 
         try:
-            result = subprocess.run(
-                command,
-                shell=True,
-                capture_output=True,
-                text=True,
-                cwd=cwd,
-                timeout=30,
-            )
+            if sys.platform == "win32":
+                result = subprocess.run(
+                    command,
+                    shell=True,
+                    capture_output=True,
+                    timeout=30,
+                    cwd=cwd,
+                )
+                stdout = result.stdout.decode("gbk", errors="replace") if result.stdout else ""
+                stderr = result.stderr.decode("gbk", errors="replace") if result.stderr else ""
+            else:
+                result = subprocess.run(
+                    command,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    cwd=cwd,
+                    timeout=30,
+                )
+                stdout = result.stdout
+                stderr = result.stderr
             return {
                 "success": result.returncode == 0,
                 "returncode": result.returncode,
-                "stdout": result.stdout,
-                "stderr": result.stderr,
+                "stdout": stdout,
+                "stderr": stderr,
                 "trusted": trusted,
             }
         except subprocess.TimeoutExpired:

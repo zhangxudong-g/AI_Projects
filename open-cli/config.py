@@ -6,7 +6,7 @@ DEFAULT_CONFIG = {
     "anthropic_base_url": "https://api.minimaxi.com/anthropic",
     "minimax_model": "MiniMax-M2.7",
     "workspace": "opencli",
-    "trusted_commands": ["git", "python", "pip", "npm", "node", "pytest"],
+    "trusted_commands": ["git", "python", "pip", "npm", "node", "pytest", "dir", "ls", "cat", "type", "pwd", "mkdir", "rm", "cp", "mv", "find", "grep"],
 }
 
 def load_config():

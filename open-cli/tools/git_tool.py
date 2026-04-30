@@ -28,11 +28,16 @@ class GitTool:
         return {"branch": branch, "files": files}
 
     def diff(self, file: str = None) -> str:
-        args = ["diff"]
+        args = ["diff", "--stat"]
         if file:
             args.append(file)
         result = self._run_git(args)
-        return result.stdout
+
+        if not result.stdout.strip():
+            return "No changes."
+
+        diff_result = self._run_git(args + ["--patch"])
+        return diff_result.stdout[:3000] if diff_result.stdout else result.stdout
 
     def diff_staged(self, file: str = None) -> str:
         args = ["diff", "--cached"]
@@ -58,20 +63,28 @@ class GitTool:
             return {"success": False, "error": result.stderr}
         return {"success": True}
 
-    def log(self, n: int = 10) -> List[Dict[str, str]]:
+    def log(self, n: int = 10) -> str:
+        result = self._run_git(["log", f"-{n}", "--pretty=format:%h %ad %s (%an)", "--date=iso"])
+        if not result.stdout.strip():
+            return "No commits found."
+        return result.stdout
+
+    def log_formatted(self, n: int = 10) -> str:
+        """Return formatted git log with details."""
         result = self._run_git(["log", f"-{n}", "--pretty=format:%H|%s|%an|%ad", "--date=iso"])
-        commits = []
+        lines = []
         for line in result.stdout.strip().split("\n"):
             if line:
                 parts = line.split("|")
                 if len(parts) >= 4:
-                    commits.append({
-                        "hash": parts[0],
-                        "subject": parts[1],
-                        "author": parts[2],
-                        "date": parts[3],
-                    })
-        return commits
+                    short_hash = parts[0][:7]
+                    subject = parts[1]
+                    author = parts[2]
+                    date = parts[3][:10]
+                    lines.append(f"{short_hash} | {date} | {subject} | {author}")
+        if not lines:
+            return "No commits found."
+        return "\n".join(lines)
 
     def branch_list(self) -> List[str]:
         result = self._run_git(["branch"])
