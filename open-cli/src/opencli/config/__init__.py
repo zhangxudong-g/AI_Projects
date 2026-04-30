@@ -6,7 +6,6 @@ from .schema import (
     UIConfig,
 )
 from .loader import load_config
-from .validator import validate_config
 
 __all__ = [
     "OpenCLIConfig",
@@ -15,5 +14,4 @@ __all__ = [
     "TrustedFolderConfig",
     "UIConfig",
     "load_config",
-    "validate_config",
 ]
