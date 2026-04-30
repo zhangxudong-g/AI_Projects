@@ -72,7 +72,7 @@ Type 'exit' or 'quit' to end session."""
             return "Goodbye!"
 
         if not self.llm:
-            return "LLM not configured. Please set MINIMAX_API_KEY."
+            return "LLM not configured. Please set ANTHROPIC_API_KEY."
 
         self.session["messages"].append({"role": "user", "content": user_input})
 
@@ -81,13 +81,14 @@ Type 'exit' or 'quit' to end session."""
         except LLMError as e:
             return f"LLM error: {e}"
 
-        tool_calls = response.get("choices", [{}])[0].get("message", {}).get("tool_calls", [])
+        content_blocks = response.content
+        tool_uses = [block for block in content_blocks if block.type == "tool_use"]
 
-        if tool_calls:
+        if tool_uses:
             results = []
-            for call in tool_calls:
-                func_name = call["function"]["name"]
-                args = json.loads(call["function"]["arguments"])
+            for block in tool_uses:
+                func_name = block.name
+                args = block.input
                 if func_name in TOOL_MAP:
                     try:
                         result = TOOL_MAP[func_name](**args)
@@ -97,11 +98,25 @@ Type 'exit' or 'quit' to end session."""
                 else:
                     results.append({"tool": func_name, "error": f"Unknown tool: {func_name}"})
 
-            self.session["messages"].append(response["choices"][0]["message"])
-            self.session["messages"].append({
-                "role": "tool",
-                "content": json.dumps(results),
-            })
+            assistant_content = []
+            for block in content_blocks:
+                if block.type == "text":
+                    assistant_content.append({"type": "text", "text": block.text})
+                elif block.type == "tool_use":
+                    assistant_content.append({"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
+
+            self.session["messages"].append({"role": "assistant", "content": assistant_content})
+
+            tool_result_content = []
+            for i, result_item in enumerate(results):
+                tool_id = tool_uses[i].id if i < len(tool_uses) else f"tool_{i}"
+                tool_result_content.append({
+                    "type": "tool_result",
+                    "tool_use_id": tool_id,
+                    "content": json.dumps(result_item)
+                })
+
+            self.session["messages"].append({"role": "user", "content": tool_result_content})
 
             try:
                 final_response = self.llm.send(self.session["messages"])
@@ -112,10 +127,14 @@ Type 'exit' or 'quit' to end session."""
             self.session_manager.save_session(self.session)
             return final_response
 
-        response_text = response["choices"][0]["message"]["content"]
-        self.session["messages"].append({"role": "assistant", "content": response_text})
-        self.session_manager.save_session(self.session)
-        return response_text
+        text_blocks = [block for block in content_blocks if block.type == "text"]
+        if text_blocks:
+            response_text = text_blocks[0].text
+            self.session["messages"].append({"role": "assistant", "content": response_text})
+            self.session_manager.save_session(self.session)
+            return response_text
+
+        return "No response content"
 
     def run(self):
         self.running = True
