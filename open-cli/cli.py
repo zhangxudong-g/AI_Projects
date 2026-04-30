@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import signal
 import sys
 import json
 import os
@@ -295,9 +296,20 @@ class REPL:
     def run(self):
         self.running = True
         print(self.get_welcome())
+
+        def handle_ctrl_c(signum, frame):
+            print(f"\n{COLORS['yellow']}Interrupted. Use 'exit' to quit.{COLORS['reset']}")
+
+        signal.signal(signal.SIGINT, handle_ctrl_c)
+
         while self.running:
             try:
-                user_input = input(f"\n{COLORS['green']}>{COLORS['reset']} ")
+                import sys
+                if sys.platform == 'win32':
+                    user_input = input(f"\n{COLORS['green']}❯{COLORS['reset']} ")
+                else:
+                    user_input = self._read_line()
+
                 if not user_input.strip():
                     continue
                 if READLINE_AVAILABLE:
@@ -311,6 +323,40 @@ class REPL:
             except EOFError:
                 break
         print(f"{COLORS['cyan']}Session ended.{COLORS['reset']}")
+
+    def _read_line(self) -> str:
+        """Read line with basic key handling."""
+        line = ""
+        while True:
+            char = sys.stdin.read(1)
+            if char == '\n' or char == '\r':
+                print(char, end='')
+                break
+            elif char == '\x03':  # Ctrl+C
+                raise KeyboardInterrupt
+            elif char == '\x0c':  # Ctrl+L
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(self.get_welcome(), end='')
+            elif char == '\x15':  # Ctrl+U
+                print("\r" + " " * 50 + "\r", end='')
+                line = ""
+            elif char == '\x12':  # Ctrl+R
+                print("\n[Search history...] ", end='')
+                search = input()
+                matches = [h for h in self.history if search in h]
+                if matches:
+                    print(f"Found: {matches[0]}")
+                    line = matches[0]
+                else:
+                    print("No matches")
+            elif char == '\x7f':  # Backspace
+                if line:
+                    line = line[:-1]
+                    print('\b \b', end='', flush=True)
+            elif ord(char) >= 32:  # Printable characters
+                line += char
+                print(char, end='', flush=True)
+        return line
 
 def main():
     session_id = None
