@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, Any, List
 
@@ -10,12 +11,25 @@ class GitTool:
         self.repo_root = repo_root or Path.cwd()
 
     def _run_git(self, args: List[str]) -> subprocess.CompletedProcess:
-        result = subprocess.run(
-            ["git"] + args,
-            cwd=self.repo_root,
-            capture_output=True,
-            text=True,
-        )
+        if sys.platform == "win32":
+            result = subprocess.run(
+                ["git"] + args,
+                cwd=self.repo_root,
+                capture_output=True,
+                timeout=30,
+            )
+            stdout = result.stdout.decode("gbk", errors="replace") if result.stdout else ""
+            stderr = result.stderr.decode("gbk", errors="replace") if result.stderr else ""
+            result.stdout = stdout
+            result.stderr = stderr
+        else:
+            result = subprocess.run(
+                ["git"] + args,
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
         return result
 
     def status(self) -> Dict[str, Any]:
@@ -65,15 +79,17 @@ class GitTool:
 
     def log(self, n: int = 10) -> str:
         result = self._run_git(["log", f"-{n}", "--pretty=format:%h %ad %s (%an)", "--date=iso"])
-        if not result.stdout.strip():
+        stdout = result.stdout or ""
+        if not stdout.strip():
             return "No commits found."
-        return result.stdout
+        return stdout
 
     def log_formatted(self, n: int = 10) -> str:
         """Return formatted git log with details."""
         result = self._run_git(["log", f"-{n}", "--pretty=format:%H|%s|%an|%ad", "--date=iso"])
         lines = []
-        for line in result.stdout.strip().split("\n"):
+        stdout = result.stdout or ""
+        for line in stdout.strip().split("\n"):
             if line:
                 parts = line.split("|")
                 if len(parts) >= 4:
