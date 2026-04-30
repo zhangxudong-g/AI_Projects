@@ -81,7 +81,7 @@ Type 'exit' or 'quit' to end session."""
         except LLMError as e:
             return f"LLM error: {e}"
 
-        content_blocks = response.content
+        content_blocks = [block for block in response.content if block.type != "thinking"]
         tool_uses = [block for block in content_blocks if block.type == "tool_use"]
 
         if tool_uses:
