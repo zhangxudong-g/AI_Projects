@@ -9,6 +9,7 @@ from core.llm import LLMClient, LLMError, TOOL_SCHEMAS
 from core.session import SessionManager
 from core.security import SecurityBoundary
 from core.renderer import MarkdownRenderer
+from core.status import StatusBar
 from core.selector import Selector
 from tools.file_tool import FileTool
 from tools.git_tool import GitTool
@@ -91,6 +92,13 @@ class REPL:
             print(f"{COLORS['yellow']}Warning: LLM not configured: {e}{COLORS['reset']}")
             self.llm = None
 
+        self.status_bar = StatusBar()
+
+        if self.llm:
+            self.status_bar.set_api_status(True)
+        else:
+            self.status_bar.set_api_status(False)
+
         workspace_path = Path.cwd()
         security = SecurityBoundary(workspace_path)
         self.file_tool = FileTool(security)
@@ -112,6 +120,7 @@ class REPL:
         self.prompt_builder = PromptBuilder(self.session["id"])
         self.history = []
         self.renderer = MarkdownRenderer()
+        self.status_bar = StatusBar()
 
         if READLINE_AVAILABLE:
             readline.parse_and_bind("tab: complete")
@@ -267,6 +276,7 @@ class REPL:
                 elif response_text.strip():
                     rendered = self.renderer.render(response_text)
                     print(rendered)
+                print(self.status_bar.render())
             except Exception as e:
                 print()
                 return f"{COLORS['red']}Stream error: {type(e).__name__}: {e}{COLORS['reset']}"
@@ -290,6 +300,7 @@ class REPL:
                 elif response_text.strip():
                     rendered = self.renderer.render(response_text)
                     print(rendered)
+                print(self.status_bar.render())
             except Exception as e:
                 print()
                 return f"{COLORS['red']}Stream error: {type(e).__name__}: {e}{COLORS['reset']}"
