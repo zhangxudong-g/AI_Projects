@@ -9,6 +9,7 @@ from core.llm import LLMClient, LLMError, TOOL_SCHEMAS
 from core.session import SessionManager
 from core.security import SecurityBoundary
 from core.renderer import MarkdownRenderer
+from core.selector import Selector
 from tools.file_tool import FileTool
 from tools.git_tool import GitTool
 from tools.cmd_tool import CmdTool
@@ -117,6 +118,11 @@ class REPL:
 
     def _colorize(self, text, color):
         return f"{color}{text}{COLORS['reset']}"
+
+    def interactive_select(self, options: list, prompt: str = "选择:") -> str:
+        """Show interactive selector and return selected option."""
+        selector = Selector(options, prompt)
+        return selector.run()
 
     def should_confirm(self, action: str) -> bool:
         dangerous = ["delete", "remove", "rm", "unlink", "format", "drop"]
