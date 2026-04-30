@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+import sys
+
+def main():
+    print("open-cli - AI-assisted programming CLI")
+    print("Usage: python cli.py [--session SESSION_ID]")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
