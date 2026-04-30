@@ -242,7 +242,10 @@ class REPL:
 
                 print(f"{COLORS['cyan']}[{func_name}]{COLORS['reset']}")
                 if print_result:
-                    print(print_result)
+                    try:
+                        print(print_result)
+                    except UnicodeEncodeError:
+                        print(print_result.encode('ascii', 'replace').decode('ascii'))
 
             assistant_content = []
             for block in content_blocks:
