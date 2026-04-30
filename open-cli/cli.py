@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 import sys
 from core.llm import LLMClient
+from core.session import SessionManager
 from config import load_config
 
 class REPL:
-    def __init__(self):
+    def __init__(self, session_id=None):
         self.config = load_config()
         self.llm = LLMClient(self.config)
         self.running = False
-        self.session_id = None
+        self.session_manager = SessionManager()
+        if session_id:
+            self.session = self.session_manager.load_session(session_id)
+            if not self.session:
+                self.session = self.session_manager.create_session()
+        else:
+            self.session = self.session_manager.create_session()
 
     def get_welcome(self) -> str:
         return "open-cli - AI-assisted programming CLI\nType 'exit' or 'quit' to end session."
@@ -18,8 +25,10 @@ class REPL:
             self.running = False
             return "Goodbye!"
 
-        messages = [{"role": "user", "content": user_input}]
-        response = self.llm.send(messages)
+        self.session["messages"].append({"role": "user", "content": user_input})
+        response = self.llm.send(self.session["messages"])
+        self.session["messages"].append({"role": "assistant", "content": response})
+        self.session_manager.save_session(self.session)
         return response
 
     def run(self):
@@ -46,8 +55,7 @@ def main():
         if idx + 1 < len(args):
             session_id = args[idx + 1]
 
-    repl = REPL()
-    repl.session_id = session_id
+    repl = REPL(session_id)
     repl.run()
     return 0
 
