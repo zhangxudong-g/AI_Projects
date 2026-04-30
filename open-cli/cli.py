@@ -40,8 +40,23 @@ class REPL:
         self.session_manager = SessionManager()
         self.session = self.session_manager.create_session()
 
+    def should_confirm(self, action: str) -> bool:
+        dangerous = ["delete", "remove", "rm", "unlink"]
+        return any(word in action.lower() for word in dangerous)
+
+    def confirm(self, message: str) -> bool:
+        response = input(f"{message} (yes/no): ").strip().lower()
+        return response in ("yes", "y")
+
     def _run_command(self, command: str):
         result = self.cmd_tool.execute(command, require_confirmation=True)
+        if result.get("requires_confirmation"):
+            if self.should_confirm(command):
+                if not self.confirm(f"Execute potentially dangerous command: {command}?"):
+                    return "Command cancelled"
+                result = self.cmd_tool.execute(command, require_confirmation=False)
+            else:
+                return f"Command not in trusted list: {command}"
         if result.get("requires_confirmation"):
             return f"Command requires confirmation: {command}"
         return f"Return code: {result.get('returncode')}\nOutput: {result.get('stdout', '')}"
