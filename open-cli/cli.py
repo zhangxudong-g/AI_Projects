@@ -245,7 +245,8 @@ class REPL:
                     try:
                         print(print_result)
                     except UnicodeEncodeError:
-                        print(print_result.encode('ascii', 'replace').decode('ascii'))
+                        safe = ''.join(c if ord(c) < 128 or c == '\n' else '?' for c in print_result)
+                        print(safe)
 
             assistant_content = []
             for block in content_blocks:
