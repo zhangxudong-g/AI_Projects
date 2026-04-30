@@ -1,14 +1,20 @@
-# Python
+# ===========================
+# Python (通用)
+# ===========================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-develop-eggs/
 dist/
 downloads/
 eggs/
+*.egg-info/
+*.egg
+venv/
+env/
+ENV/
 .eggs/
 lib/
 lib64/
@@ -16,24 +22,17 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/
+develop-eggs/
 .installed.cfg
-*.egg
 
-# Virtual Environments
-venv/
-env/
-ENV/
-chroma_env/
-
-# IDE
+# ===========================
+# IDE / OS
+# ===========================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
 Thumbs.db
 ehthumbs.db
@@ -41,81 +40,125 @@ Icon?
 .directory
 *.orig
 
-# Logs
+# ===========================
+# 日志和临时文件
+# ===========================
 *.log
 logs/
-
-# Environment variables
-.env
-.env.local
-.env.backup
-
-# Database - ignoring specific database files
-*.sqlite3
-*.db
-# But keeping database-related code/config files
-!config_example.yaml
-!config_docker_example.yaml
-!requirements.txt
-
-# Chroma specific
-.chroma/
-chroma_data/
-
-# Server monitor specific ignores
-server_monitor/__pycache__/
-server_monitor/*.db
-server_monitor/logs/
-server_monitor/.pytest_cache/
-server_monitor/config.yaml
-
-# Chroma viewer specific ignores
-chroma_viewer/chroma_env/
-chroma_viewer/test_chroma_db/
-chroma_viewer/test_new_db/
-chroma_viewer/chroma_web_viewer/__pycache__/
-
-# Temporary files
 tmp/
 temp/
 *.tmp
 *.temp
 
+# ===========================
+# 环境变量
+# ===========================
+.env
+.env.local
+.env.backup
 
-promptfoo_wiki/.__pycache__/
-promptfoo_wiki/*.db
-promptfoo_wiki/logs/
-promptfoo_wiki/.pytest_cache/
-promptfoo_wiki/config.yaml
+# ===========================
+# 数据库文件
+# ===========================
+*.sqlite3
+*.db
+*.db-journal
+
+# ===========================
+# auto_coder
+# ===========================
+auto_coder/workspace/
+auto_coder/workspace_test/
+auto_coder/.env
+auto_coder/.pytest_cache/
+auto_coder/app/memory/.memory/
+
+# ===========================
+# ai_chat_app
+# ===========================
+ai_chat_app/build/
+ai_chat_app/.dart_tool/
+ai_chat_app/.flutter-plugins
+ai_chat_app/.flutter-plugins-dependencies
+ai_chat_app/pubspec.lock
+ai_chat_app/android/.gradle/
+ai_chat_app/android/app/build/
+ai_chat_app/ios/Flutter/Flutter.framework
+ai_chat_app/ios/Flutter/flutter_export_environment.sh
+
+# ===========================
+# wiki_fact_judge
+# ===========================
+wiki_fact_judge/backend/__pycache__/
+wiki_fact_judge/backend/*.py[cod]
+wiki_fact_judge/backend/build/
+wiki_fact_judge/backend/dist/
+wiki_fact_judge/backend/venv/
+wiki_fact_judge/frontend/node_modules/
+wiki_fact_judge/frontend/build/
+wiki_fact_judge/frontend/.env
+wiki_fact_judge/data/output/
+wiki_fact_judge/data/cases/
+wiki_fact_judge/cli/output/
+wiki_fact_judge/cli/res*/
+wiki_fact_judge/cli/test*/
+wiki_fact_judge/cli/opt*/
+wiki_fact_judge/cli/result*/
+
+# ===========================
+# server_monitor
+# ===========================
+server_monitor/__pycache__/
+server_monitor/logs/
+server_monitor/.pytest_cache/
+server_monitor/monitoring.db
+!server_monitor/config_example.yaml
+!server_monitor/config_docker_example.yaml
+
+# ===========================
+# chroma_viewer
+# ===========================
+chroma_viewer/chroma_env/
+chroma_viewer/test_chroma_db/
+chroma_viewer/test_new_db/
+chroma_viewer/chroma_web_viewer/__pycache__/
+chroma_viewer/.chroma/
+chroma_viewer/chroma_data/
+
+# ===========================
+# plsql_ir
+# ===========================
+plsql_ir/output/
+
+# ===========================
+# promptfoo_wiki
+# ===========================
+promptfoo_wiki/node_modules/
+promptfoo_wiki/.cache/
 promptfoo_wiki/data/
 promptfoo_wiki/fact_judge*/data
 promptfoo_wiki/fact_judge*/output*
 promptfoo_wiki/fact_judge*/res*
 promptfoo_wiki/fact_judge*/opt*
 promptfoo_wiki/fact_judge*/report*
-
-# fact_judge_v3 specific ignores
 promptfoo_wiki/fact_judge_v3/backend/__pycache__/
-promptfoo_wiki/fact_judge_v3/backend/*.py[cod]
-promptfoo_wiki/fact_judge_v3/backend/*$py.class
 promptfoo_wiki/fact_judge_v3/backend/build/
 promptfoo_wiki/fact_judge_v3/backend/dist/
-promptfoo_wiki/fact_judge_v3/backend/venv/
-promptfoo_wiki/fact_judge_v3/backend/env/
-
-# fact_judge_v3 frontend specific ignores
 promptfoo_wiki/fact_judge_v3/frontend/node_modules/
-promptfoo_wiki/fact_judge_v3/frontend/dist/
 promptfoo_wiki/fact_judge_v3/frontend/build/
 promptfoo_wiki/fact_judge_v3/frontend/.vite/
-promptfoo_wiki/fact_judge_v3/frontend/.nuxt/
 promptfoo_wiki/fact_judge_v3/frontend/.next/
 promptfoo_wiki/fact_judge_v3/frontend/.svelte-kit/
 promptfoo_wiki/fact_judge_v3/frontend/.angular/
-promptfoo_wiki/fact_judge_v3/frontend/.cache/
-promptfoo_wiki/fact_judge_v3/frontend/public/dist/
-promptfoo_wiki/fact_judge_v3/frontend/public/build/
 
-JIP/
-test*/
-**/.qwen/
+# ===========================
+# 其他测试/临时目录
+# ===========================
+.qwen/
+.pytest_cache/
+
+# ===========================
+# worktrees
+# ===========================
+.worktrees/
+worktrees/
