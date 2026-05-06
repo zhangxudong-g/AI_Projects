@@ -10,6 +10,38 @@ class AgentType(Enum):
     GENERAL = "general"
 
 
+class MessageType(Enum):
+    THINKING = "thinking"
+    PLAN = "plan"
+    TOOL_CALL = "tool_call"
+    TOOL_RESULT = "tool_result"
+    ERROR = "error"
+    DONE = "done"
+
+
+@dataclass
+class AgentMessage:
+    type: MessageType
+    content: str
+    tool_name: Optional[str] = None
+    tool_args: Optional[dict] = None
+    success: Optional[bool] = None
+    timestamp: datetime = field(default_factory=datetime.now)
+
+    def to_dict(self) -> dict:
+        result = {
+            "type": self.type.value,
+            "content": self.content,
+        }
+        if self.tool_name:
+            result["tool_name"] = self.tool_name
+        if self.tool_args:
+            result["tool_args"] = self.tool_args
+        if self.success is not None:
+            result["success"] = self.success
+        return result
+
+
 @dataclass
 class Message:
     id: str
