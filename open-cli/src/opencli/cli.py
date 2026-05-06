@@ -41,7 +41,7 @@ def create_provider(provider_name: str, api_key: str, model: str):
 def main(
     task: Optional[str] = typer.Argument(None, help="Task description to execute"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
-    provider: str = typer.Option("minimax", "--provider", help="Provider: minimax or litellm"),
+    provider: str = typer.Option("minimax", "--provider", show_default=True, help="Provider: minimax or litellm"),
     model: Optional[str] = typer.Option(None, "--model", help="Model name"),
     api_key: Optional[str] = typer.Option(None, "--api-key", help="API key"),
 ):
