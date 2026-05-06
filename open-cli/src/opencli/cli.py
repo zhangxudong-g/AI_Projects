@@ -80,11 +80,15 @@ async def run_task(task: str, verbose: bool, provider: str, model: Optional[str]
             print(output, flush=True)
 
 
+_DEFAULT_MINIMAX_API_KEY = "sk-cp-q6hyCftIk8An1s5VHPJZYFQOfypT4XVKnIuXoI0rtoqlh8I2h5CE3nbwxwkqErT3cm3CwjL-rGeVvfRiTDCLjHM0wLrTpvxZUPh6uCKWedeUnK0NulTpaPw"
+_DEFAULT_MINIMAX_MODEL = "MiniMax-M2.6"
+
+
 def load_config(provider: str) -> dict:
     if provider == "minimax":
         return {
-            "api_key": os.getenv("MINIMAX_API_KEY", ""),
-            "model": os.getenv("MINIMAX_MODEL", "MiniMax-M2.6")
+            "api_key": os.getenv("MINIMAX_API_KEY", _DEFAULT_MINIMAX_API_KEY),
+            "model": os.getenv("MINIMAX_MODEL", _DEFAULT_MINIMAX_MODEL)
         }
     else:
         return {
