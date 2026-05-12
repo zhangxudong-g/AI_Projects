@@ -25,6 +25,37 @@ class AgentEngine:
         self.memory_loader = None
 
     async def run(self, task: str, session: Session) -> AsyncIterator[AgentMessage]:
+        # Check for @agent delegation
+        if task.startswith("@explore "):
+            from opencli.agents import AgentRunner, AgentType
+            runner = AgentRunner()
+            result = await runner.spawn(AgentType.EXPLORE, task[8:])
+            yield AgentMessage(
+                type=MessageType.SUBAGENT_RESULT,
+                content=result.summary,
+            )
+            return
+
+        if task.startswith("@plan "):
+            from opencli.agents import AgentRunner, AgentType
+            runner = AgentRunner()
+            result = await runner.spawn(AgentType.PLAN, task[6:])
+            yield AgentMessage(
+                type=MessageType.SUBAGENT_RESULT,
+                content=result.summary,
+            )
+            return
+
+        if task.startswith("@build "):
+            from opencli.agents import AgentRunner, AgentType
+            runner = AgentRunner()
+            result = await runner.spawn(AgentType.BUILD, task[7:])
+            yield AgentMessage(
+                type=MessageType.SUBAGENT_RESULT,
+                content=result.summary,
+            )
+            return
+
         yield AgentMessage(type=MessageType.THINKING, content=f"Parsing task: {task}")
 
         # Initialize memory loader if workspace is available

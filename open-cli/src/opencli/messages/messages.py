@@ -17,6 +17,7 @@ class MessageType(Enum):
     TOOL_RESULT = "tool_result"
     ERROR = "error"
     DONE = "done"
+    SUBAGENT_RESULT = "subagent_result"
 
 
 @dataclass
