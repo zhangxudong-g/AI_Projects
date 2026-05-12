@@ -4,7 +4,7 @@ import asyncio
 from io import StringIO
 from opencli.agent.engine import AgentEngine, AgentConfig
 from opencli.agent.executor import ToolExecutor
-from opencli.types.messages import Session, AgentType, Message, AgentMessage, MessageType
+from opencli.messages.messages import Session, AgentType, Message, AgentMessage, MessageType
 from opencli.tools.registry import ToolRegistry
 from opencli.tools.base import BaseTool, ToolDefinition, ToolResult
 

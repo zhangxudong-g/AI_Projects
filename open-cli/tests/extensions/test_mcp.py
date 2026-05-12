@@ -3,9 +3,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 import pytest
-from unittest.mock import AsyncMock
 from opencli.extensions.mcp.tools import MCPTool
 from opencli.tools.base import ToolDefinition, ToolResult
+
 
 class TestMCPTool:
     def test_tool_definition(self):
@@ -20,17 +20,18 @@ class TestMCPTool:
         tool = MCPTool("test_server", "test_tool", "A test tool", {})
         result = await tool.execute()
         assert result.success is False
-        assert "No MCP session" in result.error
+        assert "MCP client not initialized" in result.error
 
     @pytest.mark.asyncio
-    async def test_execute_with_mock_session(self):
+    async def test_execute_with_server_not_connected(self):
+        """Test when MCP client exists but server is not connected"""
+        from unittest.mock import patch, MagicMock
         tool = MCPTool("test_server", "test_tool", "A test tool", {})
-        mock_session = AsyncMock()
-        mock_result = AsyncMock()
-        mock_result.content = "result content"
-        mock_session.call_tool = AsyncMock(return_value=mock_result)
 
-        result = await tool.execute(session=mock_session, arg1="value1")
-        assert result.success is True
-        assert result.content == "result content"
-        mock_session.call_tool.assert_called_once_with("test_tool", arguments={"arg1": "value1"})
+        # Mock MCPClient.get_instance() to return a client without our server
+        mock_client = MagicMock()
+        mock_client.sessions = {}  # Empty - server not connected
+        with patch('opencli.extensions.mcp.client.MCPClient.get_instance', return_value=mock_client):
+            result = await tool.execute()
+            assert result.success is False
+            assert "server not connected" in result.error

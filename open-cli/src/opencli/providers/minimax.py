@@ -2,14 +2,14 @@ import httpx
 import json
 from typing import AsyncIterator, Optional
 from .base import BaseProvider
-from ..types.messages import Message, ContentBlock
+from ..messages.messages import Message, ContentBlock
 
 
 class MiniMaxProvider(BaseProvider):
     def __init__(
         self,
         api_key: str,
-        default_model: str = "MiniMax-M2.6",
+        default_model: str = "MiniMax-M2.7",
         base_url: str = "https://api.minimaxi.com/v1/text/chatcompletion_v2"
     ):
         self.api_key = api_key

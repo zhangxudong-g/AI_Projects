@@ -1,5 +1,5 @@
 import pytest
-from opencli.types.messages import AgentMessage, MessageType
+from opencli.messages.messages import AgentMessage, MessageType
 
 def test_agent_message_types():
     msg = AgentMessage(type=MessageType.THINKING, content="Analyzing task")

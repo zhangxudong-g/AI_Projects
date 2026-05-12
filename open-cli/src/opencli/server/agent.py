@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional, TYPE_CHECKING
-from ..types.messages import Message, AgentType
+from ..messages.messages import Message, AgentType
 
 if TYPE_CHECKING:
-    from ..types.messages import Session
+    from ..messages.messages import Session
 
 @dataclass
 class AgentConfig:

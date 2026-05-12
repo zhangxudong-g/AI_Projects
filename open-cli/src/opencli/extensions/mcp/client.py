@@ -1,15 +1,23 @@
 import asyncio
 import os
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Any
 
 if TYPE_CHECKING:
     from mcp import ClientSession
     from mcp.client.stdio import stdio_client
 
 class MCPClient:
+    _instance = None
+
     def __init__(self):
         self.sessions: dict[str, "ClientSession"] = {}
         self.tools: dict[str, "MCPTool"] = {}
+
+    @classmethod
+    def get_instance(cls) -> "MCPClient":
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 
     async def connect(self, name: str, command: list[str], env: Optional[dict] = None) -> bool:
         try:
@@ -42,9 +50,13 @@ class MCPClient:
             await self.sessions[name].close()
             del self.sessions[name]
 
-    async def execute_tool(self, server_name: str, tool_name: str, arguments: dict) -> "MCPTool":
-        key = f"{server_name}/{tool_name}"
-        if key not in self.tools:
-            raise ValueError(f"Tool not found: {key}")
-        tool = self.tools[key]
-        return await tool.execute(session=self.sessions.get(server_name), **arguments)
+    async def call_tool(self, tool_name: str, arguments: dict) -> Any:
+        """调用MCP工具"""
+        for server_name, session in self.sessions.items():
+            if f"{server_name}/{tool_name}" in self.tools:
+                result = await session.call_tool(tool_name, arguments)
+                return result
+        raise ValueError(f"Tool {tool_name} not found")
+
+    async def list_tools(self) -> list:
+        return list(self.tools.values())

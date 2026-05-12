@@ -1,6 +1,6 @@
 from typing import AsyncIterator
 from .agent import Agent, AgentConfig
-from ..types.messages import Session, Message, AgentType
+from ..messages.messages import Session, Message, AgentType
 from ..providers.base import BaseProvider
 from ..tools.registry import ToolRegistry
 

@@ -3,7 +3,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 import pytest
-from opencli.types.messages import AgentType, Session, Message
+from opencli.messages.messages import AgentType, Session, Message
 from opencli.server.agent import Agent, AgentConfig
 from opencli.server.orchestrator import AgentOrchestrator
 from opencli.server.session import SessionManager
@@ -139,28 +139,31 @@ class TestAgentOrchestrator:
 
 class TestSessionManager:
     def test_session_manager_init(self, tmp_path):
-        sm = SessionManager(session_dir=tmp_path)
-        assert sm.session_dir == tmp_path
+        sm = SessionManager(storage_path=tmp_path)
+        assert sm.storage_path == tmp_path
 
-    def test_create_session(self, tmp_path):
-        sm = SessionManager(session_dir=tmp_path)
-        session = sm.create_session()
-        assert session["id"] is not None
-        assert "messages" in session
-        assert session["messages"] == []
+    @pytest.mark.asyncio
+    async def test_create_session(self, tmp_path):
+        sm = SessionManager(storage_path=tmp_path)
+        session = await sm.create(AgentType.BUILD)
+        assert session.id is not None
+        assert session.agent_type == AgentType.BUILD
+        assert session.messages == []
 
-    def test_save_and_load_session(self, tmp_path):
-        sm = SessionManager(session_dir=tmp_path)
-        session = sm.create_session()
-        sm.save_session(session)
+    @pytest.mark.asyncio
+    async def test_save_and_load_session(self, tmp_path):
+        sm = SessionManager(storage_path=tmp_path)
+        session = await sm.create(AgentType.BUILD)
+        await sm.save(session)
 
-        loaded = sm.load_session(session["id"])
-        assert loaded["id"] == session["id"]
-        assert loaded["messages"] == []
+        loaded = await sm.load(session.id)
+        assert loaded is not None
+        assert loaded.id == session.id
 
-    def test_list_sessions(self, tmp_path):
-        sm = SessionManager(session_dir=tmp_path)
-        s1 = sm.create_session()
-        s2 = sm.create_session()
-        sessions = sm.list_sessions()
-        assert len(sessions) == 2
+    @pytest.mark.asyncio
+    async def test_get_session(self, tmp_path):
+        sm = SessionManager(storage_path=tmp_path)
+        session = await sm.create(AgentType.PLAN)
+        result = sm.get(session.id)
+        assert result is not None
+        assert result.id == session.id

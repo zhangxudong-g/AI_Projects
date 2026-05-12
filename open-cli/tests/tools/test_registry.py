@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 import pytest
 from opencli.tools.base import BaseTool, ToolDefinition, ToolResult
 from opencli.tools.registry import ToolRegistry
-from opencli.tools.file_tool import FileTool
+from opencli.tools.file_tool import ReadFileTool, WriteFileTool, EditFileTool, ListDirectoryTool
 from opencli.tools.git_tool import GitTool
 from opencli.tools.cmd_tool import CmdTool, CmdError
 
@@ -16,13 +16,13 @@ class TestToolRegistry:
 
     def test_register_tool(self):
         registry = ToolRegistry()
-        tool = FileTool()
+        tool = ReadFileTool()
         registry.register(tool)
         assert "read_file" in registry._tools
 
     def test_get_tool(self):
         registry = ToolRegistry()
-        tool = FileTool()
+        tool = ReadFileTool()
         registry.register(tool)
         retrieved = registry.get("read_file")
         assert retrieved is tool
@@ -34,7 +34,7 @@ class TestToolRegistry:
 
     def test_list_all(self):
         registry = ToolRegistry()
-        registry.register(FileTool())
+        registry.register(ReadFileTool())
         registry.register(GitTool())
         definitions = registry.list_all()
         assert len(definitions) == 2
@@ -43,12 +43,31 @@ class TestToolRegistry:
         assert "git_status" in names
 
 class TestToolDefinitions:
-    def test_file_tool_definition(self):
-        tool = FileTool()
+    def test_read_file_tool_definition(self):
+        tool = ReadFileTool()
         defn = tool.get_definition()
         assert defn.name == "read_file"
         assert defn.description == "Read file contents"
         assert "file_path" in defn.input_schema["properties"]
+
+    def test_write_file_tool_definition(self):
+        tool = WriteFileTool()
+        defn = tool.get_definition()
+        assert defn.name == "write_file"
+        assert "file_path" in defn.input_schema["properties"]
+        assert "content" in defn.input_schema["properties"]
+
+    def test_edit_file_tool_definition(self):
+        tool = EditFileTool()
+        defn = tool.get_definition()
+        assert defn.name == "edit_file"
+        assert "find" in defn.input_schema["properties"]
+        assert "replace" in defn.input_schema["properties"]
+
+    def test_list_directory_tool_definition(self):
+        tool = ListDirectoryTool()
+        defn = tool.get_definition()
+        assert defn.name == "list_directory"
 
     def test_git_tool_definition(self):
         tool = GitTool()
@@ -61,20 +80,63 @@ class TestToolDefinitions:
         assert defn.name == "run_command"
 
 @pytest.mark.asyncio
-class TestFileTool:
+class TestReadFileTool:
     async def test_file_tool_execute(self, tmp_path):
         test_file = tmp_path / "test.txt"
         test_file.write_text("Hello World")
-        tool = FileTool()
+        tool = ReadFileTool()
         result = await tool.execute(file_path=str(test_file))
         assert result.success is True
         assert result.content == "Hello World"
 
     async def test_file_tool_execute_not_found(self, tmp_path):
-        tool = FileTool()
+        tool = ReadFileTool()
         result = await tool.execute(file_path=str(tmp_path / "nonexistent.txt"))
         assert result.success is False
         assert result.error is not None
+
+@pytest.mark.asyncio
+class TestWriteFileTool:
+    async def test_write_file_create(self, tmp_path):
+        tool = WriteFileTool()
+        file_path = tmp_path / "output.txt"
+        result = await tool.execute(file_path=str(file_path), content="Hello World")
+        assert result.success is True
+        assert file_path.read_text() == "Hello World"
+
+    async def test_write_file_overwrite(self, tmp_path):
+        tool = WriteFileTool()
+        file_path = tmp_path / "output.txt"
+        file_path.write_text("Original")
+        result = await tool.execute(file_path=str(file_path), content="New Content")
+        assert result.success is True
+        assert file_path.read_text() == "New Content"
+
+    async def test_write_file_append(self, tmp_path):
+        tool = WriteFileTool()
+        file_path = tmp_path / "output.txt"
+        file_path.write_text("Line 1\n")
+        result = await tool.execute(file_path=str(file_path), content="Line 2\n", append=True)
+        assert result.success is True
+        assert file_path.read_text() == "Line 1\nLine 2\n"
+
+@pytest.mark.asyncio
+class TestEditFileTool:
+    async def test_edit_file_success(self, tmp_path):
+        tool = EditFileTool()
+        file_path = tmp_path / "edit_test.txt"
+        file_path.write_text("Hello World")
+        result = await tool.execute(file_path=str(file_path), find="World", replace="Universe")
+        assert result.success is True
+        assert file_path.read_text() == "Hello Universe"
+
+    async def test_edit_file_not_found(self, tmp_path):
+        tool = EditFileTool()
+        file_path = tmp_path / "edit_test.txt"
+        file_path.write_text("Hello World")
+        result = await tool.execute(file_path=str(file_path), find="Not Found", replace="X")
+        assert result.success is False
+        assert "not found" in result.error.lower()
 
 class TestGitTool:
     def test_git_tool_init(self, tmp_path):

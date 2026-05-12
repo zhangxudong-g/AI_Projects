@@ -18,11 +18,15 @@ class MCPTool(BaseTool):
             input_schema=self.input_schema
         )
 
-    async def execute(self, session: "ClientSession" = None, **kwargs) -> ToolResult:
-        if session is None:
-            return ToolResult(success=False, content=None, error="No MCP session available")
+    async def execute(self, **kwargs) -> ToolResult:
+        """通过MCP会话执行工具"""
+        from .client import MCPClient
+        client = MCPClient.get_instance()
+        if not client or self.server not in client.sessions:
+            return ToolResult(success=False, content=None, error="MCP client not initialized or server not connected")
+
         try:
-            result = await session.call_tool(self.name, arguments=kwargs)
+            result = await client.sessions[self.server].call_tool(self.name, arguments=kwargs)
             content = result.content if hasattr(result, 'content') else result
             return ToolResult(success=True, content=content)
         except Exception as e:

@@ -1,7 +1,7 @@
 import litellm
 from typing import AsyncIterator, Optional
 from .base import BaseProvider
-from ..types.messages import Message, ContentBlock
+from ..messages.messages import Message, ContentBlock
 
 
 class LiteLLMProvider(BaseProvider):

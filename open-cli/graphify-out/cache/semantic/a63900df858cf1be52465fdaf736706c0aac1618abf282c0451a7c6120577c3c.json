@@ -1,0 +1,1 @@
+{"nodes": [], "edges": [], "hyperedges": [{"id": "skills_subsystem", "label": "Skills Extension Core Subsystem", "nodes": ["skill", "skillregistry", "skillloader"], "relation": "form", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "src/opencli/extensions/skills/__init__.py"}]}

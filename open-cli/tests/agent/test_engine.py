@@ -1,6 +1,6 @@
 import pytest
 from opencli.agent.engine import AgentEngine, AgentConfig
-from opencli.types.messages import Session, AgentType, Message
+from opencli.messages.messages import Session, AgentType, Message
 
 @pytest.fixture
 def mock_provider():

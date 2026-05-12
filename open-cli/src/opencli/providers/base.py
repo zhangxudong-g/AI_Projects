@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import AsyncIterator, Optional
-from ..types.messages import Message, ContentBlock
+from ..messages.messages import Message, ContentBlock
 
 
 class BaseProvider(ABC):
