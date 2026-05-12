@@ -4,6 +4,7 @@ from .types import AgentType
 from .config import AgentConfig
 from .base import BaseAgent, AgentResult
 from .factory import AgentFactory
+from .runner import AgentRunner
 
 __all__ = [
     "AgentType",
@@ -11,4 +12,5 @@ __all__ = [
     "BaseAgent",
     "AgentResult",
     "AgentFactory",
+    "AgentRunner",
 ]
