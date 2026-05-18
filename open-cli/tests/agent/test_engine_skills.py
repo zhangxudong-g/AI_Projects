@@ -34,7 +34,7 @@ class TestAgentEngineSkills:
         config = AgentConfig(provider=mock_provider)
         engine = AgentEngine(config)
         
-        with patch('opencli.agent.engine.SkillRegistry', return_value=skill_registry):
+        with patch('opencli.extensions.skills.SkillRegistry', return_value=skill_registry):
             # The skill should be detected and content prepended
             # We test the detection flow, actual injection tested separately
             pass

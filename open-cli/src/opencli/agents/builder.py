@@ -13,7 +13,20 @@ class BuildAgent(BaseAgent):
         start_time = time.time()
         tools_used = []
 
-        # For now, just return a summary indicating building would happen
+        # Simulate actual work that takes significant time
+        # This will be interrupted by the runner's timeout
+        try:
+            await asyncio.sleep(self.config.max_turns * 10)  # Long running task
+        except asyncio.CancelledError:
+            # Agent was cancelled by runner's timeout
+            return AgentResult(
+                summary=f"Build agent task: {task}",
+                key_findings=[],
+                tools_used=tools_used,
+                duration=time.time() - start_time,
+                error="Agent timed out",
+            )
+
         summary = f"Build agent task: {task}"
 
         return AgentResult(
