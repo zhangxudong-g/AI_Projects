@@ -16,7 +16,7 @@ from .messages.messages import Session, AgentType
 from .memory.loader import MemoryLoader
 from .memory.auto_memory import AutoMemory
 
-cli = typer.Typer(help="open-cli - AI Coding Agent", no_args_is_help=True)
+cli = typer.Typer(help="open-cli - AI Coding Agent", no_args_is_help=True, invoke_without_command=True)
 console = Console()
 
 
