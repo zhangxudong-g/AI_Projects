@@ -25,7 +25,41 @@ class AgentEngine:
         self.memory_loader = None
 
     async def run(self, task: str, session: Session) -> AsyncIterator[AgentMessage]:
-        # Check for @agent delegation
+        # Check for skill invocation FIRST (before @agent delegation)
+        from opencli.skills import detect_skill_invocation, match_skill_by_keyword, inject_skill_into_prompt
+        from opencli.extensions.skills import SkillRegistry, SkillLoader
+
+        # Detect explicit /skill invocation
+        was_invoked, skill_name = detect_skill_invocation(task)
+
+        # Initialize skill registry if workspace available
+        skill_registry = None
+        if self.workspace_root:
+            skills_dir = self.workspace_root / ".opencli" / "skills"
+            if skills_dir.exists():
+                loader = SkillLoader(SkillRegistry())
+                skill_registry = loader.discover_system_skills(skills_dir)
+
+        # Get matching skills
+        matched_skills = []
+        if skill_registry:
+            # Check explicit invocation first
+            if was_invoked and skill_name:
+                skill = skill_registry.get(skill_name)
+                if skill:
+                    matched_skills.append(skill)
+
+            # Also check keyword triggers
+            keyword_matches = match_skill_by_keyword(task, skill_registry)
+            for match in keyword_matches:
+                if match not in matched_skills:
+                    matched_skills.append(match)
+
+        # Inject skills into prompt if any matched
+        if matched_skills:
+            task = inject_skill_into_prompt(task, matched_skills)
+
+        # Continue with existing @agent delegation checks
         if task.startswith("@explore "):
             from opencli.agents import AgentRunner, AgentType
             runner = AgentRunner()
