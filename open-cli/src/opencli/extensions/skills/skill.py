@@ -13,8 +13,6 @@ class Skill:
     tools: list[str] = field(default_factory=list)
     triggers: list[str] = field(default_factory=list)
     content: str = ""
-    triggers: list[str] = field(default_factory=list)
-    content: str = ""
     args: dict = field(default_factory=dict)
 
     @classmethod
