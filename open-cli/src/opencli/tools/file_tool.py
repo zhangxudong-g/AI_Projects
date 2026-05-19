@@ -1,6 +1,14 @@
+import asyncio
 from pathlib import Path
 from typing import Any, Optional
 from .base import BaseTool, ToolDefinition, ToolResult
+
+
+def _write_file(path: Path, content: str, mode: str) -> None:
+    """Synchronous helper to write file content."""
+    with open(path, mode, encoding='utf-8') as f:
+        f.write(content)
+
 
 class ReadFileTool(BaseTool):
     def get_definition(self) -> ToolDefinition:
@@ -21,7 +29,7 @@ class ReadFileTool(BaseTool):
                 return ToolResult(success=False, content=None, error=f"File not found: {file_path}")
             if path.is_dir():
                 return ToolResult(success=False, content=None, error=f"Path is a directory, not a file: {file_path}. Use list_directory instead.")
-            content = path.read_text(encoding='utf-8')
+            content = await asyncio.to_thread(path.read_text, encoding='utf-8')
             return ToolResult(success=True, content=content)
         except PermissionError:
             return ToolResult(success=False, content=None, error=f"Permission denied: {file_path}")
@@ -48,11 +56,10 @@ class WriteFileTool(BaseTool):
         try:
             path = Path(file_path)
             path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             mode = 'a' if append else 'w'
-            with open(path, mode, encoding='utf-8') as f:
-                f.write(content)
-            
+            await asyncio.to_thread(_write_file, path, content, mode)
+
             return ToolResult(success=True, content=f"File {'appended to' if append else 'written'}: {file_path}")
         except Exception as e:
             return ToolResult(success=False, content=None, error=str(e))
@@ -79,14 +86,14 @@ class EditFileTool(BaseTool):
             path = Path(file_path)
             if not path.exists():
                 return ToolResult(success=False, content=None, error=f"File not found: {file_path}")
-            
-            content = path.read_text(encoding='utf-8')
+
+            content = await asyncio.to_thread(path.read_text, encoding='utf-8')
             if find not in content:
                 return ToolResult(success=False, content=None, error=f"Text '{find}' not found in file")
-            
+
             new_content = content.replace(find, replace)
-            path.write_text(new_content, encoding='utf-8')
-            
+            await asyncio.to_thread(path.write_text, new_content, encoding='utf-8')
+
             return ToolResult(success=True, content=f"Edited: {file_path}")
         except Exception as e:
             return ToolResult(success=False, content=None, error=str(e))

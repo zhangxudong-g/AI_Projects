@@ -26,3 +26,14 @@ class BaseProvider(ABC):
     @property
     def supports_streaming(self) -> bool:
         return True
+
+    def format_message(self, msg: Message) -> dict:
+        """Format a message for the provider API."""
+        content = msg.content
+        if isinstance(content, list):
+            return {"role": msg.role, "content": self._format_blocks(content)}
+        return {"role": msg.role, "content": content}
+
+    def _format_blocks(self, blocks: list[ContentBlock]) -> str:
+        """Format content blocks into a string."""
+        return "\n".join(b.text or "" for b in blocks)

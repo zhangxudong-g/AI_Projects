@@ -20,9 +20,21 @@ class AgentEngine:
     def __init__(self, config: AgentConfig):
         self.config = config
         self.provider = config.provider
-        self.executor = None
         self.workspace_root = config.workspace_root
-        self.memory_loader = None
+        self._memory_loader = None
+        # Initialize executor once with global registry
+        from ..tools import get_registry
+        registry = get_registry()
+        self._executor = ToolExecutor(registry)
+
+    @property
+    def memory_loader(self):
+        """Lazy initialization of memory loader."""
+        return self._memory_loader
+
+    @memory_loader.setter
+    def memory_loader(self, value):
+        self._memory_loader = value
 
     async def run(self, task: str, session: Session) -> AsyncIterator[AgentMessage]:
         # Check for skill invocation FIRST (before @agent delegation)
@@ -93,20 +105,20 @@ class AgentEngine:
         yield AgentMessage(type=MessageType.THINKING, content=f"Parsing task: {task}")
 
         # Initialize memory loader if workspace is available
-        if self.workspace_root and not self.memory_loader:
+        if self.workspace_root and not self._memory_loader:
             from opencli.memory import MemoryLoader
-            self.memory_loader = MemoryLoader(project_path=self.workspace_root)
+            self._memory_loader = MemoryLoader(project_path=self.workspace_root)
 
         # Build memory context and prepend to task
-        if self.memory_loader:
-            memory_context = self.memory_loader.build_context()
+        if self._memory_loader:
+            memory_context = self._memory_loader.build_context()
             if memory_context:
                 task = f"{memory_context}\n\n## Your Task\n{task}"
 
         # Track corrections if user says "remember"
-        if self.memory_loader and "remember" in task.lower():
+        if self._memory_loader and "remember" in task.lower():
             from opencli.memory import AutoMemory
-            auto_memory = AutoMemory.from_loader(self.memory_loader)
+            auto_memory = AutoMemory.from_loader(self._memory_loader)
             auto_memory.add_correction(task)
             auto_memory.flush()
 
@@ -116,11 +128,7 @@ class AgentEngine:
         steps = self._parse_plan(plan)
 
         if steps:
-            # Execute tool calls
-            from ..tools import get_registry
-            registry = get_registry()
-            self.executor = ToolExecutor(registry)
-
+            # Execute tool calls using pre-initialized executor
             for step in steps:
                 yield AgentMessage(
                     type=MessageType.TOOL_CALL,
@@ -129,7 +137,7 @@ class AgentEngine:
                     tool_args=step["args"]
                 )
 
-                result = await self.executor.execute(step["tool"], step["args"])
+                result = await self._executor.execute(step["tool"], step["args"])
                 yield AgentMessage(
                     type=MessageType.TOOL_RESULT,
                     content=result.content if result.success else result.error,
@@ -252,132 +260,3 @@ Examples:
             return False
 
         return True
-
-    def _parse_direct_response(self, plan: str) -> Optional[dict]:
-        """Parse direct response format: {"direct": true, "content": "..."}"""
-        plan = plan.strip()
-
-        # Try to parse the entire plan as JSON
-        try:
-            data = json.loads(plan)
-            if isinstance(data, dict) and data.get("direct") and "content" in data:
-                return {"__direct__": True, "content": data["content"]}
-        except json.JSONDecodeError:
-            pass
-
-        # Try to find direct response in code blocks
-        code_block_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?"direct"[\s\S]*?\})\s*```', plan, re.MULTILINE)
-        if code_block_match:
-            try:
-                data = json.loads(code_block_match.group(1))
-                if isinstance(data, dict) and data.get("direct") and "content" in data:
-                    return {"__direct__": True, "content": data["content"]}
-            except json.JSONDecodeError:
-                pass
-
-        return None
-
-    def _parse_line_format(self, plan: str) -> list[dict]:
-        """Parse bullet/list format like - read_file: path"""
-        steps = []
-        lines = plan.split("\n")
-
-        # Tool name aliases mapping
-        tool_aliases = {
-            "read": "read_file",
-            "read_file": "read_file",
-            "file_read": "read_file",
-            "write": "write_file",
-            "write_file": "write_file",
-            "file_write": "write_file",
-            "edit": "edit_file",
-            "edit_file": "edit_file",
-            "ls": "list_directory",
-            "dir": "list_directory",
-            "list": "list_directory",
-            "list_directory": "list_directory",
-            "git": "git_status",
-            "git_status": "git_status",
-            "run": "run_command",
-            "run_command": "run_command",
-            "cmd": "run_command",
-            "exec": "run_command",
-            "shell": "run_command",
-        }
-
-        for line in lines:
-            line = line.strip()
-            # Match: - read_file: path OR 1. read_file: path OR - [ ] read_file: path
-            if re.match(r'^[\-\*]?\s*\[?\s*\d*\.?\s*\]?\s*(\w+):\s*(.+)$', line):
-                match = re.match(r'^[\-\*]?\s*\[?\s*\d*\.?\s*\]?\s*(\w+):\s*(.+)$', line)
-                tool_raw = match.group(1)
-                args_str = match.group(2).strip()
-
-                tool = tool_aliases.get(tool_raw.lower(), tool_raw.lower())
-                if tool not in tool_aliases.values():
-                    continue
-
-                # Parse args based on tool
-                if tool == "read_file":
-                    steps.append({"tool": tool, "args": {"file_path": args_str}})
-                elif tool == "write_file":
-                    # Format: path::content
-                    if "::" in args_str:
-                        path, content = args_str.split("::", 1)
-                        steps.append({"tool": tool, "args": {"file_path": path.strip(), "content": content.strip()}})
-                    else:
-                        steps.append({"tool": tool, "args": {"file_path": args_str, "content": ""}})
-                elif tool == "edit_file":
-                    # Format: path::find::replace
-                    parts = args_str.split("::")
-                    if len(parts) >= 3:
-                        steps.append({"tool": tool, "args": {"file_path": parts[0], "find": parts[1], "replace": parts[2]}})
-                elif tool == "list_directory":
-                    steps.append({"tool": tool, "args": {"path": args_str or "."}})
-                elif tool == "git_status":
-                    steps.append({"tool": tool, "args": {"command": args_str}})
-                elif tool == "run_command":
-                    steps.append({"tool": tool, "args": {"command": args_str}})
-
-        return steps
-
-    def _infer_tools_from_text(self, plan: str) -> list[dict]:
-        """Infer tool calls from natural language text."""
-        steps = []
-        plan_lower = plan.lower()
-
-        # List directory patterns
-        if any(kw in plan_lower for kw in ["list directory", "list the", "ls", "dir", "列出目录", "查看目录", "当前目录"]):
-            # Try to extract a path
-            path_match = re.search(r'[\'""]?([\./\w]+)[\'""]?', plan)
-            path = path_match.group(1) if path_match else "."
-            steps.append({"tool": "list_directory", "args": {"path": path}})
-
-        # Read file patterns
-        if any(kw in plan_lower for kw in ["read file", "read", "读取", "打开文件"]):
-            path_match = re.search(r'[\'""]?([\w/\-_.]+\.\w+)[\'""]?', plan)
-            if path_match:
-                steps.append({"tool": "read_file", "args": {"file_path": path_match.group(1)}})
-
-        # Git status patterns
-        if any(kw in plan_lower for kw in ["git status", "git log", "git diff", "git commit"]):
-            cmd = "status"
-            if "log" in plan_lower:
-                cmd = "log"
-            elif "diff" in plan_lower:
-                cmd = "diff"
-            elif "commit" in plan_lower:
-                cmd = "commit"
-            steps.append({"tool": "git_status", "args": {"command": cmd}})
-
-        # Run command patterns
-        trusted_patterns = ["git", "python", "pip", "npm", "node", "pytest", "dir", "ls", "pwd"]
-        for cmd in trusted_patterns:
-            if f"run {cmd}" in plan_lower or f"{cmd} " in plan_lower:
-                # Extract the command
-                cmd_match = re.search(rf'(?:run\s+)?({cmd}[^\s,]*)', plan, re.IGNORECASE)
-                if cmd_match:
-                    steps.append({"tool": "run_command", "args": {"command": cmd_match.group(1)}})
-                    break
-
-        return steps

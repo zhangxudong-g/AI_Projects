@@ -175,15 +175,14 @@ async def run_repl(verbose: bool, provider: str, model: Optional[str], api_key: 
                 console.print(f"[dim]{traceback.format_exc()}[/dim]")
 
 
-_DEFAULT_MINIMAX_API_KEY = "sk-cp-q6hyCftIk8An1s5VHPJZYFQOfypT4XVKnIuXoI0rtoqlh8I2h5CE3nbwxwkqErT3cm3CwjL-rGeVvfRiTDCLjHM0wLrTpvxZUPh6uCKWedeUnK0NulTpaPw"
-_DEFAULT_MINIMAX_MODEL = "MiniMax-M2.7"
-
-
 def load_config(provider: str) -> dict:
     if provider == "minimax":
+        api_key = os.getenv("MINIMAX_API_KEY")
+        if not api_key:
+            raise ValueError("MINIMAX_API_KEY environment variable is required for minimax provider")
         return {
-            "api_key": os.getenv("MINIMAX_API_KEY", _DEFAULT_MINIMAX_API_KEY),
-            "model": os.getenv("MINIMAX_MODEL", _DEFAULT_MINIMAX_MODEL)
+            "api_key": api_key,
+            "model": os.getenv("MINIMAX_MODEL", "MiniMax-M2.7")
         }
     else:
         return {

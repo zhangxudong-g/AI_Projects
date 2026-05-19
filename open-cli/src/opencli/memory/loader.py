@@ -16,6 +16,7 @@ class MemoryLoader:
     ):
         self.user_home = user_home or self._get_default_user_home()
         self.project_path = project_path
+        self._project_hash: Optional[str] = None
 
     def _get_default_user_home(self) -> Path:
         """Get default user home directory."""
@@ -23,6 +24,9 @@ class MemoryLoader:
 
     def _get_project_hash(self) -> str:
         """Get unique hash for project based on git root."""
+        if self._project_hash is not None:
+            return self._project_hash
+
         if self.project_path:
             try:
                 result = subprocess.run(
@@ -34,13 +38,16 @@ class MemoryLoader:
                 )
                 if result.returncode == 0:
                     project_root = result.stdout.strip()
-                    return hashlib.md5(project_root.encode()).hexdigest()[:8]
+                    self._project_hash = hashlib.md5(project_root.encode()).hexdigest()[:8]
+                    return self._project_hash
             except Exception:
                 pass
         # Fallback to project path string hash
         if self.project_path:
-            return hashlib.md5(str(self.project_path).encode()).hexdigest()[:8]
-        return "default"
+            self._project_hash = hashlib.md5(str(self.project_path).encode()).hexdigest()[:8]
+            return self._project_hash
+        self._project_hash = "default"
+        return self._project_hash
 
     # User-level memory
     def get_user_agents_path(self) -> Path:

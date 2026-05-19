@@ -1,7 +1,7 @@
 import litellm
 from typing import AsyncIterator, Optional
 from .base import BaseProvider
-from ..messages.messages import Message, ContentBlock
+from ..messages.messages import Message
 
 
 class LiteLLMProvider(BaseProvider):
@@ -22,19 +22,10 @@ class LiteLLMProvider(BaseProvider):
     ) -> AsyncIterator[str]:
         response = await litellm.acompletion(
             model=kwargs.get("model", self.default_model),
-            messages=[self._format_msg(m) for m in messages],
+            messages=[self.format_message(m) for m in messages],
             tools=tools,
             stream=True,
         )
         async for chunk in response:
             if chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
-
-    def _format_msg(self, msg: Message) -> dict:
-        content = msg.content
-        if isinstance(content, list):
-            return {"role": msg.role, "content": self._format_blocks(content)}
-        return {"role": msg.role, "content": content}
-
-    def _format_blocks(self, blocks: list[ContentBlock]) -> str:
-        return "\n".join(b.text or "" for b in blocks)
