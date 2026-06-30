@@ -1,0 +1,36 @@
+# ---- 环境 & 密钥 ----
+.env
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ---- 虚拟环境 ----
+.venv/
+venv/
+env/
+
+# ---- Agent 工作目录 & 临时文件 ----
+workspace/
+_agent_*.py
+
+# ---- IDE / 编辑器 ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 日志 ----
+*.log
